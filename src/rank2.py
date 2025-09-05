@@ -145,30 +145,35 @@ def find_candidates_dp_general(C, D, Q, c, d, lam):
 
 
 def fast_dp_general(C, D, Q, c, d, lam):
+    '''
+    Solve the general case:
+    min_{y} y'Cy + d'y + min_{x(1-z)=0} x'Dx + x'Qy + c'x + lam'z,
+    where y is 2 dimensional, D is diagonal, and the problem is convex.
+    '''
     n = len(c)
     c = c.reshape((n, 1))
     d = d.reshape((2, 1))
     Z = find_candidates_dp_general(C, D, Q, c, d, lam)
     f_opt = float('inf')
     x_opt = None
+    y_opt = None
     z_opt = None
     for i, z in enumerate(Z):
         s = np.squeeze(z==1)
-        D_s = D[np.ix_(s, s)]
-        Q_s = Q[s,:]
+        D_s = np.diag(D)[s]
+        Q_s = Q[s, :]
         c_s = c[s]
-        A = np.block([[2*D_s, Q_s], [Q_s.T, 2*C]])
-        b = np.block([[c_s], [d]])
+        A = C - Q_s.T/D_s@Q_s/4
+        b = d - Q_s.T/D_s@c_s/2
         if np.linalg.cond(A) < 1e4:
-            x_z = np.linalg.solve(A, -b)
-            f_z = x_z.T@A@x_z/2 + b.T@x_z + lam.T@z
+            y = np.linalg.solve(2 * A, -b)
+            x_z = - (Q_s @ y + c_s)/D_s.reshape(-1,1) / 2
+            f_z = y.T @ C @ y + x_z.T * D_s @ x_z + x_z.T @ Q_s @ y + c_s.T @ x_z + d.T @ y + lam.T @ z
             if f_z < f_opt:
-                f_opt = f_z
-                x_opt = x_z
-                z_opt = z
+                f_opt, x_opt, y_opt, z_opt = f_z, x_z, y, z
         else:
             continue
-    return x_opt, z_opt, f_opt.item()
+    return x_opt, y_opt, z_opt, f_opt.item()
 
 
 ## solving psi using dp
