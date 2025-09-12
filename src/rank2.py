@@ -165,7 +165,7 @@ def fast_dp_general(C, D, Q, c, d, lam):
         c_s = c[s]
         A = C - Q_s.T/D_s@Q_s/4
         b = d - Q_s.T/D_s@c_s/2
-        if np.linalg.cond(A) < 1e4:
+        if np.linalg.cond(A) < 1e4 and np.max(np.linalg.eigvals(A)) > 1e-3:
             y = np.linalg.solve(2 * A, -b)
             x_z = - (Q_s @ y + c_s)/D_s.reshape(-1,1) / 2
             f_z = y.T @ C @ y + x_z.T * D_s @ x_z + x_z.T @ Q_s @ y + c_s.T @ x_z + d.T @ y + lam.T @ z
