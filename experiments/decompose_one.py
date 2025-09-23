@@ -51,7 +51,7 @@ constraints.append(cp.bmat([[D0, F0], [F0.T, G0]]) >> 0)
 constraints.append(cp.multiply(G0, gi_mask) == 0)
 constraints.append(cp.multiply(F0, fi_mask) == 0)
 
-objective = cp.Minimize(cp.norm(G-G0))
+objective = cp.Minimize(cp.lambda_max(G-G0))
 
 # Formulate the optimization problem
 problem = cp.Problem(objective, constraints)
