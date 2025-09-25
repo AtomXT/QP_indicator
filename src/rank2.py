@@ -91,11 +91,11 @@ def find_candidates_dp_general(C, D, Q, c, d, lam):
         bounds2 = []
         for j in range(n):
             if j != i:
-                denominator = Q[j, 0]*Q[i, 1]/Q[i, 0] - Q[j, 1]
+                denominator = Q[j, 0]*Q[i, 1]/Q[i, 0] - Q[j, 1] if Q[i, 0] != 0 else - Q[j, 1]
                 if denominator != 0:
-                    numerator1 = -2*np.sqrt(D[j,j]*lam[j][0]) - c[j] + Q[j, 0]*c[i]/Q[i, 0]
-                    numerator2 = 2*np.sqrt(D[j,j]*lam[j][0]) - c[j] + Q[j, 0]*c[i]/Q[i, 0]
-                    al = Q[j, 0]*2*np.sqrt(D[i,i]*lam[i][0])/Q[i, 0]
+                    numerator1 = -2*np.sqrt(D[j,j]*lam[j][0]) - c[j] + Q[j, 0]*c[i]/Q[i, 0] if Q[i, 0] != 0 else -2*np.sqrt(D[j,j]*lam[j][0]) - c[j]
+                    numerator2 = 2*np.sqrt(D[j,j]*lam[j][0]) - c[j] + Q[j, 0]*c[i]/Q[i, 0] if Q[i, 0] != 0 else 2*np.sqrt(D[j,j]*lam[j][0]) - c[j]
+                    al = Q[j, 0]*2*np.sqrt(D[i,i]*lam[i][0])/Q[i, 0] if Q[i, 0] != 0 else 0
                     l1, u1 = (numerator1 + al) / denominator, (numerator2 + al) / denominator
                     if l1 > u1: l1, u1 = u1, l1
                     l2, u2 = (numerator1 - al) / denominator, (numerator2 - al) / denominator
@@ -168,6 +168,12 @@ def fast_dp_general(C, D, Q, c, d, lam):
         if np.linalg.cond(A) < 1e4 and np.max(np.linalg.eigvals(A)) > 1e-3:
             y = np.linalg.solve(2 * A, -b)
             x_z = - (Q_s @ y + c_s)/D_s.reshape(-1,1) / 2
+            # mask where |D_s| is very small
+            eps = 1e-3  # tolerance threshold
+            mask = np.abs(D_s).reshape(-1, 1) < eps
+
+            # assign zero where D_s is close to zero
+            x_z = np.where(mask, 0, x_z)
             f_z = y.T @ C @ y + x_z.T * D_s @ x_z + x_z.T @ Q_s @ y + c_s.T @ x_z + d.T @ y + lam.T @ z
             if f_z < f_opt:
                 f_opt, x_opt, y_opt, z_opt = f_z, x_z, y, z
