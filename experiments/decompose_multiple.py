@@ -24,7 +24,7 @@ D = D + 0.5*np.eye(n)  # regularization
 G = A.T@A
 # G = A.T@A + np.eye(m)*200
 # G[~np.eye(m, dtype=bool)] /= 200
-F = A
+F = A/2
 
 
 
