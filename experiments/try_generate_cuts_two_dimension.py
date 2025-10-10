@@ -173,5 +173,5 @@ for ii in range(10):
 ## compare
 print(np.abs(np.round(z_opt_vals)))
 z_dul_val = np.squeeze([zi.X for zi in z_dul])
-thr = np.quantile(z_dul_val,0.96)
+thr = np.quantile(z_dul_val,0.9)
 print(np.array([1.0 if v>thr else 0.0 for v in z_dul_val]))
