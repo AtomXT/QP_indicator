@@ -169,7 +169,7 @@ def fast_dp_general(C, D, Q, c, d, lam):
             y = np.linalg.solve(2 * A, -b)
             x_z = - (Q_s @ y + c_s)/D_s.reshape(-1,1) / 2
             # mask where |D_s| is very small
-            eps = 1e-3  # tolerance threshold
+            eps = 1e-2  # tolerance threshold
             mask = np.abs(D_s).reshape(-1, 1) < eps
 
             # assign zero where D_s is close to zero
