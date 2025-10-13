@@ -104,6 +104,11 @@ def find_candidates_dp_general(C, D, Q, c, d, lam):
                     bounds1.append((u1, j, 1))
                     bounds2.append((l2, j, 0))
                     bounds2.append((u2, j, 1))
+                else:
+                    bounds1.append((-np.inf, j, 0))
+                    bounds1.append((np.inf, j, 1))
+                    bounds2.append((-np.inf, j, 0))
+                    bounds2.append((np.inf, j, 1))
 
         # -------------The flowing method produces 2n(4n-2) candidates. ----------------
         bounds1.sort(key=lambda x: x[0])
@@ -170,7 +175,7 @@ def fast_dp_general(C, D, Q, c, d, lam):
             y = np.linalg.solve(2 * A, -b)
             x_z = - (Q_s @ y + c_s)/D_s.reshape(-1,1) / 2
             # mask where |D_s| is very small
-            eps = 1e-2  # tolerance threshold
+            eps = 1e-6  # tolerance threshold
             mask = np.abs(D_s).reshape(-1, 1) < eps
 
             # assign zero where D_s is close to zero
