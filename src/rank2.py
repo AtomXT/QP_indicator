@@ -160,6 +160,7 @@ def fast_dp_general(C, D, Q, c, d, lam):
     z_opt = None
     for i, z in enumerate(Z):
         s = np.squeeze(z==1)
+        s = np.logical_and(s, np.diag(D) != 0)  # could be optimized later
         D_s = np.diag(D)[s]
         Q_s = Q[s, :]
         c_s = c[s]
@@ -179,7 +180,7 @@ def fast_dp_general(C, D, Q, c, d, lam):
                 f_opt, x_opt, y_opt, z_opt = f_z, x_z, y, z
         else:
             continue
-    return x_opt, y_opt, z_opt, f_opt.item()
+    return x_opt, y_opt, z_opt, f_opt
 
 
 ## solving psi using dp
