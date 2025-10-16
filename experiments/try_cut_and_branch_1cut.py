@@ -50,7 +50,7 @@ eqn = y.T@y/2 + y_opt.T@G@y_opt + x_opt.T@D@x_opt + x_opt.T@F@y_opt + c.T@x_opt 
 model_opt.setObjective(eqn[0], GRB.MINIMIZE)
 # model_opt.params.QCPDual = 1
 model_opt.params.OutputFlag = 1
-model_opt.params.TimeLimit = 10
+model_opt.params.TimeLimit = 30
 model_opt.optimize()
 print(f"The obj is {model_opt.objVal}.")
 
@@ -118,7 +118,7 @@ combined.append(np.concatenate([alpha, beta, gamma]))
 print(alpha, beta, gamma)
 
 import random
-s = 3
+s = 1
 index_pair = [list(t) for t in combinations(range(m), 2)]
 pairs = random.sample(index_pair, s)
 # pairs = [[3, 4]]
@@ -188,6 +188,9 @@ Gi_sum_diff_, Di_sum_diff_, Fi_sum_diff_ = G - cp.sum(Gi).value, D - cp.sum(Di).
 Gi_sum_diff_[np.abs(Gi_sum_diff_) < 1e-6] = 0
 Fi_sum_diff_[np.abs(Fi_sum_diff_) < 1e-6] = 0
 Di_sum_diff_[np.abs(Di_sum_diff_) < 1e-6] = 0
+
+
+
 for iii in range(2):
     print(f"adding the {iii + 1}th cut.")
 
@@ -208,11 +211,13 @@ for iii in range(2):
     y_equal = model_dul.addConstrs(y_dul[i] == y_dul_bar[i] for i in range(k))
     x_equal = model_dul.addConstrs(x_dul[i] == x_dul_bar[i] for i in range(n))
 
+    psi_values = []
     for ii, pair in enumerate(pairs):
         print(f"- adding {ii + 1}th pair.")
         _, _, _, f_dp = fast_dp_general(Gi_[ii][np.ix_(pair, pair)], Di_[ii], Fi_[ii][:, pair], -beta,
                                         -gamma[pair], -alpha.reshape(-1, 1))
         psi_v = f_dp
+        psi_values.append(psi_v)
         # print(psi_v)
         model_dul.addConstr(
             t_dul[ii] >= y_dul_bar[pair].T @ Gi_[ii][np.ix_(pair, pair)] @ y_dul_bar[pair] + x_dul_bar.T @ Di_[
@@ -240,6 +245,51 @@ for iii in range(2):
     print(model_dul.objVal)
 
 z_dul_val = np.squeeze([zi.X for zi in z_dul_bar])
+thr = np.quantile(z_dul_val,0.9)
+print(np.array([1.0 if v>thr else 0.0 for v in z_dul_val]))
+print(np.abs(z_opt_vals))
+
+
+## cut and branch
+
+# def stop_after_root(model, where):
+#     if where == GRB.Callback.MIPNODE:
+#         # Get current node count
+#         nodecnt = model.cbGet(GRB.Callback.MIPNODE_NODCNT)
+#         # Stop immediately after solving root relaxation
+#         if nodecnt == 0:
+#             print("Stopping right after root relaxation.")
+#             model.terminate()
+
+# get dual variables
+model_dul = gp.Model()
+z_dul = model_dul.addMVar(n, vtype=GRB.BINARY, name='z')
+y_dul = model_dul.addMVar(k, vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name='y')
+x_dul = model_dul.addMVar(n, vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name='x')
+t_dul = model_dul.addMVar(len(pairs), vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name="t")
+
+# add constraints
+model_dul.addConstrs(x_dul[i] <= BIG_M * z_dul[i] for i in range(n))
+model_dul.addConstrs(x_dul[i] >= -BIG_M * z_dul[i] for i in range(n))
+
+for ii, pair in enumerate(pairs):
+    print(f"- adding {ii + 1}th pair.")
+    model_dul.addConstr(
+        t_dul[ii] >= y_dul[pair].T @ Gi_[ii][np.ix_(pair, pair)] @ y_dul[pair] + x_dul.T @ Di_[
+            ii] @ x_dul + x_dul.T @ Fi_[ii][:, pair] @ y_dul[pair])
+
+    model_dul.addConstr(t_dul[ii] >= alpha.T @ z_dul + beta.T @ x_dul + gamma[pair].T @ y_dul[pair] + psi_values[ii])
+
+extra_term = y.T @ y / 2 + y_dul.T @ Gi_sum_diff_ @ y_dul + x_dul.T @ Di_sum_diff_ @ x_dul + x_dul.T @ Fi_sum_diff_ @ y_dul + c.T @ x_dul + d.T @ y_dul + lam.T @ z_dul
+# # set objective
+model_dul.setObjective(gp.quicksum(t_dul) + extra_term[0], GRB.MINIMIZE)
+model_dul.params.OutputFlag = 1
+model_dul.params.TimeLimit = 30
+# model_dul.setParam("NodeLimit", 2)
+model_dul.optimize()
+print(model_dul.objVal)
+
+z_dul_val = np.squeeze([zi.X for zi in z_dul])
 thr = np.quantile(z_dul_val,0.9)
 print(np.array([1.0 if v>thr else 0.0 for v in z_dul_val]))
 print(np.abs(z_opt_vals))
