@@ -37,28 +37,23 @@ mu = 0.5
 lam = mu*np.ones((n, 1))
 np.linalg.eigvalsh(np.bmat([[D, F], [F.T, G]]))
 
-## get the optimal solution
-model_opt = gp.Model()
-z_opt = model_opt.addMVar(n, vtype=GRB.BINARY, lb=0, ub=1, name='z')
-x_opt = model_opt.addMVar(n, vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name='x')
-y_opt = model_opt.addMVar(k, vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name='y')
-# add constraints
-model_opt.addConstrs(x_opt[i]*(1-z_opt[i]) == 0 for i in range(n))
+# define a container to store the root node lower bound
+root_bound = [np.inf, -np.inf]
+def record_root_lb(model, where):
+    if where == GRB.Callback.MIPNODE:
+        # check if this is the root node
+        nodecnt = model.cbGet(GRB.Callback.MIPNODE_NODCNT)
+        if nodecnt == 0:
+            # get the relaxation bound at this node
+            lb = model.cbGet(GRB.Callback.MIPNODE_OBJBND)
+            ub = model.cbGet(GRB.Callback.MIPNODE_OBJBST)
+            # store it if not yet recorded
+            if lb >= root_bound[1]:
+                root_bound[1] = lb
+            if ub <= root_bound[0]:
+                root_bound[0] = ub
 
-# set objective
-eqn = y.T@y/2 + y_opt.T@G@y_opt + x_opt.T@D@x_opt + x_opt.T@F@y_opt + c.T@x_opt + d.T@y_opt + lam.T@z_opt
-model_opt.setObjective(eqn[0], GRB.MINIMIZE)
-# model_opt.params.QCPDual = 1
-model_opt.params.OutputFlag = 1
-model_opt.params.TimeLimit = 30
-model_opt.optimize()
-print(f"The obj is {model_opt.objVal}.")
 
-
-# extract solutions
-z_opt_vals = np.array([z_opt[i].X for i in range(n)])
-y_opt_vals = np.array([y_opt[i].X for i in range(k)])
-x_opt_vals = np.array([x_opt[i].X for i in range(n)])
 
 # get tight big-M
 model_relax = gp.Model()
@@ -81,6 +76,31 @@ x_relax_vals = np.array([x_relax[i].X for i in range(n)])
 print(f"The larges value of x is {max(x_relax_vals)}")
 BIG_M = min(BIG_M, 2*max(abs(x_relax_vals)))
 print(f'Use new Big-M {BIG_M}.')
+
+
+## get the optimal solution
+model_opt = gp.Model()
+z_opt = model_opt.addMVar(n, vtype=GRB.BINARY, lb=0, ub=1, name='z')
+x_opt = model_opt.addMVar(n, vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name='x')
+y_opt = model_opt.addMVar(k, vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name='y')
+# add constraints
+model_opt.addConstrs(x_opt[i]*(1-z_opt[i]) == 0 for i in range(n))
+
+# set objective
+eqn = y.T@y/2 + y_opt.T@G@y_opt + x_opt.T@D@x_opt + x_opt.T@F@y_opt + c.T@x_opt + d.T@y_opt + lam.T@z_opt
+model_opt.setObjective(eqn[0], GRB.MINIMIZE)
+# model_opt.params.QCPDual = 1
+model_opt.params.OutputFlag = 1
+model_opt.params.TimeLimit = 30
+model_opt.optimize(record_root_lb)
+print(f"The obj is {model_opt.objVal}.")
+print(f"The root upper bound is: {root_bound[0]}, lower bound is: {root_bound[1]}. The root gap is: {np.round(100*(root_bound[0]-root_bound[1])/root_bound[0],4)}%")
+
+
+# extract solutions
+z_opt_vals = np.array([z_opt[i].X for i in range(n)])
+y_opt_vals = np.array([y_opt[i].X for i in range(k)])
+x_opt_vals = np.array([x_opt[i].X for i in range(n)])
 
 # get dual variables
 model_dul = gp.Model()
@@ -118,7 +138,7 @@ combined.append(np.concatenate([alpha, beta, gamma]))
 print(alpha, beta, gamma)
 
 import random
-s = 1
+s = 3
 index_pair = [list(t) for t in combinations(range(m), 2)]
 pairs = random.sample(index_pair, s)
 # pairs = [[3, 4]]
@@ -252,14 +272,20 @@ print(np.abs(z_opt_vals))
 
 ## cut and branch
 
-# def stop_after_root(model, where):
-#     if where == GRB.Callback.MIPNODE:
-#         # Get current node count
-#         nodecnt = model.cbGet(GRB.Callback.MIPNODE_NODCNT)
-#         # Stop immediately after solving root relaxation
-#         if nodecnt == 0:
-#             print("Stopping right after root relaxation.")
-#             model.terminate()
+root_bound = [np.inf, -np.inf]
+def record_root_lb(model, where):
+    if where == GRB.Callback.MIPNODE:
+        # check if this is the root node
+        nodecnt = model.cbGet(GRB.Callback.MIPNODE_NODCNT)
+        if nodecnt == 0:
+            # get the relaxation bound at this node
+            lb = model.cbGet(GRB.Callback.MIPNODE_OBJBND)
+            ub = model.cbGet(GRB.Callback.MIPNODE_OBJBST)
+            # store it if not yet recorded
+            if lb >= root_bound[1]:
+                root_bound[1] = lb
+            if ub <= root_bound[0]:
+                root_bound[0] = ub
 
 # get dual variables
 model_dul = gp.Model()
@@ -286,8 +312,9 @@ model_dul.setObjective(gp.quicksum(t_dul) + extra_term[0], GRB.MINIMIZE)
 model_dul.params.OutputFlag = 1
 model_dul.params.TimeLimit = 30
 # model_dul.setParam("NodeLimit", 2)
-model_dul.optimize()
+model_dul.optimize(record_root_lb)
 print(model_dul.objVal)
+print(f"The root upper bound is: {root_bound[0]}, lower bound is: {root_bound[1]}. The root gap is: {np.round(100*(root_bound[0]-root_bound[1])/root_bound[0],4)}%")
 
 z_dul_val = np.squeeze([zi.X for zi in z_dul])
 thr = np.quantile(z_dul_val,0.9)

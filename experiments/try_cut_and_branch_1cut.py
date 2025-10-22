@@ -50,7 +50,7 @@ eqn = y.T@y/2 + y_opt.T@G@y_opt + x_opt.T@D@x_opt + x_opt.T@F@y_opt + c.T@x_opt 
 model_opt.setObjective(eqn[0], GRB.MINIMIZE)
 # model_opt.params.QCPDual = 1
 model_opt.params.OutputFlag = 1
-model_opt.params.TimeLimit = 30
+model_opt.params.TimeLimit = 3
 model_opt.optimize()
 print(f"The obj is {model_opt.objVal}.")
 
@@ -157,7 +157,7 @@ for i in range(s):
 # objective = cp.Minimize(cp.norm_inf(G - cp.sum(Gi)))
 # objective = cp.Minimize(cp.norm(D - cp.sum(Di), 'nuc')+cp.norm(G - cp.sum(Gi), 'nuc'))
 # objective = cp.Minimize(cp.sum(cp.diag(-cp.sum(Di))) + cp.sum(cp.diag(-cp.sum(Gi))))
-objective = cp.Minimize(cp.lambda_max(cp.bmat([[D - cp.sum(Di), F - cp.sum(Fi)], [(F - cp.sum(Fi)).T, G - cp.sum(Gi)]])))
+objective = cp.Minimize(0.4*cp.norm(Fi[0], 1)+cp.lambda_max(cp.bmat([[D - cp.sum(Di), F - cp.sum(Fi)], [(F - cp.sum(Fi)).T, G - cp.sum(Gi)]])))
 
 # Formulate the optimization problem
 problem = cp.Problem(objective, constraint_0)
@@ -252,14 +252,21 @@ print(np.abs(z_opt_vals))
 
 ## cut and branch
 
-# def stop_after_root(model, where):
-#     if where == GRB.Callback.MIPNODE:
-#         # Get current node count
-#         nodecnt = model.cbGet(GRB.Callback.MIPNODE_NODCNT)
-#         # Stop immediately after solving root relaxation
-#         if nodecnt == 0:
-#             print("Stopping right after root relaxation.")
-#             model.terminate()
+# define a container to store the root node lower bound
+root_bound = [np.inf, -np.inf]
+def record_root_lb(model, where):
+    if where == GRB.Callback.MIPNODE:
+        # check if this is the root node
+        nodecnt = model.cbGet(GRB.Callback.MIPNODE_NODCNT)
+        if nodecnt == 0:
+            # get the relaxation bound at this node
+            lb = model.cbGet(GRB.Callback.MIPNODE_OBJBND)
+            ub = model.cbGet(GRB.Callback.MIPNODE_OBJBST)
+            # store it if not yet recorded
+            if lb >= root_bound[1]:
+                root_bound[1] = lb
+            if ub <= root_bound[0]:
+                root_bound[0] = ub
 
 # get dual variables
 model_dul = gp.Model()
@@ -286,8 +293,9 @@ model_dul.setObjective(gp.quicksum(t_dul) + extra_term[0], GRB.MINIMIZE)
 model_dul.params.OutputFlag = 1
 model_dul.params.TimeLimit = 30
 # model_dul.setParam("NodeLimit", 2)
-model_dul.optimize()
+model_dul.optimize(record_root_lb)
 print(model_dul.objVal)
+print(f"The root upper bound is: {root_bound[0]}, lower bound is: {root_bound[1]}. The root gap is: {np.round(100*(root_bound[0]-root_bound[1])/root_bound[0],4)}%")
 
 z_dul_val = np.squeeze([zi.X for zi in z_dul])
 thr = np.quantile(z_dul_val,0.9)
