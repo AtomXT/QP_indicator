@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import time
+import random
 import gurobipy as gp
 import cvxpy as cp
 import random
@@ -16,8 +17,7 @@ from src.rank2 import fast_dp_general
 
 
 data = datasets.load_diabetes()
-k = 3
-m = k
+m = 3
 n = 100
 # Access features and target
 X = data.data[0:n, 0:m]
@@ -41,7 +41,7 @@ np.linalg.eigvalsh(np.bmat([[D, F], [F.T, G]]))
 model_opt = gp.Model()
 z_opt = model_opt.addMVar(n, vtype=GRB.BINARY, lb=0, ub=1, name='z')
 x_opt = model_opt.addMVar(n, vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name='x')
-y_opt = model_opt.addMVar(k, vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name='y')
+y_opt = model_opt.addMVar(m, vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name='y')
 # add constraints
 model_opt.addConstrs(x_opt[i]*(1-z_opt[i]) == 0 for i in range(n))
 
@@ -57,14 +57,14 @@ print(f"The obj is {model_opt.objVal}.")
 
 # extract solutions
 z_opt_vals = np.array([z_opt[i].X for i in range(n)])
-y_opt_vals = np.array([y_opt[i].X for i in range(k)])
+y_opt_vals = np.array([y_opt[i].X for i in range(m)])
 x_opt_vals = np.array([x_opt[i].X for i in range(n)])
 
 # get tight big-M
 model_relax = gp.Model()
 z_relax = model_relax.addMVar(n, vtype=GRB.CONTINUOUS, lb=0, ub=1, name='z')
 x_relax = model_relax.addMVar(n, vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name='x')
-y_relax = model_relax.addMVar(k, vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name='y')
+y_relax = model_relax.addMVar(m, vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name='y')
 # add constraints
 model_relax.addConstrs(x_relax[i] <= BIG_M*z_relax[i] for i in range(n))
 model_relax.addConstrs(x_relax[i] >= -BIG_M*z_relax[i] for i in range(n))
@@ -86,11 +86,11 @@ print(f'Use new Big-M {BIG_M}.')
 model_dul = gp.Model()
 z_dul = model_dul.addMVar(n, vtype=GRB.CONTINUOUS, lb=0, ub=1, name='z')
 # z_dul = model_dul.addMVar(n, vtype=GRB.BINARY, name='z')
-y_dul = model_dul.addMVar(k, vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name='y')
+y_dul = model_dul.addMVar(m, vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name='y')
 x_dul = model_dul.addMVar(n, vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name='x')
 z_dul_bar = model_dul.addMVar(n, vtype=GRB.CONTINUOUS, lb=0, ub=1, name='z_bar')
 # z_dul_bar = model_dul.addMVar(n, vtype=GRB.BINARY, name='z_bar')
-y_dul_bar = model_dul.addMVar(k, vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name='y_bar')
+y_dul_bar = model_dul.addMVar(m, vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name='y_bar')
 x_dul_bar = model_dul.addMVar(n, vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name='x_bar')
 # w_dul_tilde = model_dul.addMVar(n, vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name='w_tilde')
 # t_dul = model_dul.addVar(vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name="t")
@@ -99,7 +99,7 @@ x_dul_bar = model_dul.addMVar(n, vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.
 model_dul.addConstrs(x_dul[i] <= BIG_M*z_dul[i] for i in range(n))
 model_dul.addConstrs(x_dul[i] >= -BIG_M*z_dul[i] for i in range(n))
 z_equal = model_dul.addConstrs(z_dul[i] == z_dul_bar[i] for i in range(n))
-y_equal = model_dul.addConstrs(y_dul[i] == y_dul_bar[i] for i in range(k))
+y_equal = model_dul.addConstrs(y_dul[i] == y_dul_bar[i] for i in range(m))
 x_equal = model_dul.addConstrs(x_dul[i] == x_dul_bar[i] for i in range(n))
 
 # set objective
@@ -112,12 +112,10 @@ model_dul.optimize()
 
 alpha = np.array([z_equal[i].Pi for i in range(n)])
 beta = np.array([x_equal[i].Pi for i in range(n)])
-gamma = np.array([y_equal[i].Pi for i in range(k)])
-combined = []
-combined.append(np.concatenate([alpha, beta, gamma]))
+gamma = np.array([y_equal[i].Pi for i in range(m)])
 print(alpha, beta, gamma)
 
-import random
+
 s = 1
 index_pair = [list(t) for t in combinations(range(m), 2)]
 pairs = random.sample(index_pair, s)
@@ -197,10 +195,10 @@ for iii in range(2):
     # get dual variables
     model_dul = gp.Model()
     z_dul = model_dul.addMVar(n, vtype=GRB.CONTINUOUS, lb=0, ub=1, name='z')
-    y_dul = model_dul.addMVar(k, vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name='y')
+    y_dul = model_dul.addMVar(m, vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name='y')
     x_dul = model_dul.addMVar(n, vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name='x')
     z_dul_bar = model_dul.addMVar(n, vtype=GRB.CONTINUOUS, lb=0, ub=1, name='z_bar')
-    y_dul_bar = model_dul.addMVar(k, vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name='y_bar')
+    y_dul_bar = model_dul.addMVar(m, vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name='y_bar')
     x_dul_bar = model_dul.addMVar(n, vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name='x_bar')
     t_dul = model_dul.addMVar(len(pairs), vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name="t")
 
@@ -208,7 +206,7 @@ for iii in range(2):
     model_dul.addConstrs(x_dul[i] <= BIG_M * z_dul[i] for i in range(n))
     model_dul.addConstrs(x_dul[i] >= -BIG_M * z_dul[i] for i in range(n))
     z_equal = model_dul.addConstrs(z_dul[i] == z_dul_bar[i] for i in range(n))
-    y_equal = model_dul.addConstrs(y_dul[i] == y_dul_bar[i] for i in range(k))
+    y_equal = model_dul.addConstrs(y_dul[i] == y_dul_bar[i] for i in range(m))
     x_equal = model_dul.addConstrs(x_dul[i] == x_dul_bar[i] for i in range(n))
 
     psi_values = []
@@ -235,13 +233,7 @@ for iii in range(2):
 
     alpha = np.array([z_equal[i].Pi for i in range(n)])
     beta = np.array([x_equal[i].Pi for i in range(n)])
-    gamma = np.array([y_equal[i].Pi for i in range(k)])
-    combined.append(np.concatenate([alpha, beta, gamma]))
-    # model_dul.setObjective(t_dul+extra_term[0], GRB.MINIMIZE)
-    # model_dul.params.OutputFlag = 0
-    # model_dul.params.QCPDual = 1
-    # model_dul.update()
-    # model_dul.optimize()
+    gamma = np.array([y_equal[i].Pi for i in range(m)])
     print(model_dul.objVal)
 
 z_dul_val = np.squeeze([zi.X for zi in z_dul_bar])
@@ -271,7 +263,7 @@ def record_root_lb(model, where):
 # get dual variables
 model_dul = gp.Model()
 z_dul = model_dul.addMVar(n, vtype=GRB.BINARY, name='z')
-y_dul = model_dul.addMVar(k, vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name='y')
+y_dul = model_dul.addMVar(m, vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name='y')
 x_dul = model_dul.addMVar(n, vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name='x')
 t_dul = model_dul.addMVar(len(pairs), vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name="t")
 
