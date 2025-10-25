@@ -177,7 +177,7 @@ for i in range(s):
 # objective = cp.Minimize(cp.norm_inf(G - cp.sum(Gi)))
 # objective = cp.Minimize(cp.norm(D - cp.sum(Di), 'nuc')+cp.norm(G - cp.sum(Gi), 'nuc'))
 # objective = cp.Minimize(cp.sum(cp.diag(-cp.sum(Di))) + cp.sum(cp.diag(-cp.sum(Gi))))
-objective = cp.Minimize(cp.lambda_max(cp.bmat([[D - cp.sum(Di), F - cp.sum(Fi)], [(F - cp.sum(Fi)).T, G - cp.sum(Gi)]])))
+objective = cp.Minimize(0.4*(cp.norm(Fi[0], 1)+cp.norm(Fi[1], 1)+cp.norm(Fi[2], 1))+cp.lambda_max(cp.bmat([[D - cp.sum(Di), F - cp.sum(Fi)], [(F - cp.sum(Fi)).T, G - cp.sum(Gi)]])))
 
 # Formulate the optimization problem
 problem = cp.Problem(objective, constraint_0)
