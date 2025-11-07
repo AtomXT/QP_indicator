@@ -37,6 +37,7 @@ mu = 0.5
 lam = mu*np.ones((n, 1))
 np.linalg.eigvalsh(np.bmat([[D, F], [F.T, G]]))
 
+
 # define a container to store the root node lower bound
 root_bound = [np.inf, -np.inf]
 def record_root_lb(model, where):
@@ -99,6 +100,8 @@ z_opt_vals = np.array([z_opt[i].X for i in range(n)])
 y_opt_vals = np.array([y_opt[i].X for i in range(m)])
 x_opt_vals = np.array([x_opt[i].X for i in range(n)])
 
+
+
 # get dual variables
 model_dul = gp.Model()
 z_dul = model_dul.addMVar(n, vtype=GRB.CONTINUOUS, lb=0, ub=1, name='z')
@@ -147,7 +150,7 @@ for i in range(s):
     ii, jj = pairs[i]
 
     fi_mask = np.ones((n, m))
-    fi_mask[:, [ii, jj]] = 0
+    # fi_mask[:, [ii, jj]] = 0
     Fi_mask.append(fi_mask)
 
     gi_mask = np.ones((m, m))
@@ -172,7 +175,7 @@ for i in range(s):
 # objective = cp.Minimize(cp.norm_inf(G - cp.sum(Gi)))
 # objective = cp.Minimize(cp.norm(D - cp.sum(Di), 'nuc')+cp.norm(G - cp.sum(Gi), 'nuc'))
 # objective = cp.Minimize(cp.sum(cp.diag(-cp.sum(Di))) + cp.sum(cp.diag(-cp.sum(Gi))))
-objective = cp.Minimize(0.4*cp.norm(Fi[0], 1)+cp.lambda_max(cp.bmat([[D - cp.sum(Di), F - cp.sum(Fi)], [(F - cp.sum(Fi)).T, G - cp.sum(Gi)]])))
+objective = cp.Minimize(cp.lambda_max(cp.bmat([[D - cp.sum(Di), F - cp.sum(Fi)], [(F - cp.sum(Fi)).T, G - cp.sum(Gi)]])))
 
 # Formulate the optimization problem
 problem = cp.Problem(objective, constraint_0)
@@ -261,21 +264,7 @@ print(np.abs(z_opt_vals))
 
 ## cut and branch
 
-# define a container to store the root node lower bound
-root_bound = [np.inf, -np.inf]
-def record_root_lb(model, where):
-    if where == GRB.Callback.MIPNODE:
-        # check if this is the root node
-        nodecnt = model.cbGet(GRB.Callback.MIPNODE_NODCNT)
-        if nodecnt == 0:
-            # get the relaxation bound at this node
-            lb = model.cbGet(GRB.Callback.MIPNODE_OBJBND)
-            ub = model.cbGet(GRB.Callback.MIPNODE_OBJBST)
-            # store it if not yet recorded
-            if lb >= root_bound[1]:
-                root_bound[1] = lb
-            if ub <= root_bound[0]:
-                root_bound[0] = ub
+
 
 # get dual variables
 model_dul = gp.Model()
