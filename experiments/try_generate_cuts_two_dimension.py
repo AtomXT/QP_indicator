@@ -23,8 +23,8 @@ y = data[:n, 8]
 y = (y-np.mean(y))/np.std(y)
 
 
-C = X.T@X/2
-D = np.eye(n)/2 + 0.5*np.eye(n)
+C = X.T@X/2 + 0.5*np.eye(n)
+D = np.eye(n)/2
 Q = X/2
 c = -y
 d = - X.T@y

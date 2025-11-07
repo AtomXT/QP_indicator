@@ -25,8 +25,8 @@ X = (X - np.mean(X, axis=0))/X.std(axis=0)
 y = data.target[:n]
 y = (y-np.mean(y))/np.std(y)
 
-G = X.T@X/2
-D = np.eye(n)/2 + 0.5*np.eye(n)  # regularization
+G = X.T@X/2 + 0.5*np.eye(n)  # regularization
+D = np.eye(n)/2
 F = X/2
 
 c = -y
@@ -205,9 +205,9 @@ Fi_ = [np.where(np.abs(Fi[ii].value) < 1e-6, 0, Fi[ii].value) for ii in range(le
 Di_ = [np.where(np.abs(Di[ii].value) < 1e-6, 0, Di[ii].value) for ii in range(len(pairs))]
 # Di_ = [Di[ii].value for ii in range(len(pairs))]
 Gi_sum_diff_, Di_sum_diff_, Fi_sum_diff_ = G - cp.sum(Gi).value, D - cp.sum(Di).value, F - cp.sum(Fi).value
-Gi_sum_diff_[np.abs(Gi_sum_diff_) < 1e-6] = 0
-Fi_sum_diff_[np.abs(Fi_sum_diff_) < 1e-6] = 0
-Di_sum_diff_[np.abs(Di_sum_diff_) < 1e-6] = 0
+# Gi_sum_diff_[np.abs(Gi_sum_diff_) < 1e-6] = 0
+# Fi_sum_diff_[np.abs(Fi_sum_diff_) < 1e-6] = 0
+# Di_sum_diff_[np.abs(Di_sum_diff_) < 1e-6] = 0
 
 
 

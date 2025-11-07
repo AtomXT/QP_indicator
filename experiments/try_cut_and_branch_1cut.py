@@ -25,8 +25,8 @@ X = (X - np.mean(X, axis=0))/X.std(axis=0)
 y = data.target[:n]
 y = (y-np.mean(y))/np.std(y)
 
-G = X.T@X/2
-D = np.eye(n)/2 + 0.5*np.eye(n)  # regularization
+G = X.T@X/2 + 0.5*np.eye(m)  # regularization
+D = np.eye(n)/2
 F = X/2
 
 c = -y
@@ -183,13 +183,13 @@ Fi_ = [np.where(np.abs(Fi[ii].value) < 1e-6, 0, Fi[ii].value) for ii in range(le
 Di_ = [np.where(np.abs(Di[ii].value) < 1e-6, 0, Di[ii].value) for ii in range(len(pairs))]
 # Di_ = [Di[ii].value for ii in range(len(pairs))]
 Gi_sum_diff_, Di_sum_diff_, Fi_sum_diff_ = G - cp.sum(Gi).value, D - cp.sum(Di).value, F - cp.sum(Fi).value
-Gi_sum_diff_[np.abs(Gi_sum_diff_) < 1e-6] = 0
-Fi_sum_diff_[np.abs(Fi_sum_diff_) < 1e-6] = 0
-Di_sum_diff_[np.abs(Di_sum_diff_) < 1e-6] = 0
+# Gi_sum_diff_[np.abs(Gi_sum_diff_) < 1e-6] = 0
+# Fi_sum_diff_[np.abs(Fi_sum_diff_) < 1e-6] = 0
+# Di_sum_diff_[np.abs(Di_sum_diff_) < 1e-6] = 0
 
 
 
-for iii in range(2):
+for iii in range(1):
     print(f"adding the {iii + 1}th cut.")
 
     # get dual variables
@@ -290,6 +290,6 @@ print(model_dul.objVal)
 print(f"The root upper bound is: {root_bound[0]}, lower bound is: {root_bound[1]}. The root gap is: {np.round(100*(root_bound[0]-root_bound[1])/root_bound[0],4)}%")
 
 z_dul_val = np.squeeze([zi.X for zi in z_dul])
-thr = np.quantile(z_dul_val,0.9)
+thr = np.quantile(z_dul_val,0.8)
 print(np.array([1.0 if v>thr else 0.0 for v in z_dul_val]))
 print(np.abs(z_opt_vals))

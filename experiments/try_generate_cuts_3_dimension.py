@@ -26,8 +26,8 @@ X = (X - np.mean(X, axis=0))/X.std(axis=0)
 y = data.target[:n]
 y = (y-np.mean(y))/np.std(y)
 
-G = X.T@X/2
-D = np.eye(n)/2 + 0.5*np.eye(n) # regularization
+G = X.T@X/2 + 0.5*np.eye(n) # regularization
+D = np.eye(n)/2
 F = X/2
 
 c = -y

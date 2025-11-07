@@ -29,8 +29,8 @@ y = data.y[:n].values
 outlier_idx = [1, 14, 37, 42, 56]
 y[outlier_idx] = y[outlier_idx] + 1
 
-G = X.T@X/2
-D = np.eye(n)/2 + 0.5*np.eye(n)  # regularization
+G = X.T@X/2 + 0.5*np.eye(n)  # regularization
+D = np.eye(n)/2
 F = X/2
 
 c = -y
