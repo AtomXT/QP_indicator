@@ -152,7 +152,7 @@ for i in range(s):
     ii, jj = pairs[i]
 
     fi_mask = np.ones((n, m))
-    fi_mask[:, [ii, jj]] = 0
+    # fi_mask[:, [ii, jj]] = 0
     Fi_mask.append(fi_mask)
 
     gi_mask = np.ones((m, m))
@@ -200,14 +200,17 @@ if problem.status == cp.OPTIMAL:
 else:
     print("Problem not solved to optimality. Status:", problem.status)
 
-Gi_ = [np.where(np.abs(Gi[ii].value) < 1e-6, 0, Gi[ii].value) for ii in range(len(pairs))]
-Fi_ = [np.where(np.abs(Fi[ii].value) < 1e-6, 0, Fi[ii].value) for ii in range(len(pairs))]
-Di_ = [np.where(np.abs(Di[ii].value) < 1e-6, 0, Di[ii].value) for ii in range(len(pairs))]
+# Gi_ = [Gi[ii].value for ii in range(len(pairs))]
+# Fi_ = [Fi[ii].value for ii in range(len(pairs))]
+# Di_ = [Di[ii].value for ii in range(len(pairs))]
+Gi_ = [np.where(np.abs(Gi[ii].value) < 1e-10, 0, Gi[ii].value) for ii in range(len(pairs))]
+Fi_ = [np.where(np.abs(Fi[ii].value) < 1e-10, 0, Fi[ii].value) for ii in range(len(pairs))]
+Di_ = [np.where(np.abs(Di[ii].value) < 1e-10, 0, Di[ii].value) for ii in range(len(pairs))]
 # Di_ = [Di[ii].value for ii in range(len(pairs))]
 Gi_sum_diff_, Di_sum_diff_, Fi_sum_diff_ = G - cp.sum(Gi).value, D - cp.sum(Di).value, F - cp.sum(Fi).value
-Gi_sum_diff_[np.abs(Gi_sum_diff_) < 1e-6] = 0
-Fi_sum_diff_[np.abs(Fi_sum_diff_) < 1e-6] = 0
-Di_sum_diff_[np.abs(Di_sum_diff_) < 1e-6] = 0
+# Gi_sum_diff_[np.abs(Gi_sum_diff_) < 1e-6] = 0
+# Fi_sum_diff_[np.abs(Fi_sum_diff_) < 1e-6] = 0
+# Di_sum_diff_[np.abs(Di_sum_diff_) < 1e-6] = 0
 
 for i in range(s):
     print(f"Number of nonzero rows in F_{i}: {np.sum(np.count_nonzero(Fi_[i], axis=1) != 0)}")
@@ -250,7 +253,7 @@ for iii in range(1):
     # extra_term = y.T@y/2 + c.T@x_dul_bar + d.T@y_dul_bar + lam.T@z_dul_bar
     # # set objective
     model_dul.setObjective(gp.quicksum(t_dul) + extra_term[0], GRB.MINIMIZE)
-    model_dul.params.OutputFlag = 0
+    model_dul.params.OutputFlag = 1
     model_dul.params.QCPDual = 1
     model_dul.optimize()
 
@@ -318,6 +321,6 @@ print(model_dul.objVal)
 print(f"The root upper bound is: {root_bound[0]}, lower bound is: {root_bound[1]}. The root gap is: {np.round(100*(root_bound[0]-root_bound[1])/root_bound[0],4)}%. Runtime: {model_dul.runtime}.")
 
 z_dul_val = np.squeeze([zi.X for zi in z_dul])
-thr = np.quantile(z_dul_val,0.6)
+thr = np.quantile(z_dul_val,0.9)
 print(np.array([1.0 if v>thr else 0.0 for v in z_dul_val]))
 print(np.abs(z_opt_vals))

@@ -25,7 +25,7 @@ X = (X - np.mean(X, axis=0))/X.std(axis=0)
 y = data.target[:n]
 y = (y-np.mean(y))/np.std(y)
 
-G = X.T@X/2 + 0.4*np.eye(n)  # regularization
+G = X.T@X/2 + 0.4*np.eye(m)  # regularization
 D = np.eye(n)/2
 F = X/2
 
@@ -91,7 +91,7 @@ eqn = y.T@y/2 + y_opt.T@G@y_opt + x_opt.T@D@x_opt + x_opt.T@F@y_opt + c.T@x_opt 
 model_opt.setObjective(eqn[0], GRB.MINIMIZE)
 # model_opt.params.QCPDual = 1
 model_opt.params.OutputFlag = 1
-model_opt.params.TimeLimit = 30
+model_opt.params.TimeLimit = 3
 model_opt.optimize(record_root_lb)
 print(f"The obj is {model_opt.objVal}.")
 print(f"The root upper bound is: {root_bound[0]}, lower bound is: {root_bound[1]}. The root gap is: {np.round(100*(root_bound[0]-root_bound[1])/root_bound[0],4)}%")
@@ -140,8 +140,8 @@ print(alpha, beta, gamma)
 import random
 s = 3
 index_pair = [list(t) for t in combinations(range(m), 2)]
-pairs = random.sample(index_pair, s)
-# pairs = [[3, 4]]
+# pairs = random.sample(index_pair, s)
+pairs = [[0, 1], [0, 2], [1, 2]]
 
 Di = [cp.diag(cp.Variable(n)) for i in range(s)]
 Fi = [cp.Variable((n, m)) for i in range(s)]
@@ -177,7 +177,7 @@ for i in range(s):
 # objective = cp.Minimize(cp.norm_inf(G - cp.sum(Gi)))
 # objective = cp.Minimize(cp.norm(D - cp.sum(Di), 'nuc')+cp.norm(G - cp.sum(Gi), 'nuc'))
 # objective = cp.Minimize(cp.sum(cp.diag(-cp.sum(Di))) + cp.sum(cp.diag(-cp.sum(Gi))))
-objective = cp.Minimize(0.4*(cp.norm(Fi[0], 1)+cp.norm(Fi[1], 1)+cp.norm(Fi[2], 1))+cp.lambda_max(cp.bmat([[D - cp.sum(Di), F - cp.sum(Fi)], [(F - cp.sum(Fi)).T, G - cp.sum(Gi)]])))
+objective = cp.Minimize(2*(2*cp.norm(Fi[0], 1)+cp.norm(Fi[1], 1)+cp.norm(Fi[2], 1))+cp.lambda_max(cp.bmat([[D - cp.sum(Di), F - cp.sum(Fi)], [(F - cp.sum(Fi)).T, G - cp.sum(Gi)]])))
 
 # Formulate the optimization problem
 problem = cp.Problem(objective, constraint_0)
@@ -200,18 +200,19 @@ if problem.status == cp.OPTIMAL:
 else:
     print("Problem not solved to optimality. Status:", problem.status)
 
-Gi_ = [np.where(np.abs(Gi[ii].value) < 1e-6, 0, Gi[ii].value) for ii in range(len(pairs))]
-Fi_ = [np.where(np.abs(Fi[ii].value) < 1e-6, 0, Fi[ii].value) for ii in range(len(pairs))]
-Di_ = [np.where(np.abs(Di[ii].value) < 1e-6, 0, Di[ii].value) for ii in range(len(pairs))]
+Gi_ = [np.where(np.abs(Gi[ii].value) < 1e-8, 0, Gi[ii].value) for ii in range(len(pairs))]
+Fi_ = [np.where(np.abs(Fi[ii].value) < 1e-8, 0, Fi[ii].value) for ii in range(len(pairs))]
+Di_ = [np.where(np.abs(Di[ii].value) < 1e-8, 0, Di[ii].value) for ii in range(len(pairs))]
 # Di_ = [Di[ii].value for ii in range(len(pairs))]
 Gi_sum_diff_, Di_sum_diff_, Fi_sum_diff_ = G - cp.sum(Gi).value, D - cp.sum(Di).value, F - cp.sum(Fi).value
-Gi_sum_diff_[np.abs(Gi_sum_diff_) < 1e-6] = 0
-Fi_sum_diff_[np.abs(Fi_sum_diff_) < 1e-6] = 0
-Di_sum_diff_[np.abs(Di_sum_diff_) < 1e-6] = 0
+# Gi_sum_diff_[np.abs(Gi_sum_diff_) < 1e-6] = 0
+# Fi_sum_diff_[np.abs(Fi_sum_diff_) < 1e-6] = 0
+# Di_sum_diff_[np.abs(Di_sum_diff_) < 1e-6] = 0
 
-print(f"Number of nonzero rows in F_0: {np.sum(np.count_nonzero(Fi_[0], axis=1) != 0)}")
+for i in range(s):
+    print(f"Number of nonzero rows in F_{i}: {np.sum(np.count_nonzero(Fi_[i], axis=1) != 0)}")
 
-for iii in range(2):
+for iii in range(1):
     print(f"adding the {iii + 1}th cut.")
 
     # get dual variables
@@ -314,7 +315,7 @@ model_dul.params.TimeLimit = 30
 # model_dul.setParam("NodeLimit", 2)
 model_dul.optimize(record_root_lb)
 print(model_dul.objVal)
-print(f"The root upper bound is: {root_bound[0]}, lower bound is: {root_bound[1]}. The root gap is: {np.round(100*(root_bound[0]-root_bound[1])/root_bound[0],4)}%")
+print(f"The root upper bound is: {root_bound[0]}, lower bound is: {root_bound[1]}. The root gap is: {np.round(100*(root_bound[0]-root_bound[1])/root_bound[0],4)}%. Runtime: {model_dul.runtime}.")
 
 z_dul_val = np.squeeze([zi.X for zi in z_dul])
 thr = np.quantile(z_dul_val,0.9)

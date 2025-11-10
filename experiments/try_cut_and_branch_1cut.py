@@ -172,7 +172,7 @@ for i in range(s):
 # objective = cp.Minimize(cp.norm_inf(G - cp.sum(Gi)))
 # objective = cp.Minimize(cp.norm(D - cp.sum(Di), 'nuc')+cp.norm(G - cp.sum(Gi), 'nuc'))
 # objective = cp.Minimize(cp.sum(cp.diag(-cp.sum(Di))) + cp.sum(cp.diag(-cp.sum(Gi))))
-objective = cp.Minimize(1.8*cp.norm(Fi[0], 1)+cp.lambda_max(cp.bmat([[D - cp.sum(Di), F - cp.sum(Fi)], [(F - cp.sum(Fi)).T, G - cp.sum(Gi)]])))
+objective = cp.Minimize(3*cp.norm(Fi[0], 1)+cp.lambda_max(cp.bmat([[D - cp.sum(Di), F - cp.sum(Fi)], [(F - cp.sum(Fi)).T, G - cp.sum(Gi)]])))
 
 # Formulate the optimization problem
 problem = cp.Problem(objective, constraint_0)
@@ -195,14 +195,14 @@ if problem.status == cp.OPTIMAL:
 else:
     print("Problem not solved to optimality. Status:", problem.status)
 
-Gi_ = [np.where(np.abs(Gi[ii].value) < 1e-6, 0, Gi[ii].value) for ii in range(len(pairs))]
-Fi_ = [np.where(np.abs(Fi[ii].value) < 1e-6, 0, Fi[ii].value) for ii in range(len(pairs))]
-Di_ = [np.where(np.abs(Di[ii].value) < 1e-6, 0, Di[ii].value) for ii in range(len(pairs))]
+Gi_ = [np.where(np.abs(Gi[ii].value) < 1e-8, 0, Gi[ii].value) for ii in range(len(pairs))]
+Fi_ = [np.where(np.abs(Fi[ii].value) < 1e-8, 0, Fi[ii].value) for ii in range(len(pairs))]
+Di_ = [np.where(np.abs(Di[ii].value) < 1e-8, 0, Di[ii].value) for ii in range(len(pairs))]
 # Di_ = [Di[ii].value for ii in range(len(pairs))]
 Gi_sum_diff_, Di_sum_diff_, Fi_sum_diff_ = G - cp.sum(Gi).value, D - cp.sum(Di).value, F - cp.sum(Fi).value
-Gi_sum_diff_[np.abs(Gi_sum_diff_) < 1e-6] = 0
-Fi_sum_diff_[np.abs(Fi_sum_diff_) < 1e-6] = 0
-Di_sum_diff_[np.abs(Di_sum_diff_) < 1e-6] = 0
+# Gi_sum_diff_[np.abs(Gi_sum_diff_) < 1e-6] = 0
+# Fi_sum_diff_[np.abs(Fi_sum_diff_) < 1e-6] = 0
+# Di_sum_diff_[np.abs(Di_sum_diff_) < 1e-6] = 0
 
 print(f"Number of nonzero rows in F_0: {np.sum(np.count_nonzero(Fi_[0], axis=1) != 0)}")
 

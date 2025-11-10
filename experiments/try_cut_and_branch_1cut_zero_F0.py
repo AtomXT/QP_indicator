@@ -139,7 +139,7 @@ print(alpha, beta, gamma)
 s = 1
 index_pair = [list(t) for t in combinations(range(m), 2)]
 # pairs = random.sample(index_pair, s)
-pairs = [[1, 2]]
+pairs = [[0, 2]]
 
 Di = [cp.diag(cp.Variable(n)) for i in range(s)]
 Fi = [cp.Variable((n, m)) for i in range(s)]
@@ -198,14 +198,14 @@ if problem.status == cp.OPTIMAL:
 else:
     print("Problem not solved to optimality. Status:", problem.status)
 
-Gi_ = [np.where(np.abs(Gi[ii].value) < 1e-6, 0, Gi[ii].value) for ii in range(len(pairs))]
-Fi_ = [np.where(np.abs(Fi[ii].value) < 1e-6, 0, Fi[ii].value) for ii in range(len(pairs))]
-Di_ = [np.where(np.abs(Di[ii].value) < 1e-6, 0, Di[ii].value) for ii in range(len(pairs))]
+Gi_ = [np.where(np.abs(Gi[ii].value) < 1e-10, 0, Gi[ii].value) for ii in range(len(pairs))]
+Fi_ = [np.where(np.abs(Fi[ii].value) < 1e-10, 0, Fi[ii].value) for ii in range(len(pairs))]
+Di_ = [np.where(np.abs(Di[ii].value) < 1e-10, 0, Di[ii].value) for ii in range(len(pairs))]
 # Di_ = [Di[ii].value for ii in range(len(pairs))]
 Gi_sum_diff_, Di_sum_diff_, Fi_sum_diff_ = G - cp.sum(Gi).value, D - cp.sum(Di).value, F - cp.sum(Fi).value
-Gi_sum_diff_[np.abs(Gi_sum_diff_) < 1e-6] = 0
-Fi_sum_diff_[np.abs(Fi_sum_diff_) < 1e-6] = 0
-Di_sum_diff_[np.abs(Di_sum_diff_) < 1e-6] = 0
+# Gi_sum_diff_[np.abs(Gi_sum_diff_) < 1e-6] = 0
+# Fi_sum_diff_[np.abs(Fi_sum_diff_) < 1e-6] = 0
+# Di_sum_diff_[np.abs(Di_sum_diff_) < 1e-6] = 0
 
 print(f"Number of nonzero rows in F_0: {np.sum(np.count_nonzero(Fi_[0], axis=1) != 0)}")
 
