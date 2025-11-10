@@ -25,7 +25,7 @@ X = (X - np.mean(X, axis=0))/X.std(axis=0)
 y = data.target[:n]
 y = (y-np.mean(y))/np.std(y)
 
-G = X.T@X/2 + 0.5*np.eye(n)  # regularization
+G = X.T@X/2 + 0.4*np.eye(n)  # regularization
 D = np.eye(n)/2
 F = X/2
 
@@ -209,7 +209,7 @@ Gi_sum_diff_[np.abs(Gi_sum_diff_) < 1e-6] = 0
 Fi_sum_diff_[np.abs(Fi_sum_diff_) < 1e-6] = 0
 Di_sum_diff_[np.abs(Di_sum_diff_) < 1e-6] = 0
 
-
+print(f"Number of nonzero rows in F_0: {np.sum(np.count_nonzero(Fi_[0], axis=1) != 0)}")
 
 for iii in range(2):
     print(f"adding the {iii + 1}th cut.")
