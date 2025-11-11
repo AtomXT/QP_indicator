@@ -62,23 +62,6 @@ print(f"The larges value of x is {max(x_relax_vals)}")
 BIG_M = min(BIG_M, 2*max(abs(x_relax_vals)))
 print(f'Use new Big-M {BIG_M}.')
 
-
-# define a container to store the root node lower bound
-root_bound = [np.inf, -np.inf]
-def record_root_lb(model, where):
-    if where == GRB.Callback.MIPNODE:
-        # check if this is the root node
-        nodecnt = model.cbGet(GRB.Callback.MIPNODE_NODCNT)
-        if nodecnt == 0:
-            # get the relaxation bound at this node
-            lb = model.cbGet(GRB.Callback.MIPNODE_OBJBND)
-            ub = model.cbGet(GRB.Callback.MIPNODE_OBJBST)
-            # store it if not yet recorded
-            if lb >= root_bound[1]:
-                root_bound[1] = lb
-            if ub <= root_bound[0]:
-                root_bound[0] = ub
-
 ## get the optimal solution
 model_opt = gp.Model()
 z_opt = model_opt.addMVar(n, vtype=GRB.BINARY, lb=0, ub=1, name='z')
@@ -92,11 +75,9 @@ eqn = y.T@y/2 + y_opt.T@G@y_opt + x_opt.T@D@x_opt + x_opt.T@F@y_opt + c.T@x_opt 
 model_opt.setObjective(eqn[0], GRB.MINIMIZE)
 # model_opt.params.QCPDual = 1
 model_opt.params.OutputFlag = 1
-model_opt.params.TimeLimit = 30
-model_opt.optimize(record_root_lb)
+model_opt.params.TimeLimit = 3
+model_opt.optimize()
 print(f"The obj is {model_opt.objVal}.")
-print(f"The root upper bound is: {root_bound[0]}, lower bound is: {root_bound[1]}. The root gap is: {np.round(100*(root_bound[0]-root_bound[1])/root_bound[0],4)}%. Runtime: {model_opt.runtime}.")
-
 
 
 # extract solutions
@@ -141,8 +122,8 @@ print(alpha, beta, gamma)
 
 s = 1
 index_pair = [list(t) for t in combinations(range(m), 2)]
-pairs = random.sample(index_pair, s)
-# pairs = [[3, 4]]
+# pairs = random.sample(index_pair, s)
+pairs = [[3, 7]]
 
 Di = [cp.diag(cp.Variable(n)) for i in range(s)]
 Fi = [cp.Variable((n, m)) for i in range(s)]
@@ -153,7 +134,7 @@ for i in range(s):
     ii, jj = pairs[i]
 
     fi_mask = np.ones((n, m))
-    fi_mask[:, [ii, jj]] = 0
+    # fi_mask[:, [ii, jj]] = 0
     Fi_mask.append(fi_mask)
 
     gi_mask = np.ones((m, m))
@@ -178,8 +159,8 @@ for i in range(s):
 # objective = cp.Minimize(cp.norm_inf(G - cp.sum(Gi)))
 # objective = cp.Minimize(cp.norm(D - cp.sum(Di), 'nuc')+cp.norm(G - cp.sum(Gi), 'nuc'))
 # objective = cp.Minimize(cp.sum(cp.diag(-cp.sum(Di))) + cp.sum(cp.diag(-cp.sum(Gi))))
-objective = cp.Minimize(0.4*cp.norm(Fi[0], 1)+cp.lambda_max(cp.bmat([[D - cp.sum(Di), F - cp.sum(Fi)], [(F - cp.sum(Fi)).T, G - cp.sum(Gi)]])))
-# objective = cp.Minimize(cp.lambda_max(cp.bmat([[D - cp.sum(Di), F - cp.sum(Fi)], [(F - cp.sum(Fi)).T, G - cp.sum(Gi)]])))
+# objective = cp.Minimize(0.4*cp.norm(Fi[0], 1)+cp.lambda_max(cp.bmat([[D - cp.sum(Di), F - cp.sum(Fi)], [(F - cp.sum(Fi)).T, G - cp.sum(Gi)]])))
+objective = cp.Minimize(cp.lambda_max(cp.bmat([[D - cp.sum(Di), F - cp.sum(Fi)], [(F - cp.sum(Fi)).T, G - cp.sum(Gi)]])))
 
 # Formulate the optimization problem
 problem = cp.Problem(objective, constraint_0)
@@ -210,8 +191,6 @@ Gi_sum_diff_, Di_sum_diff_, Fi_sum_diff_ = G - cp.sum(Gi).value, D - cp.sum(Di).
 # Gi_sum_diff_[np.abs(Gi_sum_diff_) < 1e-6] = 0
 # Fi_sum_diff_[np.abs(Fi_sum_diff_) < 1e-6] = 0
 # Di_sum_diff_[np.abs(Di_sum_diff_) < 1e-6] = 0
-
-print(f"Number of nonzero rows in F_0: {np.sum(np.count_nonzero(Fi_[0], axis=1) != 0)}")
 
 
 # get dual variables
@@ -311,7 +290,7 @@ print(model_dul.objVal)
 print(f"The root upper bound is: {root_bound[0]}, lower bound is: {root_bound[1]}. The root gap is: {np.round(100*(root_bound[0]-root_bound[1])/root_bound[0],4)}%. Runtime: {model_dul.runtime}.")
 
 z_dul_val = np.squeeze([zi.X for zi in z_dul])
-thr = np.quantile(z_dul_val,0.9)
+thr = np.quantile(z_dul_val,0.6)
 print(np.array([1.0 if v>thr else 0.0 for v in z_dul_val]))
 print(np.abs(z_opt_vals))
 print(np.where(z_opt_vals == 1)[0], outlier_idx)
