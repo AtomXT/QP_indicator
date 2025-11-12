@@ -198,14 +198,14 @@ if problem.status == cp.OPTIMAL:
 else:
     print("Problem not solved to optimality. Status:", problem.status)
 
-Gi_ = [np.where(np.abs(Gi[ii].value) < 1e-6, 0, Gi[ii].value) for ii in range(len(pairs))]
-Fi_ = [np.where(np.abs(Fi[ii].value) < 1e-6, 0, Fi[ii].value) for ii in range(len(pairs))]
-Di_ = [np.where(np.abs(Di[ii].value) < 1e-6, 0, Di[ii].value) for ii in range(len(pairs))]
+Gi_ = [np.where(np.abs(Gi[ii].value) < 1e-10, 0, Gi[ii].value) for ii in range(len(pairs))]
+Fi_ = [np.where(np.abs(Fi[ii].value) < 1e-10, 0, Fi[ii].value) for ii in range(len(pairs))]
+Di_ = [np.where(np.abs(Di[ii].value) < 1e-10, 0, Di[ii].value) for ii in range(len(pairs))]
 # Di_ = [Di[ii].value for ii in range(len(pairs))]
 Gi_sum_diff_, Di_sum_diff_, Fi_sum_diff_ = G - cp.sum(Gi).value, D - cp.sum(Di).value, F - cp.sum(Fi).value
-Gi_sum_diff_[np.abs(Gi_sum_diff_) < 1e-6] = 0
-Fi_sum_diff_[np.abs(Fi_sum_diff_) < 1e-6] = 0
-Di_sum_diff_[np.abs(Di_sum_diff_) < 1e-6] = 0
+# Gi_sum_diff_[np.abs(Gi_sum_diff_) < 1e-6] = 0
+# Fi_sum_diff_[np.abs(Fi_sum_diff_) < 1e-6] = 0
+# Di_sum_diff_[np.abs(Di_sum_diff_) < 1e-6] = 0
 
 print(f"Number of nonzero rows in F_0: {np.sum(np.count_nonzero(Fi_[0], axis=1) != 0)}")
 
@@ -283,7 +283,7 @@ for ii, pair in enumerate(pairs):
         t_dul[ii] >= y_dul[pair].T @ Gi_[ii][np.ix_(pair, pair)] @ y_dul[pair] + x_dul.T @ Di_[
             ii] @ x_dul + gp.quicksum(temp_v[jj] for jj in range(n)))
 
-    model_dul.addConstr(t_dul[ii] >= alpha.T @ z_dul + beta.T @ x_dul + gamma[pair].T @ y_dul[pair] + psi_values[ii])
+    # model_dul.addConstr(t_dul[ii] >= alpha.T @ z_dul + beta.T @ x_dul + gamma[pair].T @ y_dul[pair] + psi_values[ii])
 
 extra_term = y.T @ y / 2 + y_dul.T @ Gi_sum_diff_ @ y_dul + x_dul.T @ Di_sum_diff_ @ x_dul + x_dul.T @ Fi_sum_diff_ @ y_dul + c.T @ x_dul + d.T @ y_dul + lam.T @ z_dul
 # # set objective
