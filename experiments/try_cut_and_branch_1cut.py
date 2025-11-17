@@ -199,7 +199,7 @@ for i in range(s):
 obj_expr = 0
 for ii in range(s):
     obj_expr += cp.lambda_min(cp.bmat([[Di[ii], Fi[ii]/2], [Fi[ii].T/2, Gi[ii]]]))
-objective = cp.Maximize(obj_expr)
+objective = cp.Maximize(-1e-4*cp.norm(Fi[0], 1)+obj_expr)
 # objective = cp.Minimize(0*cp.norm(Fi[0], 1)+cp.lambda_max(cp.bmat([[D - cp.sum(Di), F/2 - cp.sum(Fi)/2], [(F/2 - cp.sum(Fi)/2).T, G - cp.sum(Gi)]])))
 
 # Formulate the optimization problem

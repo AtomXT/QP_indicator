@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import time
+import random
 import gurobipy as gp
 import cvxpy as cp
 import random
@@ -16,26 +17,25 @@ from src.rank2 import fast_dp_general
 
 
 data = datasets.load_diabetes()
-k = 3
-m = k
+m = 3
 n = 100
 # Access features and target
 X = data.data[0:n, 0:m]
 X = (X - np.mean(X, axis=0))/X.std(axis=0)
 y = data.target[:n]
 y = (y-np.mean(y))/np.std(y)
-
-G = X.T@X/2 + 0.4*np.eye(m)  # regularization
+mu_g = 0.2
+G = X.T@X/2 + mu_g*np.eye(m)  # regularization
 D = np.eye(n)/2
-F = X/2
+F = X
 
 c = -y
 d = - X.T@y
 
 BIG_M = 1000
-mu = 0.5
+mu = 1
 lam = mu*np.ones((n, 1))
-np.linalg.eigvalsh(np.bmat([[D, F], [F.T, G]]))
+print(np.linalg.eigvalsh(np.bmat([[D, F/2], [F.T/2, G]]))[0:5])
 
 # define a container to store the root node lower bound
 root_bound = [np.inf, -np.inf]
@@ -53,13 +53,11 @@ def record_root_lb(model, where):
             if ub <= root_bound[0]:
                 root_bound[0] = ub
 
-
-
 # get tight big-M
 model_relax = gp.Model()
 z_relax = model_relax.addMVar(n, vtype=GRB.CONTINUOUS, lb=0, ub=1, name='z')
 x_relax = model_relax.addMVar(n, vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name='x')
-y_relax = model_relax.addMVar(k, vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name='y')
+y_relax = model_relax.addMVar(m, vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name='y')
 # add constraints
 model_relax.addConstrs(x_relax[i] <= BIG_M*z_relax[i] for i in range(n))
 model_relax.addConstrs(x_relax[i] >= -BIG_M*z_relax[i] for i in range(n))
@@ -77,40 +75,62 @@ print(f"The larges value of x is {max(x_relax_vals)}")
 BIG_M = min(BIG_M, 2*max(abs(x_relax_vals)))
 print(f'Use new Big-M {BIG_M}.')
 
+## solve the problem in original formulation
+model_ori = gp.Model()
+z_ori = model_ori.addMVar(n, vtype=GRB.BINARY)
+beta_ori = model_ori.addMVar(m, vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name="beta")
+w_ori = model_ori.addMVar(n, vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name="w")
+res = y - X@beta_ori - w_ori
+model_ori.setObjective(res@res/2 + mu_g*beta_ori.T@beta_ori + lam.T@z_ori, GRB.MINIMIZE)
+model_ori.addConstrs(w_ori[i] <= BIG_M*z_ori[i] for i in range(n))
+model_ori.addConstrs(w_ori[i] >= -BIG_M*z_ori[i] for i in range(n))
+model_ori.params.OutputFlag = 1
+model_ori.params.TimeLimit = 10
+model_ori.optimize(record_root_lb)
+z_opt_vals = np.array([z_ori[i].X for i in range(n)])
+print('--------------------------------')
+print('solve the problem in original formulation')
+print(f"The obj is {model_ori.objVal}.")
+print(f"The root upper bound is: {root_bound[0]}, lower bound is: {root_bound[1]}. The root gap is: {np.round(100*(root_bound[0]-root_bound[1])/root_bound[0],4)}%. Runtime: {model_ori.runtime}.")
+print(np.where(z_opt_vals == 1)[0])
+print(f"Number of outliers: {np.count_nonzero(z_opt_vals)}")
+print('--------------------------------')
 
-## get the optimal solution
-model_opt = gp.Model()
-z_opt = model_opt.addMVar(n, vtype=GRB.BINARY, lb=0, ub=1, name='z')
-x_opt = model_opt.addMVar(n, vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name='x')
-y_opt = model_opt.addMVar(k, vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name='y')
-# add constraints
-model_opt.addConstrs(x_opt[i]*(1-z_opt[i]) == 0 for i in range(n))
 
-# set objective
-eqn = y.T@y/2 + y_opt.T@G@y_opt + x_opt.T@D@x_opt + x_opt.T@F@y_opt + c.T@x_opt + d.T@y_opt + lam.T@z_opt
-model_opt.setObjective(eqn[0], GRB.MINIMIZE)
-# model_opt.params.QCPDual = 1
-model_opt.params.OutputFlag = 1
-model_opt.params.TimeLimit = 3
-model_opt.optimize(record_root_lb)
-print(f"The obj is {model_opt.objVal}.")
-print(f"The root upper bound is: {root_bound[0]}, lower bound is: {root_bound[1]}. The root gap is: {np.round(100*(root_bound[0]-root_bound[1])/root_bound[0],4)}%")
-
-
-# extract solutions
-z_opt_vals = np.array([z_opt[i].X for i in range(n)])
-y_opt_vals = np.array([y_opt[i].X for i in range(k)])
-x_opt_vals = np.array([x_opt[i].X for i in range(n)])
+# root_bound = [np.inf, -np.inf]
+# ## get the optimal solution
+# model_opt = gp.Model()
+# z_opt = model_opt.addMVar(n, vtype=GRB.BINARY, lb=0, ub=1, name='z')
+# x_opt = model_opt.addMVar(n, vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name='x')
+# y_opt = model_opt.addMVar(m, vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name='y')
+# # add constraints
+# model_opt.addConstrs(x_opt[i] <= BIG_M*z_opt[i] for i in range(n))
+# model_opt.addConstrs(x_opt[i] >= -BIG_M*z_opt[i] for i in range(n))
+# # set objective
+# eqn = y.T@y/2 + y_opt.T@G@y_opt + x_opt.T@D@x_opt + x_opt.T@F@y_opt + c.T@x_opt + d.T@y_opt + lam.T@z_opt
+# model_opt.setObjective(eqn[0], GRB.MINIMIZE)
+# # model_opt.params.QCPDual = 1
+# model_opt.params.OutputFlag = 0
+# model_opt.params.TimeLimit = 3
+# model_opt.optimize(record_root_lb)
+# print(f"The obj is {model_opt.objVal}.")
+# print(f"The root upper bound is: {root_bound[0]}, lower bound is: {root_bound[1]}. The root gap is: {np.round(100*(root_bound[0]-root_bound[1])/root_bound[0],4)}%. Runtime: {model_opt.runtime}.")
+#
+#
+# # extract solutions
+# z_opt_vals = np.array([z_opt[i].X for i in range(n)])
+# y_opt_vals = np.array([y_opt[i].X for i in range(m)])
+# x_opt_vals = np.array([x_opt[i].X for i in range(n)])
 
 # get dual variables
 model_dul = gp.Model()
 z_dul = model_dul.addMVar(n, vtype=GRB.CONTINUOUS, lb=0, ub=1, name='z')
 # z_dul = model_dul.addMVar(n, vtype=GRB.BINARY, name='z')
-y_dul = model_dul.addMVar(k, vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name='y')
+y_dul = model_dul.addMVar(m, vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name='y')
 x_dul = model_dul.addMVar(n, vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name='x')
 z_dul_bar = model_dul.addMVar(n, vtype=GRB.CONTINUOUS, lb=0, ub=1, name='z_bar')
 # z_dul_bar = model_dul.addMVar(n, vtype=GRB.BINARY, name='z_bar')
-y_dul_bar = model_dul.addMVar(k, vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name='y_bar')
+y_dul_bar = model_dul.addMVar(m, vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name='y_bar')
 x_dul_bar = model_dul.addMVar(n, vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name='x_bar')
 # w_dul_tilde = model_dul.addMVar(n, vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name='w_tilde')
 # t_dul = model_dul.addVar(vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name="t")
@@ -119,7 +139,7 @@ x_dul_bar = model_dul.addMVar(n, vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.
 model_dul.addConstrs(x_dul[i] <= BIG_M*z_dul[i] for i in range(n))
 model_dul.addConstrs(x_dul[i] >= -BIG_M*z_dul[i] for i in range(n))
 z_equal = model_dul.addConstrs(z_dul[i] == z_dul_bar[i] for i in range(n))
-y_equal = model_dul.addConstrs(y_dul[i] == y_dul_bar[i] for i in range(k))
+y_equal = model_dul.addConstrs(y_dul[i] == y_dul_bar[i] for i in range(m))
 x_equal = model_dul.addConstrs(x_dul[i] == x_dul_bar[i] for i in range(n))
 
 # set objective
@@ -132,16 +152,14 @@ model_dul.optimize()
 
 alpha = np.array([z_equal[i].Pi for i in range(n)])
 beta = np.array([x_equal[i].Pi for i in range(n)])
-gamma = np.array([y_equal[i].Pi for i in range(k)])
-combined = []
-combined.append(np.concatenate([alpha, beta, gamma]))
-print(alpha, beta, gamma)
+gamma = np.array([y_equal[i].Pi for i in range(m)])
+# print(alpha, beta, gamma)
 
-import random
+
 s = 3
 index_pair = [list(t) for t in combinations(range(m), 2)]
-# pairs = random.sample(index_pair, s)
-pairs = [[0, 1], [0, 2], [1, 2]]
+pairs = random.sample(index_pair, s)
+# pairs = [[0, 2]]
 
 Di = [cp.diag(cp.Variable(n)) for i in range(s)]
 Fi = [cp.Variable((n, m)) for i in range(s)]
@@ -166,10 +184,10 @@ for i in range(s):
 # I = np.eye(n)
 
 # constraints
-constraint_0 = [cp.bmat([[D - cp.sum(Di), F - cp.sum(Fi)], [(F - cp.sum(Fi)).T, G - cp.sum(Gi)]]) >> 0]
+constraint_0 = [cp.bmat([[D - cp.sum(Di), F/2 - cp.sum(Fi)/2], [(F/2 - cp.sum(Fi)/2).T, G - cp.sum(Gi)]]) >> 0]
 # constraint_0 = []
 for i in range(s):
-    constraint_0.append(cp.bmat([[Di[i], Fi[i]], [Fi[i].T, Gi[i]]]) >> 0)
+    constraint_0.append(cp.bmat([[Di[i], Fi[i]/2], [Fi[i].T/2, Gi[i]]]) >> 0)
     constraint_0.append(cp.multiply(Gi[i], Gi_mask[i]) == 0)
     constraint_0.append(cp.multiply(Fi[i], Fi_mask[i]) == 0)
 
@@ -177,14 +195,20 @@ for i in range(s):
 # objective = cp.Minimize(cp.norm_inf(G - cp.sum(Gi)))
 # objective = cp.Minimize(cp.norm(D - cp.sum(Di), 'nuc')+cp.norm(G - cp.sum(Gi), 'nuc'))
 # objective = cp.Minimize(cp.sum(cp.diag(-cp.sum(Di))) + cp.sum(cp.diag(-cp.sum(Gi))))
-objective = cp.Minimize(cp.lambda_max(cp.bmat([[D - cp.sum(Di), F - cp.sum(Fi)], [(F - cp.sum(Fi)).T, G - cp.sum(Gi)]])))
+# objective = cp.Maximize(-6.6e-6*cp.norm(Fi[0], 1)+cp.lambda_min(cp.bmat([[Di[0], Fi[0]/2], [Fi[0].T/2, Gi[0]]])))
+obj_expr = 0
+for ii in range(s):
+    obj_expr += cp.lambda_min(cp.bmat([[Di[ii], Fi[ii]/2], [Fi[ii].T/2, Gi[ii]]]))
+    obj_expr += -1e-4*cp.norm(Fi[ii], 1)
+objective = cp.Maximize(obj_expr)
+# objective = cp.Minimize(0*cp.norm(Fi[0], 1)+cp.lambda_max(cp.bmat([[D - cp.sum(Di), F/2 - cp.sum(Fi)/2], [(F/2 - cp.sum(Fi)/2).T, G - cp.sum(Gi)]])))
 
 # Formulate the optimization problem
 problem = cp.Problem(objective, constraint_0)
 
 # Solve the problem using MOSEK
 problem.solve(solver=cp.MOSEK)
-print(f"The solving time is {problem.solver_stats.solve_time}.")
+print(f"The decomposition time is {problem.solver_stats.solve_time}.")
 
 # Check the results
 if problem.status == cp.OPTIMAL:
@@ -194,26 +218,22 @@ if problem.status == cp.OPTIMAL:
     print(f"Maximum eigenvalue of D-\sum_i D_i: {np.max(np.linalg.eigvals(D - cp.sum(Di).value))}")
     print(f"Maximum eigenvalue of G-\sum_i G_i: {np.max(np.linalg.eigvals(G - cp.sum(Gi).value))}")
     print(f"Minimum eigenvalue of G-\sum_i G_i: {np.min(np.linalg.eigvals(G - cp.sum(Gi).value))}")
-    print(f"Maximum eigenvalue of unstructured problem: {np.max(np.linalg.eigvalsh(np.block([[D - cp.sum(Di).value, F - cp.sum(Fi).value], [(F - cp.sum(Fi).value).T, G - cp.sum(Gi).value]])))}")
-    print(f"Minimum eigenvalue of unstructured problem: {np.min(np.linalg.eigvalsh(np.block([[D - cp.sum(Di).value, F - cp.sum(Fi).value], [(F - cp.sum(Fi).value).T, G - cp.sum(Gi).value]])))}")
-    print(np.linalg.eigvalsh(np.block([[D - cp.sum(Di).value, F - cp.sum(Fi).value], [(F - cp.sum(Fi).value).T, G - cp.sum(Gi).value]])))
+    print(f"Maximum eigenvalue of unstructured problem: {np.max(np.linalg.eigvalsh(np.block([[D - cp.sum(Di).value, F/2 - cp.sum(Fi).value/2], [(F/2 - cp.sum(Fi).value/2).T, G - cp.sum(Gi).value]])))}")
+    print(f"Minimum eigenvalue of unstructured problem: {np.min(np.linalg.eigvalsh(np.block([[D - cp.sum(Di).value, F/2 - cp.sum(Fi).value/2], [(F/2 - cp.sum(Fi).value/2).T, G - cp.sum(Gi).value]])))}")
+    print(np.linalg.eigvalsh(np.block([[D - cp.sum(Di).value, F/2 - cp.sum(Fi).value/2], [(F/2 - cp.sum(Fi).value/2).T, G - cp.sum(Gi).value]]))[0:3])
 else:
     print("Problem not solved to optimality. Status:", problem.status)
 
-# Gi_ = [Gi[ii].value for ii in range(len(pairs))]
-# Fi_ = [Fi[ii].value for ii in range(len(pairs))]
-# Di_ = [Di[ii].value for ii in range(len(pairs))]
-Gi_ = [np.where(np.abs(Gi[ii].value) < 1e-10, 0, Gi[ii].value) for ii in range(len(pairs))]
-Fi_ = [np.where(np.abs(Fi[ii].value) < 1e-10, 0, Fi[ii].value) for ii in range(len(pairs))]
-Di_ = [np.where(np.abs(Di[ii].value) < 1e-10, 0, Di[ii].value) for ii in range(len(pairs))]
-# Di_ = [Di[ii].value for ii in range(len(pairs))]
-Gi_sum_diff_, Di_sum_diff_, Fi_sum_diff_ = G - cp.sum(Gi).value, D - cp.sum(Di).value, F - cp.sum(Fi).value
+Gi_ = [np.where(np.abs(Gi[ii].value) < 1e-8, 0, Gi[ii].value) for ii in range(len(pairs))]
+Fi_ = [np.where(np.abs(Fi[ii].value) < 1e-8, 0, Fi[ii].value) for ii in range(len(pairs))]
+Di_ = [np.where(Di[ii].value < 1e-8, 0, Di[ii].value) for ii in range(len(pairs))]
+Gi_sum_diff_, Di_sum_diff_, Fi_sum_diff_ = G - cp.sum(Gi_), D - cp.sum(Di_), F - cp.sum(Fi_)
 # Gi_sum_diff_[np.abs(Gi_sum_diff_) < 1e-6] = 0
 # Fi_sum_diff_[np.abs(Fi_sum_diff_) < 1e-6] = 0
 # Di_sum_diff_[np.abs(Di_sum_diff_) < 1e-6] = 0
 
-for i in range(s):
-    print(f"Number of nonzero rows in F_{i}: {np.sum(np.count_nonzero(Fi_[i], axis=1) != 0)}")
+print(f"Number of nonzero rows in F_0: {np.sum(np.count_nonzero(Fi_[0], axis=1) != 0)}")
+print("------------------------")
 
 for iii in range(1):
     print(f"adding the {iii + 1}th cut.")
@@ -221,10 +241,10 @@ for iii in range(1):
     # get dual variables
     model_dul = gp.Model()
     z_dul = model_dul.addMVar(n, vtype=GRB.CONTINUOUS, lb=0, ub=1, name='z')
-    y_dul = model_dul.addMVar(k, vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name='y')
+    y_dul = model_dul.addMVar(m, vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name='y')
     x_dul = model_dul.addMVar(n, vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name='x')
     z_dul_bar = model_dul.addMVar(n, vtype=GRB.CONTINUOUS, lb=0, ub=1, name='z_bar')
-    y_dul_bar = model_dul.addMVar(k, vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name='y_bar')
+    y_dul_bar = model_dul.addMVar(m, vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name='y_bar')
     x_dul_bar = model_dul.addMVar(n, vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name='x_bar')
     t_dul = model_dul.addMVar(len(pairs), vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name="t")
 
@@ -232,7 +252,7 @@ for iii in range(1):
     model_dul.addConstrs(x_dul[i] <= BIG_M * z_dul[i] for i in range(n))
     model_dul.addConstrs(x_dul[i] >= -BIG_M * z_dul[i] for i in range(n))
     z_equal = model_dul.addConstrs(z_dul[i] == z_dul_bar[i] for i in range(n))
-    y_equal = model_dul.addConstrs(y_dul[i] == y_dul_bar[i] for i in range(k))
+    y_equal = model_dul.addConstrs(y_dul[i] == y_dul_bar[i] for i in range(m))
     x_equal = model_dul.addConstrs(x_dul[i] == x_dul_bar[i] for i in range(n))
 
     psi_values = []
@@ -253,19 +273,13 @@ for iii in range(1):
     # extra_term = y.T@y/2 + c.T@x_dul_bar + d.T@y_dul_bar + lam.T@z_dul_bar
     # # set objective
     model_dul.setObjective(gp.quicksum(t_dul) + extra_term[0], GRB.MINIMIZE)
-    model_dul.params.OutputFlag = 1
+    model_dul.params.OutputFlag = 0
     model_dul.params.QCPDual = 1
     model_dul.optimize()
 
     alpha = np.array([z_equal[i].Pi for i in range(n)])
     beta = np.array([x_equal[i].Pi for i in range(n)])
-    gamma = np.array([y_equal[i].Pi for i in range(k)])
-    combined.append(np.concatenate([alpha, beta, gamma]))
-    # model_dul.setObjective(t_dul+extra_term[0], GRB.MINIMIZE)
-    # model_dul.params.OutputFlag = 0
-    # model_dul.params.QCPDual = 1
-    # model_dul.update()
-    # model_dul.optimize()
+    gamma = np.array([y_equal[i].Pi for i in range(m)])
     print(model_dul.objVal)
 
 z_dul_val = np.squeeze([zi.X for zi in z_dul_bar])
@@ -274,8 +288,40 @@ print(np.array([1.0 if v>thr else 0.0 for v in z_dul_val]))
 print(np.abs(z_opt_vals))
 
 
+## solve the optimal solution in the proposed formulation without cut
+root_bound = [np.inf, -np.inf]
+
+model_opt = gp.Model()
+z_opt = model_opt.addMVar(n, vtype=GRB.BINARY, name='z')
+y_opt = model_opt.addMVar(m, vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name='y')
+x_opt = model_opt.addMVar(n, vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name='x')
+t_opt = model_opt.addMVar(len(pairs), vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name="t")
+
+# add constraints
+model_opt.addConstrs(x_opt[i] <= BIG_M * z_opt[i] for i in range(n))
+model_opt.addConstrs(x_opt[i] >= -BIG_M * z_opt[i] for i in range(n))
+
+
+for ii, pair in enumerate(pairs):
+    model_opt.addConstr(
+        t_opt[ii] >= y_opt[pair].T @ Gi_[ii][np.ix_(pair, pair)] @ y_opt[pair] + x_opt.T @ Di_[
+            ii] @ x_opt + x_opt.T @ Fi_[ii][:, pair] @ y_opt[pair])
+
+extra_term = y.T @ y / 2 + y_opt.T @ Gi_sum_diff_ @ y_opt + x_opt.T @ Di_sum_diff_ @ x_opt + x_opt.T @ Fi_sum_diff_ @ y_opt + c.T @ x_opt + d.T @ y_opt + lam.T @ z_opt
+model_opt.setObjective(gp.quicksum(t_opt) + extra_term[0], GRB.MINIMIZE)
+model_opt.params.OutputFlag = 1
+model_opt.params.TimeLimit = 5
+model_opt.optimize(record_root_lb)
+print('--------------------------------------------------')
+print("Solve the optimal solution in the proposed formulation without cut")
+print(f"The obj is {model_opt.objVal}.")
+print(f"The root upper bound is: {root_bound[0]}, lower bound is: {root_bound[1]}. The root gap is: {np.round(100*(root_bound[0]-root_bound[1])/root_bound[0],4)}%. Runtime: {model_opt.runtime}.")
+print('--------------------------------------------------')
+
+
 ## cut and branch
 
+# define a container to store the root node lower bound
 root_bound = [np.inf, -np.inf]
 def record_root_lb(model, where):
     if where == GRB.Callback.MIPNODE:
@@ -294,7 +340,7 @@ def record_root_lb(model, where):
 # get dual variables
 model_dul = gp.Model()
 z_dul = model_dul.addMVar(n, vtype=GRB.BINARY, name='z')
-y_dul = model_dul.addMVar(k, vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name='y')
+y_dul = model_dul.addMVar(m, vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name='y')
 x_dul = model_dul.addMVar(n, vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name='x')
 t_dul = model_dul.addMVar(len(pairs), vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name="t")
 
@@ -314,13 +360,17 @@ extra_term = y.T @ y / 2 + y_dul.T @ Gi_sum_diff_ @ y_dul + x_dul.T @ Di_sum_dif
 # # set objective
 model_dul.setObjective(gp.quicksum(t_dul) + extra_term[0], GRB.MINIMIZE)
 model_dul.params.OutputFlag = 1
-model_dul.params.TimeLimit = 30
+model_dul.params.TimeLimit = 10
 # model_dul.setParam("NodeLimit", 2)
 model_dul.optimize(record_root_lb)
+print('--------------------------------------------------')
+print("Solve the problem in the proposed formulation with cut")
 print(model_dul.objVal)
 print(f"The root upper bound is: {root_bound[0]}, lower bound is: {root_bound[1]}. The root gap is: {np.round(100*(root_bound[0]-root_bound[1])/root_bound[0],4)}%. Runtime: {model_dul.runtime}.")
+print('--------------------------------------------------')
+
 
 z_dul_val = np.squeeze([zi.X for zi in z_dul])
-thr = np.quantile(z_dul_val,0.9)
+thr = np.quantile(z_dul_val,0.8)
 print(np.array([1.0 if v>thr else 0.0 for v in z_dul_val]))
 print(np.abs(z_opt_vals))
