@@ -16,8 +16,8 @@ from src.rank2 import fast_dp_general
 
 
 data = pd.read_csv('data/Crime.csv')
-m = 20
-n = 200
+m = 10
+n = 100
 # Access features and target
 # X = (data.data[0:n,[0, 6]] - np.mean(data.data[0:n, [0, 6]], axis=0)) / data.data[0:n,[0, 6]].std(axis=0)
 X =  data.iloc[0:n, 0:m].values
@@ -175,7 +175,7 @@ for i in range(s):
     ii, jj = pairs[i]
 
     fi_mask = np.ones((n, m))
-    # fi_mask[:, [ii, jj]] = 0
+    fi_mask[:, [ii, jj]] = 0
     Fi_mask.append(fi_mask)
 
     gi_mask = np.ones((m, m))
@@ -204,7 +204,7 @@ for i in range(s):
 obj_expr = 0
 for ii in range(s):
     obj_expr += cp.lambda_min(cp.bmat([[Di[ii], Fi[ii]/2], [Fi[ii].T/2, Gi[ii]]]))
-objective = cp.Maximize(obj_expr)
+objective = cp.Maximize(-3.2e-4*cp.norm(Fi[0], 1)+obj_expr)
 # objective = cp.Minimize(0*cp.norm(Fi[0], 1)+cp.lambda_max(cp.bmat([[D - cp.sum(Di), F/2 - cp.sum(Fi)/2], [(F/2 - cp.sum(Fi)/2).T, G - cp.sum(Gi)]])))
 
 # Formulate the optimization problem

@@ -16,8 +16,8 @@ from src.rank2 import fast_dp_general
 
 
 data = pd.read_csv('data/Crime.csv')
-m = 20
-n = 200
+m = 10
+n = 100
 # Access features and target
 # X = (data.data[0:n,[0, 6]] - np.mean(data.data[0:n, [0, 6]], axis=0)) / data.data[0:n,[0, 6]].std(axis=0)
 X =  data.iloc[0:n, 0:m].values
@@ -175,7 +175,7 @@ for i in range(s):
     ii, jj = pairs[i]
 
     fi_mask = np.ones((n, m))
-    # fi_mask[:, [ii, jj]] = 0
+    fi_mask[:, [ii, jj]] = 0
     Fi_mask.append(fi_mask)
 
     gi_mask = np.ones((m, m))
