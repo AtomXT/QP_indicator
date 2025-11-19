@@ -158,8 +158,8 @@ gamma = np.array([y_equal[i].Pi for i in range(m)])
 
 s = 1
 index_pair = [list(t) for t in combinations(range(m), 2)]
-pairs = random.sample(index_pair, s)
-# pairs = [[0, 2]]
+# pairs = random.sample(index_pair, s)
+pairs = [[0, 1]]
 
 Di = [cp.diag(cp.Variable(n)) for i in range(s)]
 Fi = [cp.Variable((n, m)) for i in range(s)]
@@ -236,7 +236,6 @@ print("------------------------")
 
 for iii in range(1):
     print(f"adding the {iii + 1}th cut.")
-
     # get dual variables
     model_dul = gp.Model()
     z_dul = model_dul.addMVar(n, vtype=GRB.CONTINUOUS, lb=0, ub=1, name='z')
@@ -253,7 +252,6 @@ for iii in range(1):
     z_equal = model_dul.addConstrs(z_dul[i] == z_dul_bar[i] for i in range(n))
     y_equal = model_dul.addConstrs(y_dul[i] == y_dul_bar[i] for i in range(m))
     x_equal = model_dul.addConstrs(x_dul[i] == x_dul_bar[i] for i in range(n))
-
     psi_values = []
     for ii, pair in enumerate(pairs):
         print(f"- adding {ii + 1}th pair.")
@@ -309,7 +307,7 @@ for ii, pair in enumerate(pairs):
 extra_term = y.T @ y / 2 + y_opt.T @ Gi_sum_diff_ @ y_opt + x_opt.T @ Di_sum_diff_ @ x_opt + x_opt.T @ Fi_sum_diff_ @ y_opt + c.T @ x_opt + d.T @ y_opt + lam.T @ z_opt
 model_opt.setObjective(gp.quicksum(t_opt) + extra_term[0], GRB.MINIMIZE)
 model_opt.params.OutputFlag = 1
-model_opt.params.TimeLimit = 5
+model_opt.params.TimeLimit = 3
 model_opt.optimize(record_root_lb)
 print('--------------------------------------------------')
 print("Solve the optimal solution in the proposed formulation without cut")
@@ -359,7 +357,7 @@ extra_term = y.T @ y / 2 + y_dul.T @ Gi_sum_diff_ @ y_dul + x_dul.T @ Di_sum_dif
 # # set objective
 model_dul.setObjective(gp.quicksum(t_dul) + extra_term[0], GRB.MINIMIZE)
 model_dul.params.OutputFlag = 1
-model_dul.params.TimeLimit = 5
+model_dul.params.TimeLimit = 3
 # model_dul.setParam("NodeLimit", 2)
 model_dul.optimize(record_root_lb)
 print('--------------------------------------------------')

@@ -85,7 +85,7 @@ model_ori.setObjective(res@res/2 + mu_g*beta_ori.T@beta_ori + lam.T@z_ori, GRB.M
 model_ori.addConstrs(w_ori[i] <= BIG_M*z_ori[i] for i in range(n))
 model_ori.addConstrs(w_ori[i] >= -BIG_M*z_ori[i] for i in range(n))
 model_ori.params.OutputFlag = 1
-model_ori.params.TimeLimit = 10
+model_ori.params.TimeLimit = 30
 model_ori.optimize(record_root_lb)
 z_opt_vals = np.array([z_ori[i].X for i in range(n)])
 print('--------------------------------')
@@ -158,8 +158,8 @@ gamma = np.array([y_equal[i].Pi for i in range(m)])
 
 s = 1
 index_pair = [list(t) for t in combinations(range(m), 2)]
-pairs = random.sample(index_pair, s)
-# pairs = [[0, 2]]
+# pairs = random.sample(index_pair, s)
+pairs = [[0, 1]]
 
 Di = [cp.diag(cp.Variable(n)) for i in range(s)]
 Fi = [cp.Variable((n, m)) for i in range(s)]
@@ -309,7 +309,7 @@ for ii, pair in enumerate(pairs):
 extra_term = y.T @ y / 2 + y_opt.T @ Gi_sum_diff_ @ y_opt + x_opt.T @ Di_sum_diff_ @ x_opt + x_opt.T @ Fi_sum_diff_ @ y_opt + c.T @ x_opt + d.T @ y_opt + lam.T @ z_opt
 model_opt.setObjective(gp.quicksum(t_opt) + extra_term[0], GRB.MINIMIZE)
 model_opt.params.OutputFlag = 1
-model_opt.params.TimeLimit = 5
+model_opt.params.TimeLimit = 30
 model_opt.optimize(record_root_lb)
 print('--------------------------------------------------')
 print("Solve the optimal solution in the proposed formulation without cut")
@@ -359,7 +359,7 @@ extra_term = y.T @ y / 2 + y_dul.T @ Gi_sum_diff_ @ y_dul + x_dul.T @ Di_sum_dif
 # # set objective
 model_dul.setObjective(gp.quicksum(t_dul) + extra_term[0], GRB.MINIMIZE)
 model_dul.params.OutputFlag = 1
-model_dul.params.TimeLimit = 10
+model_dul.params.TimeLimit = 30
 # model_dul.setParam("NodeLimit", 2)
 model_dul.optimize(record_root_lb)
 print('--------------------------------------------------')

@@ -310,7 +310,7 @@ for ii, pair in enumerate(pairs):
 extra_term = y.T @ y / 2 + y_opt.T @ Gi_sum_diff_ @ y_opt + x_opt.T @ Di_sum_diff_ @ x_opt + x_opt.T @ Fi_sum_diff_ @ y_opt + c.T @ x_opt + d.T @ y_opt + lam.T @ z_opt
 model_opt.setObjective(gp.quicksum(t_opt) + extra_term[0], GRB.MINIMIZE)
 model_opt.params.OutputFlag = 1
-model_opt.params.TimeLimit = 5
+model_opt.params.TimeLimit = 30
 model_opt.optimize(record_root_lb)
 print('--------------------------------------------------')
 print("Solve the optimal solution in the proposed formulation without cut")
