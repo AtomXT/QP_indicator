@@ -122,44 +122,13 @@ print('--------------------------------')
 # y_opt_vals = np.array([y_opt[i].X for i in range(m)])
 # x_opt_vals = np.array([x_opt[i].X for i in range(n)])
 
-# get dual variables
-model_dul = gp.Model()
-z_dul = model_dul.addMVar(n, vtype=GRB.CONTINUOUS, lb=0, ub=1, name='z')
-# z_dul = model_dul.addMVar(n, vtype=GRB.BINARY, name='z')
-y_dul = model_dul.addMVar(m, vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name='y')
-x_dul = model_dul.addMVar(n, vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name='x')
-z_dul_bar = model_dul.addMVar(n, vtype=GRB.CONTINUOUS, lb=0, ub=1, name='z_bar')
-# z_dul_bar = model_dul.addMVar(n, vtype=GRB.BINARY, name='z_bar')
-y_dul_bar = model_dul.addMVar(m, vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name='y_bar')
-x_dul_bar = model_dul.addMVar(n, vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name='x_bar')
-# w_dul_tilde = model_dul.addMVar(n, vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name='w_tilde')
-# t_dul = model_dul.addVar(vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name="t")
-
-# add constraints
-model_dul.addConstrs(x_dul[i] <= BIG_M*z_dul[i] for i in range(n))
-model_dul.addConstrs(x_dul[i] >= -BIG_M*z_dul[i] for i in range(n))
-z_equal = model_dul.addConstrs(z_dul[i] == z_dul_bar[i] for i in range(n))
-y_equal = model_dul.addConstrs(y_dul[i] == y_dul_bar[i] for i in range(m))
-x_equal = model_dul.addConstrs(x_dul[i] == x_dul_bar[i] for i in range(n))
-
-# set objective
-# model_dul.setObjective(t_dul, GRB.MINIMIZE)
-eqn = y.T@y/2 + y_dul_bar.T@G@y_dul_bar + x_dul_bar.T@D@x_dul_bar + x_dul_bar.T@F@y_dul_bar + c.T@x_dul_bar + d.T@y_dul_bar + lam.T@z_dul_bar
-model_dul.setObjective(eqn[0], GRB.MINIMIZE)
-model_dul.params.OutputFlag = 0
-model_dul.params.QCPDual = 1
-model_dul.optimize()
-
-alpha = np.array([z_equal[i].Pi for i in range(n)])
-beta = np.array([x_equal[i].Pi for i in range(n)])
-gamma = np.array([y_equal[i].Pi for i in range(m)])
-# print(alpha, beta, gamma)
 
 
-s = 3
+
+s = 1
 index_pair = [list(t) for t in combinations(range(m), 2)]
-pairs = random.sample(index_pair, s)
-# pairs = [[0, 2]]
+# pairs = random.sample(index_pair, s)
+pairs = [[0, 2]]
 
 Di = [cp.diag(cp.Variable(n)) for i in range(s)]
 Fi = [cp.Variable((n, m)) for i in range(s)]
@@ -235,52 +204,66 @@ Gi_sum_diff_, Di_sum_diff_, Fi_sum_diff_ = G - cp.sum(Gi_), D - cp.sum(Di_), F -
 print(f"Number of nonzero rows in F_0: {np.sum(np.count_nonzero(Fi_[0], axis=1) != 0)}")
 print("------------------------")
 
-for iii in range(1):
+# get dual variables
+model_dul = gp.Model()
+z_dul = model_dul.addMVar(n, vtype=GRB.CONTINUOUS, lb=0, ub=1, name='z')
+y_dul = model_dul.addMVar(m, vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name='y')
+x_dul = model_dul.addMVar(n, vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name='x')
+z_dul_bar = model_dul.addMVar(n, vtype=GRB.CONTINUOUS, lb=0, ub=1, name='z_bar')
+y_dul_bar = model_dul.addMVar(m, vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name='y_bar')
+x_dul_bar = model_dul.addMVar(n, vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name='x_bar')
+t_dul = model_dul.addMVar(len(pairs), vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name="t")
+
+# add constraints
+model_dul.addConstrs(x_dul[i] <= BIG_M * z_dul[i] for i in range(n))
+model_dul.addConstrs(x_dul[i] >= -BIG_M * z_dul[i] for i in range(n))
+z_equal = model_dul.addConstrs(z_dul[i] == z_dul_bar[i] for i in range(n))
+y_equal = model_dul.addConstrs(y_dul[i] == y_dul_bar[i] for i in range(m))
+x_equal = model_dul.addConstrs(x_dul[i] == x_dul_bar[i] for i in range(n))
+for ii, pair in enumerate(pairs):
+    print(f"- adding {ii + 1}th pair.")
+    model_dul.addConstr(
+        t_dul[ii] >= y_dul[pair].T @ Gi_[ii][np.ix_(pair, pair)] @ y_dul[pair] + x_dul.T @ Di_[
+            ii] @ x_dul + x_dul.T @ Fi_[ii][:, pair] @ y_dul[pair])
+extra_term = y.T @ y / 2 + y_dul_bar.T @ Gi_sum_diff_ @ y_dul_bar + x_dul_bar.T @ Di_sum_diff_ @ x_dul_bar + x_dul_bar.T @ Fi_sum_diff_ @ y_dul_bar + c.T @ x_dul_bar + d.T @ y_dul_bar + lam.T @ z_dul_bar
+# extra_term = y.T@y/2 + c.T@x_dul_bar + d.T@y_dul_bar + lam.T@z_dul_bar
+# # set objective
+model_dul.setObjective(gp.quicksum(t_dul) + extra_term[0], GRB.MINIMIZE)
+model_dul.params.OutputFlag = 0
+model_dul.params.QCPDual = 1
+model_dul.optimize()
+alpha = np.array([z_equal[i].Pi for i in range(n)])
+beta = np.array([x_equal[i].Pi for i in range(n)])
+gamma = np.array([y_equal[i].Pi for i in range(m)])
+print(model_dul.objVal)
+print(alpha)
+
+# --------
+psi_values = []
+alphas, betas, gammas = [], [], []
+
+for iii in range(3):
     print(f"adding the {iii + 1}th cut.")
-
-    # get dual variables
-    model_dul = gp.Model()
-    z_dul = model_dul.addMVar(n, vtype=GRB.CONTINUOUS, lb=0, ub=1, name='z')
-    y_dul = model_dul.addMVar(m, vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name='y')
-    x_dul = model_dul.addMVar(n, vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name='x')
-    z_dul_bar = model_dul.addMVar(n, vtype=GRB.CONTINUOUS, lb=0, ub=1, name='z_bar')
-    y_dul_bar = model_dul.addMVar(m, vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name='y_bar')
-    x_dul_bar = model_dul.addMVar(n, vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name='x_bar')
-    t_dul = model_dul.addMVar(len(pairs), vtype=GRB.CONTINUOUS, lb=0, ub=GRB.INFINITY, name="t")
-
-    # add constraints
-    model_dul.addConstrs(x_dul[i] <= BIG_M * z_dul[i] for i in range(n))
-    model_dul.addConstrs(x_dul[i] >= -BIG_M * z_dul[i] for i in range(n))
-    z_equal = model_dul.addConstrs(z_dul[i] == z_dul_bar[i] for i in range(n))
-    y_equal = model_dul.addConstrs(y_dul[i] == y_dul_bar[i] for i in range(m))
-    x_equal = model_dul.addConstrs(x_dul[i] == x_dul_bar[i] for i in range(n))
-
-    psi_values = []
+    alphas.append(alpha)
+    betas.append(beta)
+    gammas.append(gamma)
+    psi_values_level = []
     for ii, pair in enumerate(pairs):
         print(f"- adding {ii + 1}th pair.")
         _, _, _, f_dp = fast_dp_general(Gi_[ii][np.ix_(pair, pair)], Di_[ii], Fi_[ii][:, pair], -beta,
                                         -gamma[pair], -alpha.reshape(-1, 1))
         psi_v = f_dp
-        psi_values.append(psi_v)
+        psi_values_level.append(psi_v)
         # print(psi_v)
-        model_dul.addConstr(
-            t_dul[ii] >= y_dul[pair].T @ Gi_[ii][np.ix_(pair, pair)] @ y_dul[pair] + x_dul.T @ Di_[
-                ii] @ x_dul + x_dul.T @ Fi_[ii][:, pair] @ y_dul[pair])
-
         model_dul.addConstr(t_dul[ii] >= alpha.T @ z_dul + beta.T @ x_dul + gamma[pair].T @ y_dul[pair] + psi_v)
-
-    extra_term = y.T @ y / 2 + y_dul_bar.T @ Gi_sum_diff_ @ y_dul_bar + x_dul_bar.T @ Di_sum_diff_ @ x_dul_bar + x_dul_bar.T @ Fi_sum_diff_ @ y_dul_bar + c.T @ x_dul_bar + d.T @ y_dul_bar + lam.T @ z_dul_bar
-    # extra_term = y.T@y/2 + c.T@x_dul_bar + d.T@y_dul_bar + lam.T@z_dul_bar
-    # # set objective
-    model_dul.setObjective(gp.quicksum(t_dul) + extra_term[0], GRB.MINIMIZE)
-    model_dul.params.OutputFlag = 0
-    model_dul.params.QCPDual = 1
+    psi_values.append(psi_values_level)
     model_dul.optimize()
 
     alpha = np.array([z_equal[i].Pi for i in range(n)])
     beta = np.array([x_equal[i].Pi for i in range(n)])
     gamma = np.array([y_equal[i].Pi for i in range(m)])
     print(model_dul.objVal)
+    print(alpha)
 
 z_dul_val = np.squeeze([zi.X for zi in z_dul_bar])
 thr = np.quantile(z_dul_val,0.9)
@@ -354,7 +337,11 @@ for ii, pair in enumerate(pairs):
         t_dul[ii] >= y_dul[pair].T @ Gi_[ii][np.ix_(pair, pair)] @ y_dul[pair] + x_dul.T @ Di_[
             ii] @ x_dul + x_dul.T @ Fi_[ii][:, pair] @ y_dul[pair])
 
-    model_dul.addConstr(t_dul[ii] >= alpha.T @ z_dul + beta.T @ x_dul + gamma[pair].T @ y_dul[pair] + psi_values[ii])
+for iii in range(len(psi_values)):
+    alpha, beta, gamma = alphas[iii], betas[iii], gammas[iii]
+    psi_value = psi_values[iii]
+    for ii, pair in enumerate(pairs):
+        model_dul.addConstr(t_dul[ii] >= alpha.T @ z_dul + beta.T @ x_dul + gamma[pair].T @ y_dul[pair] + psi_value[ii])
 
 extra_term = y.T @ y / 2 + y_dul.T @ Gi_sum_diff_ @ y_dul + x_dul.T @ Di_sum_diff_ @ x_dul + x_dul.T @ Fi_sum_diff_ @ y_dul + c.T @ x_dul + d.T @ y_dul + lam.T @ z_dul
 # # set objective
