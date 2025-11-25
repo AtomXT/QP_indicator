@@ -25,8 +25,8 @@ X = (X - np.mean(X, axis=0))/X.std(axis=0)
 y = data.target[:n]
 y = (y-np.mean(y))/np.std(y)
 mu_g = 0.2
-G = X.T@X/2 + mu_g*np.eye(m)  # regularization
-D = np.eye(n)/2
+G = X.T@X + 2*mu_g*np.eye(m)  # regularization
+D = np.eye(n)
 F = X
 
 c = -y
@@ -35,7 +35,7 @@ d = - X.T@y
 BIG_M = 1000
 mu = 1
 lam = mu*np.ones((n, 1))
-print(np.linalg.eigvalsh(np.bmat([[D, F/2], [F.T/2, G]]))[0:5])
+print(np.linalg.eigvalsh(np.bmat([[D, F], [F.T, G]]))[0:5])
 
 # define a container to store the root node lower bound
 root_bound = [np.inf, -np.inf]
@@ -63,7 +63,7 @@ model_relax.addConstrs(x_relax[i] <= BIG_M*z_relax[i] for i in range(n))
 model_relax.addConstrs(x_relax[i] >= -BIG_M*z_relax[i] for i in range(n))
 
 # set objective
-eqn = y.T@y/2 + y_relax.T@G@y_relax + x_relax.T@D@x_relax + x_relax.T@F@y_relax + c.T@x_relax + d.T@y_relax + lam.T@z_relax
+eqn = y.T@y/2 + y_relax.T@G@y_relax/2 + x_relax.T@D@x_relax/2 + x_relax.T@F@y_relax + c.T@x_relax + d.T@y_relax + lam.T@z_relax
 model_relax.setObjective(eqn[0], GRB.MINIMIZE)
 # model_relax.params.QCPDual = 1
 model_relax.params.OutputFlag = 0
@@ -153,10 +153,10 @@ for i in range(s):
 # I = np.eye(n)
 
 # constraints
-constraint_0 = [cp.bmat([[D - cp.sum(Di), F/2 - cp.sum(Fi)/2], [(F/2 - cp.sum(Fi)/2).T, G - cp.sum(Gi)]]) >> 0]
+constraint_0 = [cp.bmat([[D - cp.sum(Di), F - cp.sum(Fi)], [(F - cp.sum(Fi)).T, G - cp.sum(Gi)]]) >> 0]
 # constraint_0 = []
 for i in range(s):
-    constraint_0.append(cp.bmat([[Di[i], Fi[i]/2], [Fi[i].T/2, Gi[i]]]) >> 0)
+    constraint_0.append(cp.bmat([[Di[i], Fi[i]], [Fi[i].T, Gi[i]]]) >> 0)
     constraint_0.append(cp.multiply(Gi[i], Gi_mask[i]) == 0)
     constraint_0.append(cp.multiply(Fi[i], Fi_mask[i]) == 0)
 
@@ -164,10 +164,10 @@ for i in range(s):
 # objective = cp.Minimize(cp.norm_inf(G - cp.sum(Gi)))
 # objective = cp.Minimize(cp.norm(D - cp.sum(Di), 'nuc')+cp.norm(G - cp.sum(Gi), 'nuc'))
 # objective = cp.Minimize(cp.sum(cp.diag(-cp.sum(Di))) + cp.sum(cp.diag(-cp.sum(Gi))))
-# objective = cp.Maximize(-6.6e-6*cp.norm(Fi[0], 1)+cp.lambda_min(cp.bmat([[Di[0], Fi[0]/2], [Fi[0].T/2, Gi[0]]])))
+# objective = cp.Maximize(-6.6e-6*cp.norm(Fi[0], 1)+cp.lambda_min(cp.bmat([[Di[0], Fi[0]], [Fi[0].T, Gi[0]]])))
 obj_expr = 0
 for ii in range(s):
-    obj_expr += cp.lambda_min(cp.bmat([[Di[ii], Fi[ii]/2], [Fi[ii].T/2, Gi[ii]]]))
+    obj_expr += cp.lambda_min(cp.bmat([[Di[ii], Fi[ii]], [Fi[ii].T, Gi[ii]]]))
     # obj_expr += -1e-4*cp.norm(Fi[ii], 1)
 objective = cp.Maximize(obj_expr)
 # objective = cp.Minimize(0*cp.norm(Fi[0], 1)+cp.lambda_max(cp.bmat([[D - cp.sum(Di), F/2 - cp.sum(Fi)/2], [(F/2 - cp.sum(Fi)/2).T, G - cp.sum(Gi)]])))
@@ -187,9 +187,9 @@ if problem.status == cp.OPTIMAL:
     print(f"Maximum eigenvalue of D-\sum_i D_i: {np.max(np.linalg.eigvals(D - cp.sum(Di).value))}")
     print(f"Maximum eigenvalue of G-\sum_i G_i: {np.max(np.linalg.eigvals(G - cp.sum(Gi).value))}")
     print(f"Minimum eigenvalue of G-\sum_i G_i: {np.min(np.linalg.eigvals(G - cp.sum(Gi).value))}")
-    print(f"Maximum eigenvalue of unstructured problem: {np.max(np.linalg.eigvalsh(np.block([[D - cp.sum(Di).value, F/2 - cp.sum(Fi).value/2], [(F/2 - cp.sum(Fi).value/2).T, G - cp.sum(Gi).value]])))}")
-    print(f"Minimum eigenvalue of unstructured problem: {np.min(np.linalg.eigvalsh(np.block([[D - cp.sum(Di).value, F/2 - cp.sum(Fi).value/2], [(F/2 - cp.sum(Fi).value/2).T, G - cp.sum(Gi).value]])))}")
-    print(np.linalg.eigvalsh(np.block([[D - cp.sum(Di).value, F/2 - cp.sum(Fi).value/2], [(F/2 - cp.sum(Fi).value/2).T, G - cp.sum(Gi).value]]))[0:3])
+    print(f"Maximum eigenvalue of unstructured problem: {np.max(np.linalg.eigvalsh(np.block([[D - cp.sum(Di).value, F - cp.sum(Fi).value], [(F - cp.sum(Fi).value).T, G - cp.sum(Gi).value]])))}")
+    print(f"Minimum eigenvalue of unstructured problem: {np.min(np.linalg.eigvalsh(np.block([[D - cp.sum(Di).value, F - cp.sum(Fi).value], [(F - cp.sum(Fi).value).T, G - cp.sum(Gi).value]])))}")
+    print(np.linalg.eigvalsh(np.block([[D - cp.sum(Di).value, F - cp.sum(Fi).value], [(F - cp.sum(Fi).value).T, G - cp.sum(Gi).value]]))[0:3])
 else:
     print("Problem not solved to optimality. Status:", problem.status)
 
@@ -212,7 +212,7 @@ x_dul = model_dul.addMVar(n, vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFI
 z_dul_bar = model_dul.addMVar(n, vtype=GRB.CONTINUOUS, lb=0, ub=1, name='z_bar')
 y_dul_bar = model_dul.addMVar(m, vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name='y_bar')
 x_dul_bar = model_dul.addMVar(n, vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name='x_bar')
-t_dul = model_dul.addMVar(len(pairs), vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name="t")
+t_dul = model_dul.addMVar(len(pairs), vtype=GRB.CONTINUOUS, lb=0, ub=GRB.INFINITY, name="t")
 
 # add constraints
 model_dul.addConstrs(x_dul[i] <= BIG_M * z_dul[i] for i in range(n))
@@ -223,9 +223,9 @@ x_equal = model_dul.addConstrs(x_dul[i] == x_dul_bar[i] for i in range(n))
 for ii, pair in enumerate(pairs):
     print(f"- adding {ii + 1}th pair.")
     model_dul.addConstr(
-        t_dul[ii] >= y_dul[pair].T @ Gi_[ii][np.ix_(pair, pair)] @ y_dul[pair] + x_dul.T @ Di_[
-            ii] @ x_dul + x_dul.T @ Fi_[ii][:, pair] @ y_dul[pair])
-extra_term = y.T @ y / 2 + y_dul_bar.T @ Gi_sum_diff_ @ y_dul_bar + x_dul_bar.T @ Di_sum_diff_ @ x_dul_bar + x_dul_bar.T @ Fi_sum_diff_ @ y_dul_bar + c.T @ x_dul_bar + d.T @ y_dul_bar + lam.T @ z_dul_bar
+        t_dul[ii] >= y_dul[pair].T @ Gi_[ii][np.ix_(pair, pair)] @ y_dul[pair]/2 + x_dul.T @ Di_[
+            ii] @ x_dul/2 + x_dul.T @ Fi_[ii][:, pair] @ y_dul[pair])
+extra_term = y.T @ y / 2 + y_dul_bar.T @ Gi_sum_diff_ @ y_dul_bar/2 + x_dul_bar.T @ Di_sum_diff_ @ x_dul_bar/2 + x_dul_bar.T @ Fi_sum_diff_ @ y_dul_bar + c.T @ x_dul_bar + d.T @ y_dul_bar + lam.T @ z_dul_bar
 # extra_term = y.T@y/2 + c.T@x_dul_bar + d.T@y_dul_bar + lam.T@z_dul_bar
 # # set objective
 model_dul.setObjective(gp.quicksum(t_dul) + extra_term[0], GRB.MINIMIZE)
@@ -250,7 +250,7 @@ for iii in range(3):
     psi_values_level = []
     for ii, pair in enumerate(pairs):
         print(f"- adding {ii + 1}th pair.")
-        _, _, _, f_dp = fast_dp_general(Gi_[ii][np.ix_(pair, pair)], Di_[ii], Fi_[ii][:, pair], -beta,
+        _, _, _, f_dp = fast_dp_general(Gi_[ii][np.ix_(pair, pair)]/2, Di_[ii], Fi_[ii][:, pair]/2, -beta,
                                         -gamma[pair], -alpha.reshape(-1, 1))
         psi_v = f_dp
         psi_values_level.append(psi_v)
@@ -287,10 +287,10 @@ model_opt.addConstrs(x_opt[i] >= -BIG_M * z_opt[i] for i in range(n))
 
 for ii, pair in enumerate(pairs):
     model_opt.addConstr(
-        t_opt[ii] >= y_opt[pair].T @ Gi_[ii][np.ix_(pair, pair)] @ y_opt[pair] + x_opt.T @ Di_[
-            ii] @ x_opt + x_opt.T @ Fi_[ii][:, pair] @ y_opt[pair])
+        t_opt[ii] >= y_opt[pair].T @ Gi_[ii][np.ix_(pair, pair)] @ y_opt[pair]/2 + x_opt.T @ Di_[
+            ii] @ x_opt/2 + x_opt.T @ Fi_[ii][:, pair] @ y_opt[pair])
 
-extra_term = y.T @ y / 2 + y_opt.T @ Gi_sum_diff_ @ y_opt + x_opt.T @ Di_sum_diff_ @ x_opt + x_opt.T @ Fi_sum_diff_ @ y_opt + c.T @ x_opt + d.T @ y_opt + lam.T @ z_opt
+extra_term = y.T @ y / 2 + y_opt.T @ Gi_sum_diff_ @ y_opt/2 + x_opt.T @ Di_sum_diff_ @ x_opt/2 + x_opt.T @ Fi_sum_diff_ @ y_opt + c.T @ x_opt + d.T @ y_opt + lam.T @ z_opt
 model_opt.setObjective(gp.quicksum(t_opt) + extra_term[0], GRB.MINIMIZE)
 model_opt.params.OutputFlag = 1
 model_opt.params.TimeLimit = 30
@@ -334,8 +334,8 @@ model_dul.addConstrs(x_dul[i] >= -BIG_M * z_dul[i] for i in range(n))
 for ii, pair in enumerate(pairs):
     print(f"- adding {ii + 1}th pair.")
     model_dul.addConstr(
-        t_dul[ii] >= y_dul[pair].T @ Gi_[ii][np.ix_(pair, pair)] @ y_dul[pair] + x_dul.T @ Di_[
-            ii] @ x_dul + x_dul.T @ Fi_[ii][:, pair] @ y_dul[pair])
+        t_dul[ii] >= y_dul[pair].T @ Gi_[ii][np.ix_(pair, pair)] @ y_dul[pair]/2 + x_dul.T @ Di_[
+            ii] @ x_dul/2 + x_dul.T @ Fi_[ii][:, pair] @ y_dul[pair])
 
 for iii in range(len(psi_values)):
     alpha, beta, gamma = alphas[iii], betas[iii], gammas[iii]
@@ -343,7 +343,7 @@ for iii in range(len(psi_values)):
     for ii, pair in enumerate(pairs):
         model_dul.addConstr(t_dul[ii] >= alpha.T @ z_dul + beta.T @ x_dul + gamma[pair].T @ y_dul[pair] + psi_value[ii])
 
-extra_term = y.T @ y / 2 + y_dul.T @ Gi_sum_diff_ @ y_dul + x_dul.T @ Di_sum_diff_ @ x_dul + x_dul.T @ Fi_sum_diff_ @ y_dul + c.T @ x_dul + d.T @ y_dul + lam.T @ z_dul
+extra_term = y.T @ y / 2 + y_dul.T @ Gi_sum_diff_ @ y_dul/2 + x_dul.T @ Di_sum_diff_ @ x_dul/2 + x_dul.T @ Fi_sum_diff_ @ y_dul + c.T @ x_dul + d.T @ y_dul + lam.T @ z_dul
 # # set objective
 model_dul.setObjective(gp.quicksum(t_dul) + extra_term[0], GRB.MINIMIZE)
 model_dul.params.OutputFlag = 1
