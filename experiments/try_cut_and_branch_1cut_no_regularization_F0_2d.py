@@ -18,7 +18,7 @@ from src.rank2 import fast_dp_general
 
 data = datasets.load_diabetes()
 m = 2
-n = 50
+n = 100
 # Access features and target
 X = data.data[0:n, 0:m]
 X = (X - np.mean(X, axis=0))/X.std(axis=0)
