@@ -17,7 +17,7 @@ from src.rank2 import fast_dp_general
 
 
 data = datasets.load_diabetes()
-m = 2
+m = 3
 n = 100
 # Access features and target
 X = data.data[0:n, 0:m]
@@ -160,10 +160,10 @@ x_opt_vals = np.array([x_opt[i].X for i in range(n)])
 # -----------------
 
 
-s = 1
+s = 3
 index_pair = [list(t) for t in combinations(range(m), 2)]
-# pairs = random.sample(index_pair, s)
-pairs = [[0, 1]]
+pairs = random.sample(index_pair, s)
+# pairs = [[0, 1]]
 
 Di = [cp.diag(cp.Variable(n)) for i in range(s)]
 Fi = [cp.Variable((n, m)) for i in range(s)]
@@ -277,7 +277,7 @@ print(alpha)
 psi_values = []
 alphas, betas, gammas = [], [], []
 
-for iii in range(3):
+for iii in range(1):
     print(f"adding the {iii + 1}th cut.")
     alphas.append(alpha)
     betas.append(beta)
@@ -285,7 +285,7 @@ for iii in range(3):
     psi_values_level = []
     for ii, pair in enumerate(pairs):
         print(f"- adding {ii + 1}th pair.")
-        _, _, _, f_dp = fast_dp_general(Gi_[ii][np.ix_(pair, pair)]/2, Di_[ii], Fi_[ii][:, pair]/2, -beta,
+        _, _, _, f_dp = fast_dp_general(Gi_[ii][np.ix_(pair, pair)]/2, Di_[ii]/2, Fi_[ii][:, pair], -beta,
                                         -gamma[pair], -alpha.reshape(-1, 1))
         psi_v = f_dp
         psi_values_level.append(psi_v)
