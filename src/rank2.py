@@ -86,6 +86,7 @@ def fast_dp(X, y, lam):
 def find_candidates_dp_general(C, D, Q, c, d, lam):
     Z = []
     n = len(c)
+    lam[lam <= 0] = 0
     for i in range(n):
         bounds1 = []
         bounds2 = []
