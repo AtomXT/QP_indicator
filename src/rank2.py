@@ -159,14 +159,18 @@ def fast_dp_general(C, D, Q, c, d, lam):
     n = len(c)
     c = c.reshape((n, 1))
     d = d.reshape((2, 1))
-    Z = find_candidates_dp_general(C, D, Q, c, d, lam)
+    D_index = np.diag(D) != 0
+    Z = find_candidates_dp_general(C, D[np.ix_(D_index, D_index)], Q[D_index, :], c[D_index], d, lam[D_index])
+    Z_full = np.zeros((len(Z), n))
+    Z_full[:,D_index] = np.concatenate(Z,axis=1).T
+    Z = list(Z_full)
     f_opt = float('inf')
     x_opt = None
     y_opt = None
     z_opt = None
     for i, z in enumerate(Z):
         s = np.squeeze(z==1)
-        s = np.logical_and(s, np.diag(D) != 0)  # could be optimized later
+        # s = np.logical_and(s, np.diag(D) != 0)  # could be optimized later
         D_s = np.diag(D)[s]
         Q_s = Q[s, :]
         c_s = c[s]
