@@ -17,7 +17,7 @@ from src.rank2 import fast_dp_general
 
 
 data = datasets.load_diabetes()
-m = 2
+m = 3
 n = 100
 # Access features and target
 X = data.data[0:n, 0:m]
@@ -124,7 +124,7 @@ print('--------------------------------')
 
 
 
-s = 1
+s = 3
 index_pair = [list(t) for t in combinations(range(m), 2)]
 pairs = random.sample(index_pair, s)
 # pairs = [[0, 1]]
@@ -195,14 +195,14 @@ if problem.status == cp.OPTIMAL:
 else:
     print("Problem not solved to optimality. Status:", problem.status)
 
-# Gi_ = [np.where(np.abs(Gi[ii].value) < 1e-8, 0, Gi[ii].value) for ii in range(len(pairs))]
-# Fi_ = [np.where(np.abs(Fi[ii].value) < 1e-8, 0, Fi[ii].value) for ii in range(len(pairs))]
-# Di_ = [np.where(Di[ii].value < 1e-8, 0, Di[ii].value) for ii in range(len(pairs))]
+Gi_ = [np.where(np.abs(Gi[ii].value) < 1e-8, 0, Gi[ii].value) for ii in range(len(pairs))]
+Fi_ = [np.where(np.abs(Fi[ii].value) < 1e-8, 0, Fi[ii].value) for ii in range(len(pairs))]
+Di_ = [np.where(Di[ii].value < 1e-8, 0, Di[ii].value) for ii in range(len(pairs))]
 # Di_ = [Di[ii].value for ii in range(len(pairs))]
 # Gi_ = [Gi[ii].value for ii in range(len(pairs))]
 # Fi_ = [Fi[ii].value*(1-Fi_mask[ii]) for ii in range(len(pairs))]
 # Di_ = [np.where(Di[ii].value < 0, 0, Di[ii].value) for ii in range(len(pairs))]
-Gi_, Fi_, Di_ = [G], [F], [D]
+# Gi_, Fi_, Di_ = [G], [F], [D]
 Gi_sum_diff_, Di_sum_diff_, Fi_sum_diff_ = G - cp.sum(Gi_), D - cp.sum(Di_), F - cp.sum(Fi_)
 # Gi_sum_diff_[np.abs(Gi_sum_diff_) < 1e-6] = 0
 # Fi_sum_diff_[np.abs(Fi_sum_diff_) < 1e-6] = 0
@@ -250,7 +250,7 @@ print(alpha)
 psi_values = []
 alphas, betas, gammas = [], [], []
 
-for iii in range(1):
+for iii in range(5):
     print(f"adding the {iii + 1}th cut.")
     alphas.append(alpha)
     betas.append(beta)
@@ -301,7 +301,7 @@ model_opt.addConstr(t_opt[0] >= y_opt.T@G@y_opt/2 + x_opt.T@D@x_opt/2 + x_opt.T@
 extra_term = y.T @ y / 2 + c.T @ x_opt + d.T @ y_opt + lam.T @ z_opt # y_opt.T @ Gi_sum_diff_ @ y_opt/2 + x_opt.T @ Di_sum_diff_ @ x_opt/2 + x_opt.T @ Fi_sum_diff_ @ y_opt +
 model_opt.setObjective(gp.quicksum(t_opt) + extra_term[0], GRB.MINIMIZE)
 model_opt.params.OutputFlag = 1
-model_opt.params.PreMIQCPForm = 1
+# model_opt.params.PreMIQCPForm = 1
 model_opt.params.TimeLimit = 60
 model_opt.optimize(record_root_lb)
 print('--------------------------------------------------')
