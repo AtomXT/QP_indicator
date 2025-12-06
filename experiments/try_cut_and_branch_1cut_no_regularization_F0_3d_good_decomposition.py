@@ -85,7 +85,7 @@ model_ori.setObjective(res@res/2 + mu_g*beta_ori.T@beta_ori + lam.T@z_ori, GRB.M
 model_ori.addConstrs(w_ori[i] <= BIG_M*z_ori[i] for i in range(n))
 model_ori.addConstrs(w_ori[i] >= -BIG_M*z_ori[i] for i in range(n))
 model_ori.params.OutputFlag = 1
-model_ori.params.TimeLimit = 60
+model_ori.params.TimeLimit = 5
 model_ori.optimize(record_root_lb)
 z_opt_vals = np.array([z_ori[i].X for i in range(n)])
 print('--------------------------------')
@@ -111,7 +111,7 @@ print('--------------------------------')
 # model_opt.setObjective(eqn[0], GRB.MINIMIZE)
 # # model_opt.params.QCPDual = 1
 # model_opt.params.OutputFlag = 0
-# model_opt.params.TimeLimit = 60
+# model_opt.params.TimeLimit = 3
 # model_opt.optimize(record_root_lb)
 # print(f"The obj is {model_opt.objVal}.")
 # print(f"The root upper bound is: {root_bound[0]}, lower bound is: {root_bound[1]}. The root gap is: {np.round(100*(root_bound[0]-root_bound[1])/root_bound[0],4)}%. Runtime: {model_opt.runtime}.")
@@ -292,17 +292,17 @@ t_opt = model_opt.addMVar(len(pairs), vtype=GRB.CONTINUOUS, lb=0, ub=GRB.INFINIT
 model_opt.addConstrs(x_opt[i] <= BIG_M * z_opt[i] for i in range(n))
 model_opt.addConstrs(x_opt[i] >= -BIG_M * z_opt[i] for i in range(n))
 
-model_opt.addConstr(t_opt[0] >= y_opt.T@G@y_opt/2 + x_opt.T@D@x_opt/2 + x_opt.T@F@y_opt)
-# for ii, pair in enumerate(pairs):
-#     model_opt.addConstr(
-#         t_opt[ii] >= y_opt[pair].T @ Gi_[ii][np.ix_(pair, pair)] @ y_opt[pair]/2 + x_opt.T @ Di_[
-#             ii] @ x_opt/2 + x_opt.T @ Fi_[ii][:, pair] @ y_opt[pair])
+# model_opt.addConstr(t_opt[0] >= y_opt.T@G@y_opt/2 + x_opt.T@D@x_opt/2 + x_opt.T@F@y_opt)
+for ii, pair in enumerate(pairs):
+    model_opt.addConstr(
+        t_opt[ii] >= y_opt[pair].T @ Gi_[ii][np.ix_(pair, pair)] @ y_opt[pair]/2 + x_opt.T @ Di_[
+            ii] @ x_opt/2 + x_opt.T @ Fi_[ii][:, pair] @ y_opt[pair])
 
-extra_term = y.T @ y / 2 + c.T @ x_opt + d.T @ y_opt + lam.T @ z_opt # y_opt.T @ Gi_sum_diff_ @ y_opt/2 + x_opt.T @ Di_sum_diff_ @ x_opt/2 + x_opt.T @ Fi_sum_diff_ @ y_opt +
+extra_term = y.T @ y / 2 + y_opt.T @ Gi_sum_diff_ @ y_opt/2 + x_opt.T @ Di_sum_diff_ @ x_opt/2 + x_opt.T @ Fi_sum_diff_ @ y_opt + c.T @ x_opt + d.T @ y_opt + lam.T @ z_opt
 model_opt.setObjective(gp.quicksum(t_opt) + extra_term[0], GRB.MINIMIZE)
 model_opt.params.OutputFlag = 1
 # model_opt.params.PreMIQCPForm = 1
-model_opt.params.TimeLimit = 60
+model_opt.params.TimeLimit = 3
 model_opt.optimize(record_root_lb)
 print('--------------------------------------------------')
 print("Solve the optimal solution in the proposed formulation without cut")
@@ -357,7 +357,7 @@ extra_term = y.T @ y / 2 + y_dul.T @ Gi_sum_diff_ @ y_dul/2 + x_dul.T @ Di_sum_d
 model_dul.setObjective(gp.quicksum(t_dul) + extra_term[0], GRB.MINIMIZE)
 model_dul.params.OutputFlag = 1
 # model_dul.params.PreMIQCPForm = 1
-model_dul.params.TimeLimit = 60
+model_dul.params.TimeLimit = 5
 # model_dul.setParam("NodeLimit", 2)
 model_dul.optimize(record_root_lb)
 print('--------------------------------------------------')
