@@ -28,7 +28,7 @@ def get_data(name, n, m):
         # 9 is auto_mpg 87 is servo
         # data (as pandas dataframes)
         X = auto_mpg.data.features.dropna().values
-        X = X[:, [0, 4, 5, 6, 1, 2, 3]]
+        X = X[:, [4, 5, 6, 0, 1, 2, 3]]
         y = auto_mpg.data.targets.values.reshape(-1)
     else:
         X, y = None, None
@@ -53,20 +53,18 @@ def record_root_lb(model, where):
             if ub <= root_bound[0]:
                 root_bound[0] = ub
 
-n_list = [50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 200]
-# n_list = [50]
+# n_list = [50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 200]
+n_list = [50]
 # m_list = [2, 3, 4]
-m_list = [2]
+m_list = [3]
 timelimit = 600
 # data_list = ['diabetes', 'autompg']
-data_list = ['diabetes']
+data_list = ['autompg']
 results = []
 
 for m in m_list:
     for n in n_list:
         for dataset in data_list:
-            m = 3
-            n = 90
             # Access features and target
             X, y = get_data(dataset, n, m)
             mu_g = 0.2
@@ -115,7 +113,7 @@ for m in m_list:
             model_ori.addConstrs(w_ori[i] <= BIG_M * z_ori[i] for i in range(n))
             model_ori.addConstrs(w_ori[i] >= -BIG_M * z_ori[i] for i in range(n))
             model_ori.params.OutputFlag = 0
-            model_ori.paramsTimeLimit = timelimit
+            model_ori.params.TimeLimit = timelimit
             model_ori.optimize(record_root_lb)
             result = [m, n, dataset, 'original', root_bound[0], root_bound[1], (root_bound[0] - root_bound[1]) / root_bound[0], model_ori.ObjVal, model_ori.ObjBound, (model_ori.ObjVal - model_ori.ObjBound) / model_ori.ObjVal, model_ori.NodeCount, model_ori.runtime]
             results.append(result)
@@ -273,7 +271,7 @@ for m in m_list:
             model_opt.setObjective(gp.quicksum(t_opt) + extra_term[0], GRB.MINIMIZE)
             model_opt.params.OutputFlag = 0
             # model_opt.params.PreMIQCPForm = 1
-            model_opt.paramsTimeLimit = timelimit
+            model_opt.params.TimeLimit = timelimit
             model_opt.optimize(record_root_lb)
             result = [m, n, dataset, 'no_cut', root_bound[0], root_bound[1], (root_bound[0] - root_bound[1]) / root_bound[0], model_opt.ObjVal, model_opt.ObjBound, (model_opt.ObjVal - model_opt.ObjBound) / model_opt.ObjVal, model_opt.NodeCount, model_opt.runtime]
             results.append(result)
@@ -315,7 +313,7 @@ for m in m_list:
             model_dul.setObjective(gp.quicksum(t_dul) + extra_term[0], GRB.MINIMIZE)
             model_dul.params.OutputFlag = 0
             # model_dul.params.PreMIQCPForm = 1
-            model_dul.paramsTimeLimit = timelimit
+            model_dul.params.TimeLimit = timelimit
             # model_dul.setParam("NodeLimit", 2)
             model_dul.optimize(record_root_lb)
             print('--------------------------------------------------')

@@ -65,7 +65,7 @@ def get_data(name):
         # 9 is auto_mpg 87 is servo
         # data (as pandas dataframes)
         X = auto_mpg.data.features.dropna().values
-        X = X[:, [0, 4, 5, 6, 1, 2, 3]]
+        X = X[:, [4, 5, 6, 0, 1, 2, 3]]
         y = auto_mpg.data.targets.values.reshape(-1)
     else:
         X, y = None, None
