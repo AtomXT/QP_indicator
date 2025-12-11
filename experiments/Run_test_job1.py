@@ -11,6 +11,8 @@ from src.utils import decomposition, get_data
 
 import os
 
+current_dir = os.path.dirname(os.path.abspath(__file__))
+
 np.set_printoptions(linewidth=200)
 
 
@@ -281,7 +283,6 @@ for dataset in data_list:
                 print('--------------------------------------------------')
                 results_df = pd.DataFrame(results, columns=['m','n','dataset','formulation','root_ub','root_lb','root_gap','end_ub','end_lb','end_gap','node_count','time'])
                 print(results_df)
-                current_path = os.getcwd()
-                results_df.to_csv(f"{current_path}/../experiments_results/results_job1.csv")
+                results_df.to_csv(f"{current_dir}/../experiments_results/results_job1.csv")
             except:
                 continue
