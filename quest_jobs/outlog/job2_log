@@ -1,0 +1,1104 @@
+[3, 50, 'autompg']
+[0.00590211 0.00739742 0.01237278 1.         1.        ]
+Set parameter TokenServer to value "questlicense2.quest.northwestern.edu"
+/gpfs/projects/p32811/QP_indicator/experiments/Run_test_job2.py:103: DeprecationWarning: Conversion of an array with ndim > 0 to a scalar is deprecated, and will error in future. Ensure you extract a single element from your array before performing this operation. (Deprecated NumPy 1.25.)
+  model_ori.setObjective(res@res/2 + mu_g*beta_ori.T@beta_ori + lam.T@z_ori, GRB.MINIMIZE)
+The relaxed obj is 0.04027515330811937.
+The larges value of x is 1.9470711486023513
+Use new Big-M 3.8941422972047026.
+Set parameter Threads to value 8
+Set parameter TimeLimit to value 300
+Gurobi Optimizer version 10.0.1 build v10.0.1rc0 (linux64)
+
+CPU model: Intel(R) Xeon(R) Gold 6230R CPU @ 2.10GHz, instruction set [SSE2|AVX|AVX2|AVX512]
+Thread count: 52 physical cores, 52 logical processors, using up to 8 threads
+
+Optimize a model with 100 rows, 103 columns and 200 nonzeros
+Model fingerprint: 0x9cf75adb
+Model has 206 quadratic objective terms
+Variable types: 53 continuous, 50 integer (50 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 4e+00]
+  Objective range  [4e-03, 3e+01]
+  QObjective range [7e-02, 5e+01]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [0e+00, 0e+00]
+Found heuristic solution: objective 25.0000000
+Presolve time: 0.00s
+Presolved: 100 rows, 103 columns, 200 nonzeros
+Presolved model has 206 quadratic objective terms
+Variable types: 53 continuous, 50 integer (50 binary)
+
+Root relaxation: objective 4.837058e+00, 228 iterations, 0.00 seconds (0.00 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0    4.83706    0   29   25.00000    4.83706  80.7%     -    0s
+H    0     0                       9.0978612    4.83706  46.8%     -    0s
+H    0     0                       9.0515609    4.83706  46.6%     -    0s
+     0     0    4.83706    0   29    9.05156    4.83706  46.6%     -    0s
+H    0     0                       9.0480644    4.83706  46.5%     -    0s
+     0     2    4.83706    0   29    9.04806    4.83706  46.5%     -    0s
+
+Explored 165 nodes (1479 simplex iterations) in 0.11 seconds (0.03 work units)
+Thread count was 8 (of 52 available processors)
+
+Solution count 2: 9.04806 25 
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 9.048064400493e+00, best bound 9.048064400493e+00, gap 0.0000%
+
+User-callback calls 583, time in user-callback 0.00 sec
+--------------------------------
+solve the problem in original formulation
+The obj is 9.048064400492706.
+The root upper bound is: 9.048064400492706, lower bound is: 4.837057685480424. The root gap is: 46.5404%. Runtime: 0.11420512199401855.
+[25 26 28 30 32]
+Number of outliers: 5
+--------------------------------
+The decomposition time is 0.13087806850671768.
+Optimal value: 1.7635583737926879
+The decomposition time is 0.04454848915338516.
+Optimal value: 0.5420560750576873
+The decomposition time is 0.05207503028213978.
+Optimal value: 6.6638878417868135
+The best pair is: [[1, 2]]
+------------------------
+The decomposition time is 0.05306559149175882.
+Optimal value: 6.6638878417868135
+4.837065405820798
+6.22265394565704
+Set parameter Threads to value 8
+Set parameter TimeLimit to value 300
+Gurobi Optimizer version 10.0.1 build v10.0.1rc0 (linux64)
+
+CPU model: Intel(R) Xeon(R) Gold 6230R CPU @ 2.10GHz, instruction set [SSE2|AVX|AVX2|AVX512]
+Thread count: 52 physical cores, 52 logical processors, using up to 8 threads
+
+Optimize a model with 100 rows, 104 columns and 200 nonzeros
+Model fingerprint: 0xe0e9e0a2
+Model has 206 quadratic objective terms
+Model has 1 quadratic constraint
+Variable types: 54 continuous, 50 integer (50 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 4e+00]
+  QMatrix range    [1e-08, 4e+00]
+  QLMatrix range   [1e+00, 1e+00]
+  Objective range  [4e-03, 3e+01]
+  QObjective range [7e-02, 5e+01]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [0e+00, 0e+00]
+Found heuristic solution: objective 25.0000000
+Warning: diagonal adjustment of 1.7e-09 performed to make Q PSD
+Warning: diagonal adjustment of 1.0e-10 performed to make Q PSD
+Presolve time: 0.00s
+Presolved: 100 rows, 104 columns, 200 nonzeros
+Presolved model has 206 quadratic objective terms
+Presolved model has 1 quadratic constraint(s)
+Variable types: 54 continuous, 50 integer (50 binary)
+
+Root relaxation: objective -6.302483e+00, 228 iterations, 0.00 seconds (0.00 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0   -6.30248    0   22   25.00000   -6.30248   125%     -    0s
+H    0     0                      12.8950949   -6.30248   149%     -    0s
+H    0     0                      12.8950741   -6.30248   149%     -    0s
+     0     0    2.83116    0   27   12.89507    2.83116  78.0%     -    0s
+H    0     0                      11.0510308    2.83116  74.4%     -    0s
+H    0     0                       9.8331245    2.83116  71.2%     -    0s
+     0     0    3.87945    0   28    9.83312    3.87945  60.5%     -    0s
+H    0     0                       9.8331222    3.87945  60.5%     -    0s
+     0     0    3.95702    0   29    9.83312    3.95702  59.8%     -    0s
+     0     0    4.40816    0   28    9.83312    4.40816  55.2%     -    0s
+     0     0    4.56067    0   28    9.83312    4.56067  53.6%     -    0s
+     0     0    4.59598    0   27    9.83312    4.59598  53.3%     -    0s
+     0     0    4.66294    0   28    9.83312    4.66294  52.6%     -    0s
+     0     0    4.70788    0   29    9.83312    4.70788  52.1%     -    0s
+     0     0    4.73203    0   29    9.83312    4.73203  51.9%     -    0s
+     0     0    4.79966    0   28    9.83312    4.79966  51.2%     -    0s
+     0     0    4.81124    0   29    9.83312    4.81124  51.1%     -    0s
+     0     0    4.82453    0   29    9.83312    4.82453  50.9%     -    0s
+H    0     0                       9.0480698    4.82453  46.7%     -    0s
+     0     2    5.01240    0   29    9.04807    5.01240  44.6%     -    0s
+H   31    33                       9.0480645    6.60520  27.0%   7.8    0s
+
+Explored 680 nodes (3351 simplex iterations) in 0.26 seconds (0.10 work units)
+Thread count was 8 (of 52 available processors)
+
+Solution count 5: 9.04806 9.83312 11.051 ... 25
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 9.048064546434e+00, best bound 9.047725748777e+00, gap 0.0037%
+
+User-callback calls 1749, time in user-callback 0.00 sec
+--------------------------------------------------
+Solve the optimal solution in the proposed formulation without cut
+The obj is 9.04806454643395.
+The root upper bound is: 9.048069810131908, lower bound is: 5.012402614098043. The root gap is: 44.6025%. Runtime: 0.25626492500305176.
+--------------------------------------------------
+- adding 1th pair.
+Set parameter Threads to value 8
+Set parameter TimeLimit to value 300
+Gurobi Optimizer version 10.0.1 build v10.0.1rc0 (linux64)
+
+CPU model: Intel(R) Xeon(R) Gold 6230R CPU @ 2.10GHz, instruction set [SSE2|AVX|AVX2|AVX512]
+Thread count: 52 physical cores, 52 logical processors, using up to 8 threads
+
+Optimize a model with 101 rows, 104 columns and 303 nonzeros
+Model fingerprint: 0x18d9e9cf
+Model has 206 quadratic objective terms
+Model has 1 quadratic constraint
+Variable types: 54 continuous, 50 integer (50 binary)
+Coefficient statistics:
+  Matrix range     [1e-02, 5e+00]
+  QMatrix range    [1e-08, 4e+00]
+  QLMatrix range   [1e+00, 1e+00]
+  Objective range  [4e-03, 3e+01]
+  QObjective range [7e-02, 5e+01]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [2e+00, 2e+00]
+Found heuristic solution: objective 25.0000000
+Warning: diagonal adjustment of 1.7e-09 performed to make Q PSD
+Warning: diagonal adjustment of 1.0e-10 performed to make Q PSD
+Presolve time: 0.00s
+Presolved: 101 rows, 104 columns, 303 nonzeros
+Presolved model has 206 quadratic objective terms
+Presolved model has 1 quadratic constraint(s)
+Variable types: 54 continuous, 50 integer (50 binary)
+
+Root relaxation: objective 6.222652e+00, 284 iterations, 0.00 seconds (0.00 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0    6.22265    0   28   25.00000    6.22265  75.1%     -    0s
+H    0     0                      11.0510315    6.22265  43.7%     -    0s
+     0     0    6.22265    0   28   11.05103    6.22265  43.7%     -    0s
+H    0     0                       9.2182685    6.22265  32.5%     -    0s
+H    0     0                       9.0480660    6.22265  31.2%     -    0s
+H    0     0                       9.0480650    6.22265  31.2%     -    0s
+H    0     2                       9.0480650    6.22265  31.2%     -    0s
+     0     2    6.22265    0   28    9.04807    6.22265  31.2%     -    0s
+H   66    44                       9.0480650    6.64111  26.6%  13.0    0s
+H   79    50                       9.0480634    6.64111  26.6%  12.6    0s
+H   85    50                       9.0480628    6.64111  26.6%  12.1    0s
+
+Explored 766 nodes (4753 simplex iterations) in 0.16 seconds (0.06 work units)
+Thread count was 8 (of 52 available processors)
+
+Solution count 4: 9.04806 9.21827 11.051 25 
+
+Optimal solution found (tolerance 1.00e-04)
+Warning: max constraint violation (1.9723e-06) exceeds tolerance
+Best objective 9.048062826452e+00, best bound 9.047966442773e+00, gap 0.0011%
+
+User-callback calls 1827, time in user-callback 0.00 sec
+/gpfs/projects/p32811/QP_indicator/experiments/Run_test_job2.py:103: DeprecationWarning: Conversion of an array with ndim > 0 to a scalar is deprecated, and will error in future. Ensure you extract a single element from your array before performing this operation. (Deprecated NumPy 1.25.)
+  model_ori.setObjective(res@res/2 + mu_g*beta_ori.T@beta_ori + lam.T@z_ori, GRB.MINIMIZE)
+--------------------------------------------------
+Solve the problem in the proposed formulation with cut
+9.048062826451911
+The root upper bound is: 9.048065030229553, lower bound is: 6.222652416099038. The root gap is: 31.2267%. Runtime: 0.16544795036315918.
+--------------------------------------------------
+   m   n  dataset formulation  ...    end_lb   end_gap  node_count      time
+0  3  50  autompg    original  ...  9.048064  0.000000       165.0  0.114205
+1  3  50  autompg      no_cut  ...  9.047726  0.000037       680.0  0.256265
+2  3  50  autompg         cut  ...  9.047966  0.000011       766.0  0.165448
+
+[3 rows x 12 columns]
+[3, 60, 'autompg']
+[0.00392601 0.00767025 0.01327101 1.         1.        ]
+The relaxed obj is 0.048373710565872585.
+The larges value of x is 2.285081900100683
+Use new Big-M 4.570163800201366.
+Set parameter Threads to value 8
+Set parameter TimeLimit to value 300
+Gurobi Optimizer version 10.0.1 build v10.0.1rc0 (linux64)
+
+CPU model: Intel(R) Xeon(R) Gold 6230R CPU @ 2.10GHz, instruction set [SSE2|AVX|AVX2|AVX512]
+Thread count: 52 physical cores, 52 logical processors, using up to 8 threads
+
+Optimize a model with 120 rows, 123 columns and 240 nonzeros
+Model fingerprint: 0x8a38515f
+Model has 246 quadratic objective terms
+Variable types: 63 continuous, 60 integer (60 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 5e+00]
+  Objective range  [1e-01, 4e+01]
+  QObjective range [1e-01, 6e+01]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [0e+00, 0e+00]
+Found heuristic solution: objective 30.0000000
+Presolve time: 0.00s
+Presolved: 120 rows, 123 columns, 240 nonzeros
+Presolved model has 246 quadratic objective terms
+Variable types: 63 continuous, 60 integer (60 binary)
+
+Root relaxation: objective 4.614281e+00, 276 iterations, 0.00 seconds (0.00 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0    4.61428    0   35   30.00000    4.61428  84.6%     -    0s
+H    0     0                      10.8845295    4.61428  57.6%     -    0s
+H    0     0                      10.7488678    4.61428  57.1%     -    0s
+H    0     0                      10.6750775    4.61428  56.8%     -    0s
+H    0     0                      10.5510912    4.61428  56.3%     -    0s
+H    0     0                      10.5026218    4.61428  56.1%     -    0s
+     0     0    4.83798    0   35   10.50262    4.83798  53.9%     -    0s
+     0     2    4.83798    0   35   10.50262    4.83798  53.9%     -    0s
+
+Explored 1760 nodes (9416 simplex iterations) in 0.21 seconds (0.09 work units)
+Thread count was 8 (of 52 available processors)
+
+Solution count 4: 10.5026 10.7489 10.8845 30 
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 1.050262184474e+01, best bound 1.050262184474e+01, gap 0.0000%
+
+User-callback calls 3826, time in user-callback 0.01 sec
+--------------------------------
+solve the problem in original formulation
+The obj is 10.50262184474414.
+The root upper bound is: 10.50262184474414, lower bound is: 4.837978606205795. The root gap is: 53.9355%. Runtime: 0.20759201049804688.
+[28 30 54]
+Number of outliers: 3
+--------------------------------
+The decomposition time is 0.06981371715664864.
+Optimal value: 1.1516408927422321
+The decomposition time is 0.061753829941153526.
+Optimal value: 0.8402135871690515
+The decomposition time is 0.07256864570081234.
+Optimal value: 9.77962911713393
+The best pair is: [[1, 2]]
+------------------------
+The decomposition time is 0.07130221370607615.
+Optimal value: 9.77962911713393
+4.614291882815998
+80.00337240543155
+Set parameter Threads to value 8
+Set parameter TimeLimit to value 300
+Gurobi Optimizer version 10.0.1 build v10.0.1rc0 (linux64)
+
+CPU model: Intel(R) Xeon(R) Gold 6230R CPU @ 2.10GHz, instruction set [SSE2|AVX|AVX2|AVX512]
+Thread count: 52 physical cores, 52 logical processors, using up to 8 threads
+
+Optimize a model with 120 rows, 124 columns and 240 nonzeros
+Model fingerprint: 0x741b52d2
+Model has 246 quadratic objective terms
+Model has 1 quadratic constraint
+Variable types: 64 continuous, 60 integer (60 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 5e+00]
+  QMatrix range    [8e-09, 9e+00]
+  QLMatrix range   [1e+00, 1e+00]
+  Objective range  [1e-01, 4e+01]
+  QObjective range [1e-01, 6e+01]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [0e+00, 0e+00]
+Found heuristic solution: objective 30.0000000
+Warning: diagonal adjustment of 4.5e-09 performed to make Q PSD
+Warning: diagonal adjustment of 1.0e-10 performed to make Q PSD
+Presolve time: 0.00s
+Presolved: 120 rows, 124 columns, 240 nonzeros
+Presolved model has 246 quadratic objective terms
+Presolved model has 1 quadratic constraint(s)
+Variable types: 64 continuous, 60 integer (60 binary)
+
+Root relaxation: objective -9.921151e+00, 279 iterations, 0.00 seconds (0.00 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0   -9.92115    0   39   30.00000   -9.92115   133%     -    0s
+H    0     0                      13.7803766   -9.92115   172%     -    0s
+H    0     0                      13.7803762   -9.92115   172%     -    0s
+     0     0    3.27830    0   35   13.78038    3.27830  76.2%     -    0s
+H    0     0                      11.4630329    3.27830  71.4%     -    0s
+H    0     0                      10.5026236    3.27830  68.8%     -    0s
+     0     0    3.75248    0   34   10.50262    3.75248  64.3%     -    0s
+     0     0    4.26050    0   34   10.50262    4.26050  59.4%     -    0s
+H    0     0                      10.5026174    4.26050  59.4%     -    0s
+     0     0    4.46553    0   34   10.50262    4.46553  57.5%     -    0s
+     0     0    4.51144    0   34   10.50262    4.51144  57.0%     -    0s
+     0     0    4.56392    0   34   10.50262    4.56392  56.5%     -    0s
+     0     0    4.58479    0   35   10.50262    4.58479  56.3%     -    0s
+     0     2    4.58479    0   35   10.50262    4.58479  56.3%     -    0s
+H  468   278                      10.5026173    7.71982  26.5%   4.1    0s
+H 2406   597                      10.5026166    9.01505  14.2%   6.1    0s
+
+Explored 4511 nodes (28616 simplex iterations) in 0.67 seconds (0.39 work units)
+Thread count was 8 (of 52 available processors)
+
+Solution count 3: 10.5026 11.463 13.7804 
+
+Optimal solution found (tolerance 1.00e-04)
+Warning: max constraint violation (6.1195e-06) exceeds tolerance
+Best objective 1.050261659433e+01, best bound 1.050252086992e+01, gap 0.0009%
+
+User-callback calls 9666, time in user-callback 0.02 sec
+--------------------------------------------------
+Solve the optimal solution in the proposed formulation without cut
+The obj is 10.502616594331638.
+The root upper bound is: 10.502617449193963, lower bound is: 4.58478707640122. The root gap is: 56.3462%. Runtime: 0.6710479259490967.
+--------------------------------------------------
+- adding 1th pair.
+Set parameter Threads to value 8
+Set parameter TimeLimit to value 300
+Gurobi Optimizer version 10.0.1 build v10.0.1rc0 (linux64)
+
+CPU model: Intel(R) Xeon(R) Gold 6230R CPU @ 2.10GHz, instruction set [SSE2|AVX|AVX2|AVX512]
+Thread count: 52 physical cores, 52 logical processors, using up to 8 threads
+
+Optimize a model with 121 rows, 124 columns and 363 nonzeros
+Model fingerprint: 0x7c820c3d
+Model has 246 quadratic objective terms
+Model has 1 quadratic constraint
+Variable types: 64 continuous, 60 integer (60 binary)
+Coefficient statistics:
+  Matrix range     [2e-03, 1e+01]
+  QMatrix range    [8e-09, 9e+00]
+  QLMatrix range   [1e+00, 1e+00]
+  Objective range  [1e-01, 4e+01]
+  QObjective range [1e-01, 6e+01]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [7e+01, 7e+01]
+Warning: diagonal adjustment of 4.5e-09 performed to make Q PSD
+Warning: diagonal adjustment of 1.0e-10 performed to make Q PSD
+Presolve time: 0.00s
+Presolved: 121 rows, 124 columns, 363 nonzeros
+Presolved model has 246 quadratic objective terms
+Presolved model has 1 quadratic constraint(s)
+Variable types: 64 continuous, 60 integer (60 binary)
+
+Root relaxation: objective 8.000336e+01, 357 iterations, 0.00 seconds (0.00 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0   80.00336    0   15          -   80.00336      -     -    0s
+H    0     0                      80.9136450   80.00336  1.13%     -    0s
+     0     0   80.00336    0   15   80.91364   80.00336  1.13%     -    0s
+H    0     0                      80.5690487   80.00336  0.70%     -    0s
+     0     2   80.00336    0   15   80.56905   80.00336  0.70%     -    0s
+H   32    34                      80.4909716   80.00336  0.61%  20.6    0s
+H   33    34                      80.3860147   80.00336  0.48%  20.8    0s
+H   35    34                      80.1483129   80.00336  0.18%  20.1    0s
+H   77    41                      80.0463554   80.00337  0.05%  10.9    0s
+H   79    41                      80.0148815   80.00337  0.01%  10.8    0s
+H   89    41                      80.0130033   80.00337  0.01%  10.1    0s
+H  118    49                      80.0068792   80.00338  0.00%   8.2    0s
+
+Explored 141 nodes (1384 simplex iterations) in 0.05 seconds (0.03 work units)
+Thread count was 8 (of 52 available processors)
+
+Solution count 9: 80.0069 80.013 80.0149 ... 80.9136
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 8.000687922493e+01, best bound 8.000337758836e+01, gap 0.0044%
+
+User-callback calls 514, time in user-callback 0.00 sec
+/gpfs/projects/p32811/QP_indicator/experiments/Run_test_job2.py:103: DeprecationWarning: Conversion of an array with ndim > 0 to a scalar is deprecated, and will error in future. Ensure you extract a single element from your array before performing this operation. (Deprecated NumPy 1.25.)
+  model_ori.setObjective(res@res/2 + mu_g*beta_ori.T@beta_ori + lam.T@z_ori, GRB.MINIMIZE)
+--------------------------------------------------
+Solve the problem in the proposed formulation with cut
+80.00687922492612
+The root upper bound is: 80.56904869536879, lower bound is: 80.0033555423224. The root gap is: 0.7021%. Runtime: 0.05365896224975586.
+--------------------------------------------------
+   m   n  dataset formulation  ...     end_lb   end_gap  node_count      time
+0  3  50  autompg    original  ...   9.048064  0.000000       165.0  0.114205
+1  3  50  autompg      no_cut  ...   9.047726  0.000037       680.0  0.256265
+2  3  50  autompg         cut  ...   9.047966  0.000011       766.0  0.165448
+3  3  60  autompg    original  ...  10.502622  0.000000      1760.0  0.207592
+4  3  60  autompg      no_cut  ...  10.502521  0.000009      4511.0  0.671048
+5  3  60  autompg         cut  ...  80.003378  0.000044       141.0  0.053659
+
+[6 rows x 12 columns]
+[3, 70, 'autompg']
+[0.00390478 0.00548318 0.01031156 1.         1.        ]
+The relaxed obj is 0.05541761627829089.
+The larges value of x is 2.4101746628439895
+Use new Big-M 4.820349325687979.
+Set parameter Threads to value 8
+Set parameter TimeLimit to value 300
+Gurobi Optimizer version 10.0.1 build v10.0.1rc0 (linux64)
+
+CPU model: Intel(R) Xeon(R) Gold 6230R CPU @ 2.10GHz, instruction set [SSE2|AVX|AVX2|AVX512]
+Thread count: 52 physical cores, 52 logical processors, using up to 8 threads
+
+Optimize a model with 140 rows, 143 columns and 280 nonzeros
+Model fingerprint: 0x40f1e940
+Model has 286 quadratic objective terms
+Variable types: 73 continuous, 70 integer (70 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 5e+00]
+  Objective range  [2e-01, 5e+01]
+  QObjective range [4e-02, 7e+01]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [0e+00, 0e+00]
+Found heuristic solution: objective 35.0000000
+Presolve time: 0.00s
+Presolved: 140 rows, 143 columns, 280 nonzeros
+Presolved model has 286 quadratic objective terms
+Variable types: 73 continuous, 70 integer (70 binary)
+
+Root relaxation: objective 5.264429e+00, 341 iterations, 0.00 seconds (0.00 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0    5.26443    0   44   35.00000    5.26443  85.0%     -    0s
+H    0     0                      12.5292814    5.26443  58.0%     -    0s
+H    0     0                      12.4469971    5.26443  57.7%     -    0s
+H    0     0                      12.3570002    5.26443  57.4%     -    0s
+     0     0    5.26443    0   44   12.35700    5.26443  57.4%     -    0s
+H    0     0                      12.2950454    5.26443  57.2%     -    0s
+     0     2    5.26443    0   44   12.29505    5.26443  57.2%     -    0s
+
+Explored 4376 nodes (27980 simplex iterations) in 0.34 seconds (0.23 work units)
+Thread count was 8 (of 52 available processors)
+
+Solution count 3: 12.295 12.5293 35 
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 1.229504536594e+01, best bound 1.229504536594e+01, gap 0.0000%
+
+User-callback calls 9084, time in user-callback 0.01 sec
+--------------------------------
+solve the problem in original formulation
+The obj is 12.295045365937767.
+The root upper bound is: 12.295045365937767, lower bound is: 5.264428541245806. The root gap is: 57.1825%. Runtime: 0.3381688594818115.
+[26 28 30 32 54]
+Number of outliers: 5
+--------------------------------
+The decomposition time is 0.08924212213605642.
+Optimal value: 1.4087546612744515
+The decomposition time is 0.08878151699900627.
+Optimal value: 4.183892142047109
+The decomposition time is 0.0927505362778902.
+Optimal value: 10.20061300815213
+The best pair is: [[1, 2]]
+------------------------
+The decomposition time is 0.09364413935691118.
+Optimal value: 10.20061300815213
+5.264430837807733
+5.264451180527541
+Set parameter Threads to value 8
+Set parameter TimeLimit to value 300
+Gurobi Optimizer version 10.0.1 build v10.0.1rc0 (linux64)
+
+CPU model: Intel(R) Xeon(R) Gold 6230R CPU @ 2.10GHz, instruction set [SSE2|AVX|AVX2|AVX512]
+Thread count: 52 physical cores, 52 logical processors, using up to 8 threads
+
+Optimize a model with 140 rows, 144 columns and 280 nonzeros
+Model fingerprint: 0x51561c6e
+Model has 286 quadratic objective terms
+Model has 1 quadratic constraint
+Variable types: 74 continuous, 70 integer (70 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 5e+00]
+  QMatrix range    [1e-08, 9e+00]
+  QLMatrix range   [1e+00, 1e+00]
+  Objective range  [2e-01, 5e+01]
+  QObjective range [4e-02, 7e+01]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [0e+00, 0e+00]
+Found heuristic solution: objective 35.0000000
+Warning: diagonal adjustment of 1.4e-07 performed to make Q PSD
+Warning: diagonal adjustment of 1.0e-10 performed to make Q PSD
+Presolve time: 0.00s
+Presolved: 140 rows, 144 columns, 280 nonzeros
+Presolved model has 286 quadratic objective terms
+Presolved model has 1 quadratic constraint(s)
+Variable types: 74 continuous, 70 integer (70 binary)
+
+Root relaxation: objective -1.180488e+01, 270 iterations, 0.00 seconds (0.00 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0  -11.80488    0   45   35.00000  -11.80488   134%     -    0s
+H    0     0                      15.1962353  -11.80488   178%     -    0s
+     0     0    0.79252    0   43   15.19624    0.79252  94.8%     -    0s
+H    0     0                      12.8103887    0.79252  93.8%     -    0s
+H    0     0                      12.4919833    0.79252  93.7%     -    0s
+     0     0    2.17910    0   44   12.49198    2.17910  82.6%     -    0s
+     0     0    3.26065    0   44   12.49198    3.26065  73.9%     -    0s
+H    0     0                      12.3241270    3.26065  73.5%     -    0s
+     0     0    4.11473    0   41   12.32413    4.11473  66.6%     -    0s
+     0     0    4.69304    0   40   12.32413    4.69304  61.9%     -    0s
+     0     0    4.98033    0   44   12.32413    4.98033  59.6%     -    0s
+H    0     0                      12.3241270    4.98033  59.6%     -    0s
+     0     0    5.16662    0   41   12.32413    5.16662  58.1%     -    0s
+H    0     0                      12.3241208    5.16662  58.1%     -    0s
+     0     0    5.22220    0   43   12.32412    5.22220  57.6%     -    0s
+     0     0    5.24447    0   44   12.32412    5.24447  57.4%     -    0s
+     0     0    5.24447    0   44   12.32412    5.24447  57.4%     -    0s
+H    0     0                      12.2950488    5.24447  57.3%     -    0s
+     0     2    5.24447    0   44   12.29505    5.24447  57.3%     -    0s
+H   31    40                      12.2950487    7.33625  40.3%   5.9    0s
+H   38    40                      12.2950478    7.33625  40.3%   5.8    0s
+H   67    80                      12.2950413    7.33625  40.3%   5.7    0s
+
+Explored 9286 nodes (58045 simplex iterations) in 0.96 seconds (0.84 work units)
+Thread count was 8 (of 52 available processors)
+
+Solution count 6: 12.295 12.3241 12.492 ... 35
+
+Optimal solution found (tolerance 1.00e-04)
+Warning: max constraint violation (5.2053e-06) exceeds tolerance
+Best objective 1.229504125254e+01, best bound 1.229432401497e+01, gap 0.0058%
+
+User-callback calls 19251, time in user-callback 0.03 sec
+--------------------------------------------------
+Solve the optimal solution in the proposed formulation without cut
+The obj is 12.295041252542351.
+The root upper bound is: 12.29504884110818, lower bound is: 5.244470855435626. The root gap is: 57.3449%. Runtime: 0.9651210308074951.
+--------------------------------------------------
+- adding 1th pair.
+Set parameter Threads to value 8
+Set parameter TimeLimit to value 300
+Gurobi Optimizer version 10.0.1 build v10.0.1rc0 (linux64)
+
+CPU model: Intel(R) Xeon(R) Gold 6230R CPU @ 2.10GHz, instruction set [SSE2|AVX|AVX2|AVX512]
+Thread count: 52 physical cores, 52 logical processors, using up to 8 threads
+
+Optimize a model with 141 rows, 144 columns and 423 nonzeros
+Model fingerprint: 0x6b7022c8
+Model has 286 quadratic objective terms
+Model has 1 quadratic constraint
+Variable types: 74 continuous, 70 integer (70 binary)
+Coefficient statistics:
+  Matrix range     [6e-03, 1e+01]
+  QMatrix range    [1e-08, 9e+00]
+  QLMatrix range   [1e+00, 1e+00]
+  Objective range  [2e-01, 5e+01]
+  QObjective range [4e-02, 7e+01]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [5e+00, 5e+00]
+Found heuristic solution: objective 35.0000000
+Warning: diagonal adjustment of 1.4e-07 performed to make Q PSD
+Warning: diagonal adjustment of 1.0e-10 performed to make Q PSD
+Presolve time: 0.00s
+Presolved: 141 rows, 144 columns, 423 nonzeros
+Presolved model has 286 quadratic objective terms
+Presolved model has 1 quadratic constraint(s)
+Variable types: 74 continuous, 70 integer (70 binary)
+
+Root relaxation: objective 4.448176e+00, 402 iterations, 0.00 seconds (0.00 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0    4.44818    0   40   35.00000    4.44818  87.3%     -    0s
+H    0     0                      13.8447673    4.44818  67.9%     -    0s
+     0     0    5.26435    0   44   13.84477    5.26435  62.0%     -    0s
+H    0     0                      12.8103867    5.26435  58.9%     -    0s
+H    0     0                      12.2950492    5.26435  57.2%     -    0s
+     0     0    5.26437    0   44   12.29505    5.26437  57.2%     -    0s
+H    0     0                      12.2950470    5.26437  57.2%     -    0s
+     0     0    5.26440    0   44   12.29505    5.26440  57.2%     -    0s
+H    0     0                      12.2950469    5.30386  56.9%     -    0s
+     0     2    5.30386    0   44   12.29505    5.30386  56.9%     -    0s
+H   31    40                      12.2950468    7.46743  39.3%  13.1    0s
+H   78    80                      12.2950399    7.46743  39.3%  10.5    0s
+
+Explored 10161 nodes (70904 simplex iterations) in 1.00 seconds (0.90 work units)
+Thread count was 8 (of 52 available processors)
+
+Solution count 4: 12.295 12.8104 13.8448 35 
+
+Optimal solution found (tolerance 1.00e-04)
+Warning: max constraint violation (8.8527e-06) exceeds tolerance
+Best objective 1.229503992770e+01, best bound 1.229387960464e+01, gap 0.0094%
+
+User-callback calls 20962, time in user-callback 0.03 sec
+/gpfs/projects/p32811/QP_indicator/experiments/Run_test_job2.py:103: DeprecationWarning: Conversion of an array with ndim > 0 to a scalar is deprecated, and will error in future. Ensure you extract a single element from your array before performing this operation. (Deprecated NumPy 1.25.)
+  model_ori.setObjective(res@res/2 + mu_g*beta_ori.T@beta_ori + lam.T@z_ori, GRB.MINIMIZE)
+--------------------------------------------------
+Solve the problem in the proposed formulation with cut
+12.295039927701886
+The root upper bound is: 12.295046854222619, lower bound is: 5.303864582090544. The root gap is: 56.8618%. Runtime: 0.9985179901123047.
+--------------------------------------------------
+   m   n  dataset formulation  ...     end_lb   end_gap  node_count      time
+0  3  50  autompg    original  ...   9.048064  0.000000       165.0  0.114205
+1  3  50  autompg      no_cut  ...   9.047726  0.000037       680.0  0.256265
+2  3  50  autompg         cut  ...   9.047966  0.000011       766.0  0.165448
+3  3  60  autompg    original  ...  10.502622  0.000000      1760.0  0.207592
+4  3  60  autompg      no_cut  ...  10.502521  0.000009      4511.0  0.671048
+5  3  60  autompg         cut  ...  80.003378  0.000044       141.0  0.053659
+6  3  70  autompg    original  ...  12.295045  0.000000      4376.0  0.338169
+7  3  70  autompg      no_cut  ...  12.294324  0.000058      9286.0  0.965121
+8  3  70  autompg         cut  ...  12.293880  0.000094     10161.0  0.998518
+
+[9 rows x 12 columns]
+[3, 80, 'autompg']
+[0.00330536 0.00512383 0.00886908 1.         1.        ]
+The relaxed obj is 0.06355273694434516.
+The larges value of x is 2.5305865257328835
+Use new Big-M 5.061173051465767.
+Set parameter Threads to value 8
+Set parameter TimeLimit to value 300
+Gurobi Optimizer version 10.0.1 build v10.0.1rc0 (linux64)
+
+CPU model: Intel(R) Xeon(R) Gold 6230R CPU @ 2.10GHz, instruction set [SSE2|AVX|AVX2|AVX512]
+Thread count: 52 physical cores, 52 logical processors, using up to 8 threads
+
+Optimize a model with 160 rows, 163 columns and 320 nonzeros
+Model fingerprint: 0x1eaba93a
+Model has 326 quadratic objective terms
+Variable types: 83 continuous, 80 integer (80 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 5e+00]
+  Objective range  [3e-02, 5e+01]
+  QObjective range [2e-01, 8e+01]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [0e+00, 0e+00]
+Found heuristic solution: objective 40.0000000
+Presolve time: 0.00s
+Presolved: 160 rows, 163 columns, 320 nonzeros
+Presolved model has 326 quadratic objective terms
+Variable types: 83 continuous, 80 integer (80 binary)
+
+Root relaxation: objective 6.673184e+00, 391 iterations, 0.00 seconds (0.00 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0    6.67318    0   52   40.00000    6.67318  83.3%     -    0s
+H    0     0                      17.4169926    6.67318  61.7%     -    0s
+H    0     0                      17.2209245    6.67318  61.2%     -    0s
+H    0     0                      16.8351569    6.67318  60.4%     -    0s
+H    0     0                      16.7849627    6.67318  60.2%     -    0s
+H    0     0                      16.6157010    6.67318  59.8%     -    0s
+     0     0    6.89999    0   52   16.61570    6.89999  58.5%     -    0s
+     0     2    6.89999    0   52   16.61570    6.89999  58.5%     -    0s
+
+Explored 41269 nodes (291695 simplex iterations) in 2.20 seconds (2.29 work units)
+Thread count was 8 (of 52 available processors)
+
+Solution count 4: 16.6157 17.2209 17.417 40 
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 1.661570096948e+01, best bound 1.661570096948e+01, gap 0.0000%
+
+User-callback calls 83327, time in user-callback 0.11 sec
+--------------------------------
+solve the problem in original formulation
+The obj is 16.615700969475675.
+The root upper bound is: 16.615700969475675, lower bound is: 6.899985539725415. The root gap is: 58.4731%. Runtime: 2.1986491680145264.
+[25 26 28 30 32 51 54 70 79]
+Number of outliers: 9
+--------------------------------
+The decomposition time is 0.10708083491772413.
+Optimal value: 1.2097839263659236
+The decomposition time is 0.1110950130969286.
+Optimal value: 19.28081355106644
+The decomposition time is 0.12309505417943001.
+Optimal value: 11.302941056416842
+The best pair is: [[0, 2]]
+------------------------
+The decomposition time is 0.1122288079932332.
+Optimal value: 19.28081355106644
+6.673186889775799
+8.881761502716778
+Set parameter Threads to value 8
+Set parameter TimeLimit to value 300
+Gurobi Optimizer version 10.0.1 build v10.0.1rc0 (linux64)
+
+CPU model: Intel(R) Xeon(R) Gold 6230R CPU @ 2.10GHz, instruction set [SSE2|AVX|AVX2|AVX512]
+Thread count: 52 physical cores, 52 logical processors, using up to 8 threads
+
+Optimize a model with 160 rows, 164 columns and 320 nonzeros
+Model fingerprint: 0x554476e9
+Model has 326 quadratic objective terms
+Model has 1 quadratic constraint
+Variable types: 84 continuous, 80 integer (80 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 5e+00]
+  QMatrix range    [1e-08, 1e+01]
+  QLMatrix range   [1e+00, 1e+00]
+  Objective range  [3e-02, 5e+01]
+  QObjective range [2e-02, 8e+01]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [0e+00, 0e+00]
+Found heuristic solution: objective 40.0000000
+Warning: diagonal adjustment of 2.4e-08 performed to make Q PSD
+Warning: diagonal adjustment of 1.0e-10 performed to make Q PSD
+Presolve time: 0.00s
+Presolved: 160 rows, 164 columns, 320 nonzeros
+Presolved model has 326 quadratic objective terms
+Presolved model has 1 quadratic constraint(s)
+Variable types: 84 continuous, 80 integer (80 binary)
+
+Root relaxation: objective -2.867987e+01, 381 iterations, 0.00 seconds (0.00 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0  -28.67987    0   54   40.00000  -28.67987   172%     -    0s
+H    0     0                      22.1936267  -28.67987   229%     -    0s
+H    0     0                      22.1936034  -28.67987   229%     -    0s
+     0     0    4.15827    0   54   22.19360    4.15827  81.3%     -    0s
+H    0     0                      20.0422989    4.15827  79.3%     -    0s
+H    0     0                      17.9952810    4.15827  76.9%     -    0s
+H    0     0                      17.7377711    4.15827  76.6%     -    0s
+     0     0    4.65801    0   56   17.73777    4.65801  73.7%     -    0s
+     0     0    5.88378    0   53   17.73777    5.88378  66.8%     -    0s
+H    0     0                      16.8620660    5.88378  65.1%     -    0s
+H    0     0                      16.8620559    5.88378  65.1%     -    0s
+     0     0    6.40596    0   53   16.86206    6.40596  62.0%     -    0s
+     0     0    6.50910    0   52   16.86206    6.50910  61.4%     -    0s
+     0     0    6.60761    0   52   16.86206    6.60761  60.8%     -    0s
+     0     0    6.62969    0   52   16.86206    6.62969  60.7%     -    0s
+     0     0    6.62969    0   52   16.86206    6.62969  60.7%     -    0s
+H    0     0                      16.6928915    6.62969  60.3%     -    0s
+     0     2    6.62969    0   52   16.69289    6.62969  60.3%     -    0s
+H   31    40                      16.6928915    8.67062  48.1%  10.1    0s
+H  415   383                      16.6928891    8.82770  47.1%   5.5    0s
+H 1463   855                      16.6157013   10.57670  36.3%   6.6    0s
+H 1900   972                      16.6157011   10.79289  35.0%   6.3    0s
+H 1903   972                      16.6156959   10.79289  35.0%   6.3    0s
+H 1905   972                      16.6156952   10.79289  35.0%   6.3    0s
+ 53677 16230   16.21576   27   45   16.61570   15.10234  9.11%   6.3    5s
+*101440     0              65      16.6156948   16.57800  0.23%   6.1    8s
+
+Explored 101969 nodes (620436 simplex iterations) in 8.57 seconds (13.90 work units)
+Thread count was 8 (of 52 available processors)
+
+Solution count 7: 16.6157 16.6929 16.8621 ... 22.1936
+No other solutions better than 16.6157
+
+Optimal solution found (tolerance 1.00e-04)
+Warning: max constraint violation (8.1673e-06) exceeds tolerance
+Best objective 1.661569483080e+01, best bound 1.661569483387e+01, gap 0.0000%
+
+User-callback calls 205589, time in user-callback 0.28 sec
+--------------------------------------------------
+Solve the optimal solution in the proposed formulation without cut
+The obj is 16.615694830802177.
+The root upper bound is: 16.6928915200426, lower bound is: 6.629691353131278. The root gap is: 60.2843%. Runtime: 8.575658082962036.
+--------------------------------------------------
+- adding 1th pair.
+Set parameter Threads to value 8
+Set parameter TimeLimit to value 300
+Gurobi Optimizer version 10.0.1 build v10.0.1rc0 (linux64)
+
+CPU model: Intel(R) Xeon(R) Gold 6230R CPU @ 2.10GHz, instruction set [SSE2|AVX|AVX2|AVX512]
+Thread count: 52 physical cores, 52 logical processors, using up to 8 threads
+
+Optimize a model with 161 rows, 164 columns and 483 nonzeros
+Model fingerprint: 0xe45c165c
+Model has 326 quadratic objective terms
+Model has 1 quadratic constraint
+Variable types: 84 continuous, 80 integer (80 binary)
+Coefficient statistics:
+  Matrix range     [2e-02, 2e+01]
+  QMatrix range    [1e-08, 1e+01]
+  QLMatrix range   [1e+00, 1e+00]
+  Objective range  [3e-02, 5e+01]
+  QObjective range [2e-02, 8e+01]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [9e+00, 9e+00]
+Found heuristic solution: objective 40.0000000
+Warning: diagonal adjustment of 2.4e-08 performed to make Q PSD
+Warning: diagonal adjustment of 1.0e-10 performed to make Q PSD
+Presolve time: 0.00s
+Presolved: 161 rows, 164 columns, 483 nonzeros
+Presolved model has 326 quadratic objective terms
+Presolved model has 1 quadratic constraint(s)
+Variable types: 84 continuous, 80 integer (80 binary)
+
+Root relaxation: objective 8.881725e+00, 431 iterations, 0.00 seconds (0.01 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0    8.88172    0   39   40.00000    8.88172  77.8%     -    0s
+H    0     0                      23.9596205    8.88172  62.9%     -    0s
+H    0     0                      22.9460990    8.88172  61.3%     -    0s
+H    0     0                      20.9438661    8.88172  57.6%     -    0s
+     0     0    8.88175    0   50   20.94387    8.88175  57.6%     -    0s
+H    0     0                      18.7810374    8.88175  52.7%     -    0s
+H    0     0                      17.5550453    8.88175  49.4%     -    0s
+H    0     0                      17.5550430    8.88175  49.4%     -    0s
+     0     0    8.88175    0   50   17.55504    8.88175  49.4%     -    0s
+H    0     0                      17.0164670    8.88175  47.8%     -    0s
+     0     2    8.88175    0   50   17.01647    8.88175  47.8%     -    0s
+H   31    40                      17.0164643    8.95427  47.4%  32.5    0s
+H   76    80                      17.0164642    9.00512  47.1%  20.3    0s
+H  811   686                      17.0164638    9.05477  46.8%   6.1    0s
+H  876   711                      17.0164631    9.42735  44.6%   7.8    0s
+H  888   674                      17.0164594    9.42735  44.6%   7.8    0s
+H 1977  1108                      16.6157021    9.51516  42.7%   7.0    0s
+H 1978  1079                      16.6157004    9.51516  42.7%   7.0    0s
+H 3085  1578                      16.6156967   10.38332  37.5%   7.5    0s
+H 3104  1578                      16.6156917   10.40558  37.4%   7.5    0s
+ 76431 18095   15.90020   30   35   16.61569   14.75362  11.2%   6.2    5s
+ 187049  9347   16.48600   30   37   16.61569   16.23852  2.27%   5.5   10s
+
+Explored 203387 nodes (1101093 simplex iterations) in 10.69 seconds (18.76 work units)
+Thread count was 8 (of 52 available processors)
+
+Solution count 7: 16.6157 17.0165 17.555 ... 40
+No other solutions better than 16.6157
+
+Optimal solution found (tolerance 1.00e-04)
+Warning: max constraint violation (9.5299e-06) exceeds tolerance
+Best objective 1.661569171071e+01, best bound 1.661569171379e+01, gap 0.0000%
+
+User-callback calls 408375, time in user-callback 0.48 sec
+/gpfs/projects/p32811/QP_indicator/experiments/Run_test_job2.py:103: DeprecationWarning: Conversion of an array with ndim > 0 to a scalar is deprecated, and will error in future. Ensure you extract a single element from your array before performing this operation. (Deprecated NumPy 1.25.)
+  model_ori.setObjective(res@res/2 + mu_g*beta_ori.T@beta_ori + lam.T@z_ori, GRB.MINIMIZE)
+--------------------------------------------------
+Solve the problem in the proposed formulation with cut
+16.615691710713417
+The root upper bound is: 17.016467005641257, lower bound is: 8.881746647236731. The root gap is: 47.805%. Runtime: 10.691038131713867.
+--------------------------------------------------
+    m   n  dataset formulation  ...     end_lb       end_gap  node_count       time
+0   3  50  autompg    original  ...   9.048064  0.000000e+00       165.0   0.114205
+1   3  50  autompg      no_cut  ...   9.047726  3.744421e-05       680.0   0.256265
+2   3  50  autompg         cut  ...   9.047966  1.065241e-05       766.0   0.165448
+3   3  60  autompg    original  ...  10.502622  0.000000e+00      1760.0   0.207592
+4   3  60  autompg      no_cut  ...  10.502521  9.114340e-06      4511.0   0.671048
+5   3  60  autompg         cut  ...  80.003378  4.376669e-05       141.0   0.053659
+6   3  70  autompg    original  ...  12.295045  0.000000e+00      4376.0   0.338169
+7   3  70  autompg      no_cut  ...  12.294324  5.833552e-05      9286.0   0.965121
+8   3  70  autompg         cut  ...  12.293880  9.437327e-05     10161.0   0.998518
+9   3  80  autompg    original  ...  16.615701  0.000000e+00     41269.0   2.198649
+10  3  80  autompg      no_cut  ...  16.615695 -1.848882e-10    101969.0   8.575658
+11  3  80  autompg         cut  ...  16.615692 -1.848765e-10    203387.0  10.691038
+
+[12 rows x 12 columns]
+[3, 90, 'autompg']
+[0.00304563 0.00446297 0.00751559 1.         1.        ]
+The relaxed obj is 0.0717736461939893.
+The larges value of x is 2.4535683145326233
+Use new Big-M 4.9071366290652465.
+Set parameter Threads to value 8
+Set parameter TimeLimit to value 300
+Gurobi Optimizer version 10.0.1 build v10.0.1rc0 (linux64)
+
+CPU model: Intel(R) Xeon(R) Gold 6230R CPU @ 2.10GHz, instruction set [SSE2|AVX|AVX2|AVX512]
+Thread count: 52 physical cores, 52 logical processors, using up to 8 threads
+
+Optimize a model with 180 rows, 183 columns and 360 nonzeros
+Model fingerprint: 0x81417937
+Model has 366 quadratic objective terms
+Variable types: 93 continuous, 90 integer (90 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 5e+00]
+  Objective range  [2e-02, 5e+01]
+  QObjective range [1e-01, 9e+01]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [0e+00, 0e+00]
+Found heuristic solution: objective 45.0000000
+Presolve time: 0.00s
+Presolved: 180 rows, 183 columns, 360 nonzeros
+Presolved model has 366 quadratic objective terms
+Variable types: 93 continuous, 90 integer (90 binary)
+
+Root relaxation: objective 7.836440e+00, 410 iterations, 0.00 seconds (0.00 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0    7.83644    0   63   45.00000    7.83644  82.6%     -    0s
+H    0     0                      19.7451032    7.83644  60.3%     -    0s
+H    0     0                      19.7108125    7.83644  60.2%     -    0s
+H    0     0                      19.0299782    7.83644  58.8%     -    0s
+H    0     0                      18.9917243    7.83644  58.7%     -    0s
+H    0     0                      18.8553921    7.83644  58.4%     -    0s
+     0     0    7.92145    0   63   18.85539    7.92145  58.0%     -    0s
+H    0     0                      18.8491461    7.92145  58.0%     -    0s
+     0     2    7.92145    0   63   18.84915    7.92145  58.0%     -    0s
+
+Explored 116639 nodes (739962 simplex iterations) in 4.45 seconds (6.86 work units)
+Thread count was 8 (of 52 available processors)
+
+Solution count 5: 18.8491 18.8554 19.7108 ... 45
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 1.884914608780e+01, best bound 1.884914608780e+01, gap 0.0000%
+
+User-callback calls 234356, time in user-callback 0.25 sec
+--------------------------------
+solve the problem in original formulation
+The obj is 18.84914608780193.
+The root upper bound is: 18.84914608780193, lower bound is: 7.921447466293139. The root gap is: 57.9745%. Runtime: 4.455181121826172.
+[25 26 28 30 32 54 70 79 84]
+Number of outliers: 9
+--------------------------------
+The decomposition time is 0.11355571635067463.
+Optimal value: 1.1889578950465514
+The decomposition time is 0.13098520785570145.
+Optimal value: 12.62106743769386
+The decomposition time is 0.12620154581964016.
+Optimal value: 12.055716817999759
+The best pair is: [[0, 2]]
+------------------------
+The decomposition time is 0.1320342319086194.
+Optimal value: 12.62106743769386
+7.836448902589048
+9.639966765945879
+Set parameter Threads to value 8
+Set parameter TimeLimit to value 300
+Gurobi Optimizer version 10.0.1 build v10.0.1rc0 (linux64)
+
+CPU model: Intel(R) Xeon(R) Gold 6230R CPU @ 2.10GHz, instruction set [SSE2|AVX|AVX2|AVX512]
+Thread count: 52 physical cores, 52 logical processors, using up to 8 threads
+
+Optimize a model with 180 rows, 184 columns and 360 nonzeros
+Model fingerprint: 0x9b9b0bb9
+Model has 366 quadratic objective terms
+Model has 1 quadratic constraint
+Variable types: 94 continuous, 90 integer (90 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 5e+00]
+  QMatrix range    [1e-08, 7e+00]
+  QLMatrix range   [1e+00, 1e+00]
+  Objective range  [2e-02, 5e+01]
+  QObjective range [5e-02, 9e+01]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [0e+00, 0e+00]
+Found heuristic solution: objective 45.0000000
+Warning: diagonal adjustment of 2.9e-09 performed to make Q PSD
+Warning: diagonal adjustment of 1.0e-10 performed to make Q PSD
+Presolve time: 0.00s
+Presolved: 180 rows, 184 columns, 360 nonzeros
+Presolved model has 366 quadratic objective terms
+Presolved model has 1 quadratic constraint(s)
+Variable types: 94 continuous, 90 integer (90 binary)
+
+Root relaxation: objective -4.368817e+00, 394 iterations, 0.00 seconds (0.00 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0   -4.36882    0   61   45.00000   -4.36882   110%     -    0s
+H    0     0                      22.0107867   -4.36882   120%     -    0s
+     0     0    2.23338    0   60   22.01079    2.23338  89.9%     -    0s
+H    0     0                      20.4557884    2.23338  89.1%     -    0s
+H    0     0                      19.2814258    2.23338  88.4%     -    0s
+     0     0    7.71658    0   62   19.28143    7.71658  60.0%     -    0s
+     0     0    7.78061    0   62   19.28143    7.78061  59.6%     -    0s
+     0     0    7.83600    0   63   19.28143    7.83600  59.4%     -    0s
+     0     0    7.83623    0   63   19.28143    7.83623  59.4%     -    0s
+     0     0    7.83644    0   63   19.28143    7.83644  59.4%     -    0s
+H    0     0                      19.2814242    7.83644  59.4%     -    0s
+H    0     0                      18.8811689    7.83644  58.5%     -    0s
+H    0     2                      18.8811689    7.83644  58.5%     -    0s
+     0     2    7.83644    0   63   18.88117    7.83644  58.5%     -    0s
+H   33    40                      18.8811369   10.20757  45.9%  12.2    0s
+H   35    40                      18.8599130   10.20757  45.9%  12.0    0s
+H  671   551                      18.8599130   10.99684  41.7%   6.4    0s
+H  755   596                      18.8491459   10.99684  41.7%   7.3    0s
+H 1876   807                      18.8491395   10.99684  41.7%   7.0    0s
+ 93593 29025   17.55906   25   45   18.84914   17.34358  7.99%   6.3    5s
+ 202424 11220   18.75137   29   45   18.84914   18.50452  1.83%   6.0   10s
+
+Explored 220871 nodes (1288358 simplex iterations) in 10.80 seconds (19.73 work units)
+Thread count was 8 (of 52 available processors)
+
+Solution count 6: 18.8491 18.8599 19.2814 ... 45
+
+Optimal solution found (tolerance 1.00e-04)
+Warning: max constraint violation (6.6408e-06) exceeds tolerance
+Best objective 1.884913951134e+01, best bound 1.884832254713e+01, gap 0.0043%
+
+User-callback calls 443432, time in user-callback 0.48 sec
+--------------------------------------------------
+Solve the optimal solution in the proposed formulation without cut
+The obj is 18.849139511343264.
+The root upper bound is: 18.881168876331472, lower bound is: 7.836437972075679. The root gap is: 58.496%. Runtime: 10.800132036209106.
+--------------------------------------------------
+- adding 1th pair.
+Set parameter Threads to value 8
+Set parameter TimeLimit to value 300
+Gurobi Optimizer version 10.0.1 build v10.0.1rc0 (linux64)
+
+CPU model: Intel(R) Xeon(R) Gold 6230R CPU @ 2.10GHz, instruction set [SSE2|AVX|AVX2|AVX512]
+Thread count: 52 physical cores, 52 logical processors, using up to 8 threads
+
+Optimize a model with 181 rows, 184 columns and 543 nonzeros
+Model fingerprint: 0xb6a11dbe
+Model has 366 quadratic objective terms
+Model has 1 quadratic constraint
+Variable types: 94 continuous, 90 integer (90 binary)
+Coefficient statistics:
+  Matrix range     [5e-04, 1e+01]
+  QMatrix range    [1e-08, 7e+00]
+  QLMatrix range   [1e+00, 1e+00]
+  Objective range  [2e-02, 5e+01]
+  QObjective range [5e-02, 9e+01]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [5e+00, 5e+00]
+Found heuristic solution: objective 45.0000000
+Warning: diagonal adjustment of 2.9e-09 performed to make Q PSD
+Warning: diagonal adjustment of 1.0e-10 performed to make Q PSD
+Presolve time: 0.00s
+Presolved: 181 rows, 184 columns, 543 nonzeros
+Presolved model has 366 quadratic objective terms
+Presolved model has 1 quadratic constraint(s)
+Variable types: 94 continuous, 90 integer (90 binary)
+
+Root relaxation: objective 9.639789e+00, 471 iterations, 0.00 seconds (0.01 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0    9.63979    0   54   45.00000    9.63979  78.6%     -    0s
+H    0     0                      21.1448589    9.63979  54.4%     -    0s
+H    0     0                      21.1419648    9.63979  54.4%     -    0s
+     0     0    9.63995    0   62   21.14196    9.63995  54.4%     -    0s
+H    0     0                      19.7430773    9.63995  51.2%     -    0s
+     0     0    9.63995    0   62   19.74308    9.63995  51.2%     -    0s
+H    0     0                      18.8553996    9.63995  48.9%     -    0s
+     0     2    9.63995    0   62   18.85540    9.63995  48.9%     -    0s
+H   32    40                      18.8553986    9.84002  47.8%  25.8    0s
+H   37    40                      18.8553922    9.84002  47.8%  25.5    0s
+H   72    80                      18.8553921    9.84002  47.8%  18.3    0s
+H  812   705                      18.8491481    9.97886  47.1%   8.1    0s
+H  819   681                      18.8491455    9.97886  47.1%   8.3    0s
+H  848   663                      18.8491449   10.07731  46.5%   8.9    0s
+H 1619  1060                      18.8491421   12.04430  36.1%   8.0    0s
+H 2786  1224                      18.8491407   12.70268  32.6%   6.8    0s
+ 95126 32774   17.97061   28   43   18.84914   17.22830  8.60%   5.8    5s
+ 206696 26153   18.63048   27   48   18.84914   18.20384  3.42%   5.5   10s
+
+Explored 262312 nodes (1396124 simplex iterations) in 12.58 seconds (23.07 work units)
+Thread count was 8 (of 52 available processors)
+
+Solution count 5: 18.8491 18.8554 19.7431 ... 45
+
+Optimal solution found (tolerance 1.00e-04)
+Warning: max constraint violation (5.4746e-06) exceeds tolerance
+Best objective 1.884914066251e+01, best bound 1.884908907609e+01, gap 0.0003%
+
+User-callback calls 526342, time in user-callback 0.57 sec
+--------------------------------------------------
+Solve the problem in the proposed formulation with cut
+18.849140662508674
+The root upper bound is: 18.855399628089856, lower bound is: 9.639953839081748. The root gap is: 48.8743%. Runtime: 12.584672927856445.
+--------------------------------------------------
+    m   n  dataset formulation  ...     end_lb       end_gap  node_count       time
+0   3  50  autompg    original  ...   9.048064  0.000000e+00       165.0   0.114205
+1   3  50  autompg      no_cut  ...   9.047726  3.744421e-05       680.0   0.256265
+2   3  50  autompg         cut  ...   9.047966  1.065241e-05       766.0   0.165448
+3   3  60  autompg    original  ...  10.502622  0.000000e+00      1760.0   0.207592
+4   3  60  autompg      no_cut  ...  10.502521  9.114340e-06      4511.0   0.671048
+5   3  60  autompg         cut  ...  80.003378  4.376669e-05       141.0   0.053659
+6   3  70  autompg    original  ...  12.295045  0.000000e+00      4376.0   0.338169
+7   3  70  autompg      no_cut  ...  12.294324  5.833552e-05      9286.0   0.965121
+8   3  70  autompg         cut  ...  12.293880  9.437327e-05     10161.0   0.998518
+9   3  80  autompg    original  ...  16.615701  0.000000e+00     41269.0   2.198649
+10  3  80  autompg      no_cut  ...  16.615695 -1.848882e-10    101969.0   8.575658
+11  3  80  autompg         cut  ...  16.615692 -1.848765e-10    203387.0  10.691038
+12  3  90  autompg    original  ...  18.849146  0.000000e+00    116639.0   4.455181
+13  3  90  autompg      no_cut  ...  18.848323  4.334226e-05    220871.0  10.800132
+14  3  90  autompg         cut  ...  18.849089  2.736805e-06    262312.0  12.584673
+
+[15 rows x 12 columns]
