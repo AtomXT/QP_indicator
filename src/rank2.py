@@ -180,11 +180,11 @@ def fast_dp_general(C, D, Q, c, d, lam):
             y = np.linalg.solve(2 * A, -b)
             x_z = - (Q_s @ y + c_s)/D_s.reshape(-1,1) / 2
             # mask where |D_s| is very small
-            eps = 1e-6  # tolerance threshold
-            mask = np.abs(D_s).reshape(-1, 1) < eps
-
-            # assign zero where D_s is close to zero
-            x_z = np.where(mask, 0, x_z)
+            # eps = 1e-8  # tolerance threshold
+            # mask = np.abs(D_s).reshape(-1, 1) < eps
+            #
+            # # assign zero where D_s is close to zero
+            # x_z = np.where(mask, 0, x_z)
             f_z = y.T @ C @ y + x_z.T * D_s @ x_z + x_z.T @ Q_s @ y + c_s.T @ x_z + d.T @ y + lam.T @ z
             if f_z < f_opt:
                 f_opt, x_opt, y_opt, z_opt = f_z, x_z, y, z
