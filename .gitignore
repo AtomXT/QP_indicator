@@ -1,7 +1,7 @@
 **/.ipynb_checkpoints/
 data/
 experiments/tests
-experiments/quest_jobs/outlog
+experiments/quest_jobs/outlog/
 **/.DS_Store
 **/.idea/
 __pycache__/
