@@ -35,7 +35,7 @@ def record_root_lb(model, where):
                 root_bound[0] = ub
 
 # n_list = [50, 60, 70, 80, 90, 100, 120, 150, 200]
-n_list = [100, 120, 150, 200]
+n_list = [120, 150, 200]
 # m_list = [2, 3, 4]
 m_list = [3]
 # m = 3
