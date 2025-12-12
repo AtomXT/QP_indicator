@@ -283,6 +283,6 @@ for dataset in data_list:
                 print('--------------------------------------------------')
                 results_df = pd.DataFrame(results, columns=['m','n','dataset','formulation','root_ub','root_lb','root_gap','end_ub','end_lb','end_gap','node_count','time'])
                 print(results_df)
-                results_df.to_csv(f"{current_dir}/../experiments_results/results_job4.csv")
+                results_df.to_csv(f"{current_dir}/../experiments_results/results_job7.csv")
             except:
                 continue
