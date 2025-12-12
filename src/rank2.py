@@ -159,7 +159,7 @@ def fast_dp_general(C, D, Q, c, d, lam):
     n = len(c)
     c = c.reshape((n, 1))
     d = d.reshape((2, 1))
-    D_index = np.diag(D) != 0
+    D_index = np.diag(D) >= 1e-7
     Z = find_candidates_dp_general(C, D[np.ix_(D_index, D_index)], Q[D_index, :], c[D_index], d, lam[D_index])
     Z_full = np.zeros((len(Z), n))
     Z_full[:,D_index] = np.concatenate(Z,axis=1).T
