@@ -35,9 +35,9 @@ def record_root_lb(model, where):
                 root_bound[0] = ub
 
 # n_list = [50, 60, 70, 80, 90, 100, 120, 150, 200]
-n_list = [50, 60, 70, 80, 90]
+n_list = [100, 120, 150, 200]
 # m_list = [2, 3, 4]
-m_list = [3]
+m_list = [2]
 # m = 3
 # n = 90
 # Access features and target
@@ -283,6 +283,6 @@ for dataset in data_list:
                 print('--------------------------------------------------')
                 results_df = pd.DataFrame(results, columns=['m','n','dataset','formulation','root_ub','root_lb','root_gap','end_ub','end_lb','end_gap','node_count','time'])
                 print(results_df)
-                results_df.to_csv(f"{current_dir}/../experiments_results/results_job5.csv")
+                results_df.to_csv(f"{current_dir}/../experiments_results/results_job4.csv")
             except:
                 continue
