@@ -1,5 +1,6 @@
 import cvxpy as cp
 import numpy as np
+from scipy.optimize import linprog
 from sklearn import datasets
 from gurobipy import GRB
 from ucimlrepo import fetch_ucirepo
@@ -72,3 +73,66 @@ def get_data(name):
         print('Unknown dataset')
     return X, y
 
+
+def pairwise_infeasible(F, a, D, lam, i, j, s, t, tol=1e-9):
+    """
+    Check infeasibility of (z_i^s, z_j^t) = (1,1).
+
+    Parameters
+    ----------
+    F : ndarray (n, m)
+    a : ndarray (n,)
+    D : ndarray (n,)     # diagonal entries D_ii
+    lam : ndarray (n,)
+    i, j : int           # indices, i != j
+    s, t : str           # '+' or '-'
+    tol : float          # numerical tolerance
+
+    Returns
+    -------
+    infeasible : bool
+    """
+
+    theta_i = np.sqrt(2 * D[i] * lam[i])
+    theta_j = np.sqrt(2 * D[j] * lam[j])
+
+    A = []
+    b = []
+
+    # constraint for i
+    if s == '+':
+        # F_i y >= theta_i - a_i  ->  -F_i y <= -(theta_i - a_i)
+        A.append(-F[i])
+        b.append(-(theta_i - a[i]))
+    elif s == '-':
+        # F_i y <= -theta_i - a_i
+        A.append(F[i])
+        b.append(-theta_i - a[i])
+    else:
+        raise ValueError("s must be '+' or '-'")
+
+    # constraint for j
+    if t == '+':
+        A.append(-F[j])
+        b.append(-(theta_j - a[j]))
+    elif t == '-':
+        A.append(F[j])
+        b.append(-theta_j - a[j])
+    else:
+        raise ValueError("t must be '+' or '-'")
+
+    A = np.vstack(A)
+    b = np.array(b)
+
+    m = F.shape[1]
+
+    # dummy objective (we only care about feasibility)
+    res = linprog(
+        c=np.zeros(m),
+        A_ub=A,
+        b_ub=b,
+        bounds=[(-100, 100)] * m,
+        method='highs'
+    )
+
+    return not res.success
