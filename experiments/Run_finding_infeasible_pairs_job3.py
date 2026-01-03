@@ -84,7 +84,7 @@ for dataset in data_list:
                 model_relax.setObjective(eqn[0], GRB.MINIMIZE)
                 # model_relax.params.QCPDual = 1
                 model_relax.params.OutputFlag = 0
-                model_relax.params.Threads = 8
+                model_relax.params.Threads = 16
                 model_relax.optimize()
                 print(f"The relaxed obj is {model_relax.objVal}.")
                 x_relax_vals = np.array([x_relax[i].X for i in range(n)])
@@ -103,7 +103,7 @@ for dataset in data_list:
                 model_ori.addConstrs(w_ori[i] <= BIG_M*z_ori[i] for i in range(n))
                 model_ori.addConstrs(w_ori[i] >= -BIG_M*z_ori[i] for i in range(n))
                 model_ori.params.OutputFlag = 1
-                model_ori.params.Threads = 8
+                model_ori.params.Threads = 16
                 model_ori.params.TimeLimit = timelimit
                 model_ori.optimize(record_root_lb)
                 z_opt_vals = np.array([z_ori[i].X for i in range(n)])
@@ -148,7 +148,7 @@ for dataset in data_list:
                 model_opt.setObjective(obj[0], GRB.MINIMIZE)
                 model_opt.params.OutputFlag = 1
                 # model_opt.params.PreMIQCPForm = 1
-                model_opt.params.Threads = 8
+                model_opt.params.Threads = 16
                 model_opt.params.TimeLimit = timelimit
                 model_opt.optimize(record_root_lb)
                 result_opt = [m, n, dataset, 'opt', root_bound[0], root_bound[1],
@@ -209,7 +209,7 @@ for dataset in data_list:
                 model_opt.setObjective(obj[0], GRB.MINIMIZE)
                 model_opt.params.OutputFlag = 1
                 # model_opt.params.PreMIQCPForm = 1
-                model_opt.params.Threads = 8
+                model_opt.params.Threads = 16
                 model_opt.params.TimeLimit = timelimit
                 model_opt.optimize(record_root_lb)
                 result_opt = [m, n, dataset, 'opt_feasibility', root_bound[0], root_bound[1],
