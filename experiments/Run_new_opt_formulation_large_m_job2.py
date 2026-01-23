@@ -37,7 +37,7 @@ def record_root_lb(model, where):
 # n_list = [50, 60, 70, 80, 90, 100, 120, 150, 200]
 n_list = [50, 80, 100, 120, 150, 200]
 # m_list = [2, 3, 4]
-m_list = [10]
+m_list = [7]
 # m = 3
 # n = 90
 # Access features and target
