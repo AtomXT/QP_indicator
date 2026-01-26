@@ -187,8 +187,8 @@ for dataset in data_list:
             model_opt.addConstrs(np.sqrt(2 * lam[i] * D[i, i]) - 1000 * (1 - z_plus[i]) <= gp.quicksum(
                 F[i, j] * y_opt[j] for j in range(m)) + c[i] for i in range(n))
 
-            model_opt.addConstrs(x_opt[i] + (F[i, :]@y_opt + c[i])/D[i, i] <= 1000*(1 - z_opt[i]) for i in range(n))
-            model_opt.addConstrs(-x_opt[i] - (F[i, :] @ y_opt + c[i]) / D[i, i] <= 1000 * (1 - z_opt[i]) for i in range(n))
+            model_opt.addConstrs(x_opt[i] + (F[i, :]@y_opt + c[i])/D[i, i] <= BIG_M * (1 - z_opt[i]) for i in range(n))
+            model_opt.addConstrs(-x_opt[i] - (F[i, :] @ y_opt + c[i]) / D[i, i] <= BIG_M * (1 - z_opt[i]) for i in range(n))
 
             obj = y.T @ y / 2 + y_opt.T @ G @ y_opt / 2 + x_opt.T @ D @ x_opt / 2 + x_opt.T @ F @ y_opt + c.T @ x_opt + d.T @ y_opt + lam.T @ z_opt
             model_opt.setObjective(obj[0], GRB.MINIMIZE)
