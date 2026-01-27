@@ -73,6 +73,20 @@ def get_data(name):
         print('Unknown dataset')
     return X, y
 
+def get_data_offline(name):
+    if name == 'diabetes':
+        data = np.load("data.npz")
+        X = data["X"]
+        y = data["y"]
+    elif name == 'autompg':
+        data = np.load("data.npz")
+        X = data["X"]
+        y = data["y"]
+    else:
+        X, y = None, None
+        print('Unknown dataset')
+    return X, y
+
 
 def pairwise_infeasible(F, a, D, lam, i, j, s, t, tol=1e-9):
     """
