@@ -37,11 +37,11 @@ def record_root_lb(model, where):
 # n_list = [50, 60, 70, 80, 90, 100, 120, 150, 200]
 n_list = [50, 80, 100, 120, 150, 200]
 # m_list = [2, 3, 4]
-m_list = [2, 3]
+m_list = [10]
 # m = 3
 # n = 90
 # Access features and target
-timelimit = 300
+timelimit = 600
 # data_list = ['diabetes', 'autompg']
 data_list = ['diabetes']
 results = []
@@ -315,7 +315,7 @@ for dataset in data_list:
 
             results_df = pd.DataFrame(results, columns=['m','n','dataset','formulation','root_ub','root_lb','root_gap','end_ub','end_lb','end_gap','node_count','time'])
             print(results_df)
-            results_df.to_csv(f"{current_dir}/../experiments_results/convex_hull_results_job1.csv")
+            results_df.to_csv(f"{current_dir}/../experiments_results/convex_hull_results_job3.csv")
         # except:
         #     continue
 
