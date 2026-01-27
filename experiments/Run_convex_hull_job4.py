@@ -8,7 +8,7 @@ import gurobipy as gp
 import cvxpy as cp
 import random
 from gurobipy import GRB
-from src.utils import decomposition, get_data, pairwise_infeasible
+from src.utils import decomposition, get_data, get_data_offline, pairwise_infeasible
 import os
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -46,7 +46,7 @@ timelimit = 600
 data_list = ['autompg']
 results = []
 for dataset in data_list:
-    X_, y_ = get_data(dataset)
+    X_, y_ = get_data_offline(dataset)
     for m in m_list:
         for n in n_list:
         # try:
