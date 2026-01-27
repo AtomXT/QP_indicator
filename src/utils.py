@@ -75,11 +75,11 @@ def get_data(name):
 
 def get_data_offline(name):
     if name == 'diabetes':
-        data = np.load("data.npz")
+        data = np.load("data/diabetes.npz")
         X = data["X"]
         y = data["y"]
     elif name == 'autompg':
-        data = np.load("data.npz")
+        data = np.load("data/autompg.npz")
         X = data["X"]
         y = data["y"]
     else:
