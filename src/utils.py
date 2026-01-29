@@ -4,6 +4,11 @@ from scipy.optimize import linprog
 from sklearn import datasets
 from gurobipy import GRB
 from ucimlrepo import fetch_ucirepo
+import os
+
+
+current_dir = os.path.dirname(os.path.abspath(__file__))
+project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 def decomposition(D, G, F, pairs, s=1):
     n, m = F.shape
@@ -75,11 +80,11 @@ def get_data(name):
 
 def get_data_offline(name):
     if name == 'diabetes':
-        data = np.load("data/diabetes.npz")
+        data = np.load(f"{project_root}/data/diabetes.npz")
         X = data["X"]
         y = data["y"]
     elif name == 'autompg':
-        data = np.load("data/autompg.npz")
+        data = np.load(f"{project_root}/data/autompg.npz")
         X = data["X"]
         y = data["y"]
     else:
