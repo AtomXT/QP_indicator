@@ -1,5 +1,6 @@
 import cvxpy as cp
 import numpy as np
+import pandas as pd
 from scipy.optimize import linprog
 from sklearn import datasets
 from gurobipy import GRB
@@ -87,6 +88,10 @@ def get_data_offline(name):
         data = np.load(f"{project_root}/data/autompg.npz")
         X = data["X"]
         y = data["y"]
+    elif name == 'crime':
+        data = pd.read_csv(f"{project_root}/data/Crime.csv")
+        X = data.iloc[:, :-1].values
+        y = data.iloc[:,-1].values
     else:
         X, y = None, None
         print('Unknown dataset')
