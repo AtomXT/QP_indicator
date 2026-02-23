@@ -16,7 +16,6 @@ Outputs:
 - One .npz per instance, containing:
     Q as CSR (data, indices, indptr, shape),
     d vector,
-    lambda vector,
     metadata dict (as a JSON string).
 """
 
@@ -41,7 +40,6 @@ class InstanceMeta:
     target_kappa: float         # desired condition number of Q
     achieved_kappa_est: float   # estimated condition number after construction
 
-    tau: float                  # scaling parameter for lambda (lambda_i = tau * trace(Q)/n)
     trace_per_dim_after_norm: float  # trace(Q)/n after normalization (should be ~1)
 
     num_edges: int              # number of ER edges (controls off-diagonal sparsity)
@@ -153,7 +151,6 @@ def save_instance(
     out_path: str,
     Q: sp.csr_matrix,
     d: np.ndarray,
-    lam: np.ndarray,
     meta: InstanceMeta,
 ) -> None:
     """
@@ -166,7 +163,6 @@ def save_instance(
         "Q_indptr": Q.indptr,
         "Q_shape": np.array(Q.shape, dtype=np.int64),
         "d": d.astype(np.float64),
-        "lambda": lam.astype(np.float64),
         "meta_json": np.array(json.dumps(asdict(meta)), dtype=object),
     }
     np.savez_compressed(out_path, **payload)
@@ -175,19 +171,17 @@ def save_instance(
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--out_dir", type=str, default="../data/Q_sparsity")
-    parser.add_argument("--n_list", type=str, default="100,300,1000",
+    parser.add_argument("--n_list", type=str, default="100,500,1000",
                         help="Comma-separated list of n values.")
-    parser.add_argument("--delta_list", type=str, default="0.01,0.03,0.1,0.3,0.5",
+    parser.add_argument("--delta_list", type=str, default="0.01,0.05,0.1,0.5",
                         help="Comma-separated list of ER densities (edge probabilities).")
     parser.add_argument("--reps", type=int, default=10, help="Instances per (n,delta).")
     parser.add_argument("--kappa", type=float, default=100.0, help="Target condition number of Q.")
-    parser.add_argument("--tau_list", type=str, default="0,001,0.1,1", help="lambda_i = tau * (trace(Q)/n). After normalization trace/n=1, lambda_i=tau.")
-    parser.add_argument("--seed", type=int, default=12345, help="Base RNG seed.")
+    parser.add_argument("--seed", type=int, default=2026, help="Base RNG seed.")
     args = parser.parse_args()
 
     n_list = [int(x.strip()) for x in args.n_list.split(",") if x.strip()]
     delta_list = [float(x.strip()) for x in args.delta_list.split(",") if x.strip()]
-    tau_list = [float(x.strip()) for x in args.tau_list.split(",") if x.strip()]
     reps = args.reps
 
     rng_master = np.random.default_rng(args.seed)
@@ -195,55 +189,50 @@ def main():
     manifest = []
     for n in n_list:
         for delta in delta_list:
-            for tau in tau_list:
-                for rep in range(reps):
-                    # Derive a deterministic per-instance seed
-                    seed = int(rng_master.integers(0, 2**31 - 1))
-                    rng = np.random.default_rng(seed)
+            for rep in range(reps):
+                # Derive a deterministic per-instance seed
+                seed = int(rng_master.integers(0, 2**31 - 1))
+                rng = np.random.default_rng(seed)
 
-                    # 1) Generate ER Laplacian L (PSD, sparse exactly by edges)
-                    L, m_edges = er_laplacian_psd(n=n, delta=delta, rng=rng)
+                # 1) Generate ER Laplacian L (PSD, sparse exactly by edges)
+                L, m_edges = er_laplacian_psd(n=n, delta=delta, rng=rng)
 
-                    # 2) Form Q = L + alpha I to hit target kappa, then normalize trace(Q)/n=1
-                    Q_raw, achieved_kappa = build_Q_with_kappa(L, target_kappa=args.kappa)
-                    Q = normalize_trace(Q_raw)
+                # 2) Form Q = L + alpha I to hit target kappa, then normalize trace(Q)/n=1
+                Q_raw, achieved_kappa = build_Q_with_kappa(L, target_kappa=args.kappa)
+                Q = normalize_trace(Q_raw)
 
-                    # After trace normalization, trace(Q)/n should be 1 (up to numerical tolerance)
-                    trace_per_dim = float(Q.diagonal().sum()) / n
+                # After trace normalization, trace(Q)/n should be 1 (up to numerical tolerance)
+                trace_per_dim = float(Q.diagonal().sum()) / n
 
-                    # 3) Generate d and normalize ||d||_2 = 1
-                    d = rng.normal(size=n)
-                    d_norm = np.linalg.norm(d)
-                    if d_norm > 0:
-                        d = d / d_norm
+                # 3) Generate d and normalize ||d||_2 = 1
+                d = rng.normal(size=n)
+                d_norm = np.linalg.norm(d)
+                if d_norm > 0:
+                    d = d / d_norm
 
-                    # 4) lambda: scale-coupled rule; since trace_per_dim≈1, lambda_i≈tau
-                    lam = np.full(n, tau * trace_per_dim, dtype=np.float64)
+                # Metadata / sparsity stats
+                offdiag_nnz = int(Q.nnz - np.count_nonzero(Q.diagonal()))
+                diag_nnz = int(np.count_nonzero(Q.diagonal()))
+                meta = InstanceMeta(
+                    n=n,
+                    delta=float(delta),
+                    rep=int(rep),
+                    seed=seed,
+                    target_kappa=float(args.kappa),
+                    achieved_kappa_est=float(achieved_kappa),
+                    trace_per_dim_after_norm=float(trace_per_dim),
+                    num_edges=int(m_edges),
+                    offdiag_nnz=offdiag_nnz,
+                    diag_nnz=diag_nnz,
+                    Q_nnz_total=int(Q.nnz),
+                )
 
-                    # Metadata / sparsity stats
-                    offdiag_nnz = int(Q.nnz - np.count_nonzero(Q.diagonal()))
-                    diag_nnz = int(np.count_nonzero(Q.diagonal()))
-                    meta = InstanceMeta(
-                        n=n,
-                        delta=float(delta),
-                        rep=int(rep),
-                        seed=seed,
-                        target_kappa=float(args.kappa),
-                        achieved_kappa_est=float(achieved_kappa),
-                        tau=float(tau),
-                        trace_per_dim_after_norm=float(trace_per_dim),
-                        num_edges=int(m_edges),
-                        offdiag_nnz=offdiag_nnz,
-                        diag_nnz=diag_nnz,
-                        Q_nnz_total=int(Q.nnz),
-                    )
+                # Save
+                fname = f"inst_n{n}_delta{delta:g}_rep{rep:02d}.npz"
+                out_path = os.path.join(args.out_dir, f"n={n}", f"delta={delta:g}", fname)
+                save_instance(out_path, Q, d, meta)
 
-                    # Save
-                    fname = f"inst_n{n}_delta{delta:g}_rep{rep:02d}.npz"
-                    out_path = os.path.join(args.out_dir, f"n={n}", f"delta={delta:g}", fname)
-                    save_instance(out_path, Q, d, lam, meta)
-
-                    manifest.append({"path": out_path, **asdict(meta)})
+                manifest.append({"path": out_path, **asdict(meta)})
 
     # Save a manifest for easy loading/analysis
     manifest_path = os.path.join(args.out_dir, "manifest.json")
