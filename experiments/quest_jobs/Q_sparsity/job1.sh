@@ -16,7 +16,7 @@ source activate python39
 module load gurobi
 
 python3 -m experiments.Run_sparse_to_dense_Q \
-  --n_list "100,500,1000" \
+  --n_list "1000" \
   --delta_list "0.01,0.1,0.5" \
   --tau_list "0.05,0.1,0.2" \
   --timelimit "600" \
