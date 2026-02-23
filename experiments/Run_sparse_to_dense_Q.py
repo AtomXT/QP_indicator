@@ -243,82 +243,85 @@ for n in n_list:
             c = -Q.T @ d
             BIG_M = BIG_M_INIT
             for tau in tau_list:
-                print([n, delta, tau, rep])
-                lam = tau * np.ones(n) / np.sqrt(n)
-                # define a container to store the root node lower bound
-                root_bound = [np.inf, -np.inf]
+                try:
+                    print([n, delta, tau, rep])
+                    lam = tau * np.ones(n) / np.sqrt(n)
+                    # define a container to store the root node lower bound
+                    root_bound = [np.inf, -np.inf]
 
-                # get tight big-M
-                model_relax = gp.Model()
-                z_relax = model_relax.addMVar(n, vtype=GRB.CONTINUOUS, lb=0, ub=1, name='z')
-                x_relax = model_relax.addMVar(n, vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name='x')
-                # add constraints
-                model_relax.addConstrs(x_relax[i] <= BIG_M*z_relax[i] for i in range(n))
-                model_relax.addConstrs(x_relax[i] >= -BIG_M*z_relax[i] for i in range(n))
+                    # get tight big-M
+                    model_relax = gp.Model()
+                    z_relax = model_relax.addMVar(n, vtype=GRB.CONTINUOUS, lb=0, ub=1, name='z')
+                    x_relax = model_relax.addMVar(n, vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name='x')
+                    # add constraints
+                    model_relax.addConstrs(x_relax[i] <= BIG_M*z_relax[i] for i in range(n))
+                    model_relax.addConstrs(x_relax[i] >= -BIG_M*z_relax[i] for i in range(n))
 
-                # set objective
-                eqn = x_relax.T@Q@x_relax/2 + c.T@x_relax + d.T@Q@d/2 + lam.T@z_relax
-                model_relax.setObjective(eqn, GRB.MINIMIZE)
-                # model_relax.params.QCPDual = 1
-                model_relax.params.OutputFlag = 0
-                model_relax.params.Threads = THREADS
-                model_relax.optimize()
-                print(f"The relaxed obj is {model_relax.objVal}.")
-                x_relax_vals = np.array([x_relax[i].X for i in range(n)])
-                print(f"The larges value of x is {max(x_relax_vals)}")
-                BIG_M = min(BIG_M, 2*max(abs(x_relax_vals)))
-                print(f'Use new Big-M {BIG_M}.')
+                    # set objective
+                    eqn = x_relax.T@Q@x_relax/2 + c.T@x_relax + d.T@Q@d/2 + lam.T@z_relax
+                    model_relax.setObjective(eqn, GRB.MINIMIZE)
+                    # model_relax.params.QCPDual = 1
+                    model_relax.params.OutputFlag = 0
+                    model_relax.params.Threads = THREADS
+                    model_relax.optimize()
+                    print(f"The relaxed obj is {model_relax.objVal}.")
+                    x_relax_vals = np.array([x_relax[i].X for i in range(n)])
+                    print(f"The larges value of x is {max(x_relax_vals)}")
+                    BIG_M = min(BIG_M, 2*max(abs(x_relax_vals)))
+                    print(f'Use new Big-M {BIG_M}.')
 
-                ## solve the problem in original formulation
-                model_ori = gp.Model()
-                z_ori = model_ori.addMVar(n, vtype=GRB.BINARY)
-                x_ori = model_ori.addMVar(n, vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name="x")
-                model_ori.setObjective(x_ori.T@Q@x_ori/2 + c.T@x_ori + d.T@Q@d/2 + lam.T@z_ori, GRB.MINIMIZE)
-                model_ori.addConstrs(x_ori[i] <= BIG_M*z_ori[i] for i in range(n))
-                model_ori.addConstrs(x_ori[i] >= -BIG_M*z_ori[i] for i in range(n))
-                model_ori.params.OutputFlag = 1
-                model_ori.params.Threads = THREADS
-                model_ori.params.TimeLimit = timelimit
-                model_ori.optimize(record_root_lb)
-                z_opt_vals = np.array([z_ori[i].X for i in range(n)])
-                result_opt = [n, delta, tau, rep, 'original', root_bound[0], root_bound[1],
-                          (root_bound[0] - root_bound[1]) / root_bound[0], model_ori.ObjVal, model_ori.ObjBound,
-                          (model_ori.ObjVal - model_ori.ObjBound) / model_ori.ObjVal, np.count_nonzero(z_opt_vals), model_ori.NodeCount,
-                          model_ori.runtime]
-                results.append(result_opt)
-                print('--------------------------------')
-                print('solve the problem in original formulation')
-                print(f"The obj is {model_ori.objVal}.")
-                print(f"The root upper bound is: {root_bound[0]}, lower bound is: {root_bound[1]}. The root gap is: {np.round(100*(root_bound[0]-root_bound[1])/root_bound[0],4)}%. Runtime: {model_ori.runtime}.")
-                print(np.where(z_opt_vals == 1)[0])
-                print(f"Number of outliers: {np.count_nonzero(z_opt_vals)}")
-                print('--------------------------------')
+                    ## solve the problem in original formulation
+                    model_ori = gp.Model()
+                    z_ori = model_ori.addMVar(n, vtype=GRB.BINARY)
+                    x_ori = model_ori.addMVar(n, vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name="x")
+                    model_ori.setObjective(x_ori.T@Q@x_ori/2 + c.T@x_ori + d.T@Q@d/2 + lam.T@z_ori, GRB.MINIMIZE)
+                    model_ori.addConstrs(x_ori[i] <= BIG_M*z_ori[i] for i in range(n))
+                    model_ori.addConstrs(x_ori[i] >= -BIG_M*z_ori[i] for i in range(n))
+                    model_ori.params.OutputFlag = 1
+                    model_ori.params.Threads = THREADS
+                    model_ori.params.TimeLimit = timelimit
+                    model_ori.optimize(record_root_lb)
+                    z_opt_vals = np.array([z_ori[i].X for i in range(n)])
+                    result_opt = [n, delta, tau, rep, 'original', root_bound[0], root_bound[1],
+                            (root_bound[0] - root_bound[1]) / root_bound[0], model_ori.ObjVal, model_ori.ObjBound,
+                            (model_ori.ObjVal - model_ori.ObjBound) / model_ori.ObjVal, np.count_nonzero(z_opt_vals), model_ori.NodeCount,
+                            model_ori.runtime]
+                    results.append(result_opt)
+                    print('--------------------------------')
+                    print('solve the problem in original formulation')
+                    print(f"The obj is {model_ori.objVal}.")
+                    print(f"The root upper bound is: {root_bound[0]}, lower bound is: {root_bound[1]}. The root gap is: {np.round(100*(root_bound[0]-root_bound[1])/root_bound[0],4)}%. Runtime: {model_ori.runtime}.")
+                    print(np.where(z_opt_vals == 1)[0])
+                    print(f"Number of outliers: {np.count_nonzero(z_opt_vals)}")
+                    print('--------------------------------')
 
-                ## solve the optimal solution in the proposed formulation
-                root_bound = [np.inf, -np.inf]
+                    ## solve the optimal solution in the proposed formulation
+                    root_bound = [np.inf, -np.inf]
 
-                model_opt = cor_reform(Q, d, lam, BIG_M)
-                model_opt.params.OutputFlag = 1
-                # model_opt.params.PreMIQCPForm = 1
-                model_opt.params.Threads = THREADS
-                model_opt.params.TimeLimit = timelimit
-                model_opt.optimize(record_root_lb)
-                z_opt_vals = np.array([1-model_opt._z0[i].X for i in range(n)])
-                result_opt = [n, delta, tau, rep, 'opt', root_bound[0], root_bound[1],
-                              (root_bound[0] - root_bound[1]) / root_bound[0], model_opt.ObjVal, model_opt.ObjBound,
-                              (model_opt.ObjVal - model_opt.ObjBound) / model_opt.ObjVal, np.count_nonzero(z_opt_vals), model_opt.NodeCount,
-                              model_opt.runtime]
-                results.append(result_opt)
-                print('--------------------------------------------------')
-                print("Solve the optimal solution in the proposed formulation")
-                print(f"The obj is {model_opt.objVal}.")
-                print(
-                    f"The root upper bound is: {root_bound[0]}, lower bound is: {root_bound[1]}. The root gap is: {np.round(100 * (root_bound[0] - root_bound[1]) / root_bound[0], 4)}%. Runtime: {model_opt.runtime}.")
-                print('--------------------------------------------------')
+                    model_opt = cor_reform(Q, d, lam, BIG_M)
+                    model_opt.params.OutputFlag = 1
+                    # model_opt.params.PreMIQCPForm = 1
+                    model_opt.params.Threads = THREADS
+                    model_opt.params.TimeLimit = timelimit
+                    model_opt.optimize(record_root_lb)
+                    z_opt_vals = np.array([1-model_opt._z0[i].X for i in range(n)])
+                    result_opt = [n, delta, tau, rep, 'opt', root_bound[0], root_bound[1],
+                                (root_bound[0] - root_bound[1]) / root_bound[0], model_opt.ObjVal, model_opt.ObjBound,
+                                (model_opt.ObjVal - model_opt.ObjBound) / model_opt.ObjVal, np.count_nonzero(z_opt_vals), model_opt.NodeCount,
+                                model_opt.runtime]
+                    results.append(result_opt)
+                    print('--------------------------------------------------')
+                    print("Solve the optimal solution in the proposed formulation")
+                    print(f"The obj is {model_opt.objVal}.")
+                    print(
+                        f"The root upper bound is: {root_bound[0]}, lower bound is: {root_bound[1]}. The root gap is: {np.round(100 * (root_bound[0] - root_bound[1]) / root_bound[0], 4)}%. Runtime: {model_opt.runtime}.")
+                    print('--------------------------------------------------')
 
 
-                results_df = pd.DataFrame(results, columns=['n', 'delta', 'tau', 'rep' ,'formulation','root_ub','root_lb','root_gap','end_ub','end_lb','end_gap','nnz','node_count','time'])
-                print(results_df)
-                results_df.to_csv(f"{current_dir}/../experiments_results/Sparsity_Q_{job_name}.csv", index=False)
-
+                    results_df = pd.DataFrame(results, columns=['n', 'delta', 'tau', 'rep' ,'formulation','root_ub','root_lb','root_gap','end_ub','end_lb','end_gap','nnz','node_count','time'])
+                    print(results_df)
+                    results_df.to_csv(f"{current_dir}/../experiments_results/Sparsity_Q_{job_name}.csv", index=False)
+                except Exception as e:
+                    print(f"Error: {e}")
+                    continue
 
