@@ -319,6 +319,6 @@ for n in n_list:
 
                 results_df = pd.DataFrame(results, columns=['n', 'delta', 'tau', 'rep' ,'formulation','root_ub','root_lb','root_gap','end_ub','end_lb','end_gap','nnz','node_count','time'])
                 print(results_df)
-                results_df.to_csv(f"{current_dir}/../experiments_results/{job_name}.csv", index=False)
+                results_df.to_csv(f"{current_dir}/../experiments_results/Sparsity_Q_{job_name}.csv", index=False)
 
 
