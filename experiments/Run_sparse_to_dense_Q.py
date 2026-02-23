@@ -150,6 +150,7 @@ def cor_reform(Q, d, lam, M=100, timelimit=None, mip_gap=None, threads=None, ver
 
     # Regime binaries
     z0 = m.addVars(n, vtype=GRB.BINARY, name="z0")
+    m._z0 = z0
     zp = m.addVars(n, vtype=GRB.BINARY, name="zplus")
     zm = m.addVars(n, vtype=GRB.BINARY, name="zminus")
 
@@ -282,7 +283,7 @@ for n in n_list:
                 z_opt_vals = np.array([z_ori[i].X for i in range(n)])
                 result_opt = [n, delta, tau, rep, 'original', root_bound[0], root_bound[1],
                           (root_bound[0] - root_bound[1]) / root_bound[0], model_ori.ObjVal, model_ori.ObjBound,
-                          (model_ori.ObjVal - model_ori.ObjBound) / model_ori.ObjVal, model_ori.NodeCount,
+                          (model_ori.ObjVal - model_ori.ObjBound) / model_ori.ObjVal, np.count_nonzero(z_opt_vals), model_ori.NodeCount,
                           model_ori.runtime]
                 results.append(result_opt)
                 print('--------------------------------')
@@ -302,9 +303,10 @@ for n in n_list:
                 model_opt.params.Threads = THREADS
                 model_opt.params.TimeLimit = timelimit
                 model_opt.optimize(record_root_lb)
+                z_opt_vals = np.array([1-model_opt._z0[i].X for i in range(n)])
                 result_opt = [n, delta, tau, rep, 'opt', root_bound[0], root_bound[1],
                               (root_bound[0] - root_bound[1]) / root_bound[0], model_opt.ObjVal, model_opt.ObjBound,
-                              (model_opt.ObjVal - model_opt.ObjBound) / model_opt.ObjVal, model_opt.NodeCount,
+                              (model_opt.ObjVal - model_opt.ObjBound) / model_opt.ObjVal, np.count_nonzero(z_opt_vals), model_opt.NodeCount,
                               model_opt.runtime]
                 results.append(result_opt)
                 print('--------------------------------------------------')
@@ -315,7 +317,7 @@ for n in n_list:
                 print('--------------------------------------------------')
 
 
-                results_df = pd.DataFrame(results, columns=['n', 'delta', 'tau', 'rep' ,'formulation','root_ub','root_lb','root_gap','end_ub','end_lb','end_gap','node_count','time'])
+                results_df = pd.DataFrame(results, columns=['n', 'delta', 'tau', 'rep' ,'formulation','root_ub','root_lb','root_gap','end_ub','end_lb','end_gap','nnz','node_count','time'])
                 print(results_df)
                 results_df.to_csv(f"{current_dir}/../experiments_results/{job_name}.csv", index=False)
 
