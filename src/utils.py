@@ -137,6 +137,55 @@ def load_instance_Q_sparsity(n: int, delta: float, rep: int):
 
     return Q, d, meta
 
+
+def load_instance_bss(p: int, n: int, rep: int, project_root: str):
+    """
+    Load one BSS dataset specified by (p, n, rep).
+
+    Returns:
+        X           : np.ndarray (float64)
+        y           : np.ndarray
+        G           : np.ndarray
+        c           : np.ndarray
+        beta_star   : np.ndarray
+        support     : np.ndarray
+        beta_ridge  : np.ndarray
+        bar_beta    : np.ndarray
+        H           : np.ndarray
+        meta        : dict
+    """
+
+    data_root = f"{project_root}/data/bss_cardinality"
+
+    fname = f"inst_p{p}_n{n}_rep{rep:02d}.npz"
+
+    path = os.path.join(
+        data_root,
+        f"p={p}",
+        f"n={n}",
+        fname
+    )
+
+    if not os.path.exists(path):
+        raise FileNotFoundError(f"Instance not found: {path}")
+
+    obj = np.load(path, allow_pickle=True)
+
+    # Cast X back to float64 for numerical stability in solvers
+    X = obj["X"].astype(np.float64)
+    y = obj["y"]
+    G = obj["G"]
+    c = obj["c"]
+    beta_star = obj["beta_star"]
+    support = obj["support"]
+    beta_ridge = obj["beta_ridge"]
+    bar_beta = obj["bar_beta"]
+    H = obj["H"]
+
+    meta = json.loads(str(obj["meta_json"]))
+
+    return X, y, G, c, beta_star, support, beta_ridge, bar_beta, H, meta
+
 def pairwise_infeasible(F, a, D, lam, i, j, s, t, tol=1e-9):
     """
     Check infeasibility of (z_i^s, z_j^t) = (1,1).
