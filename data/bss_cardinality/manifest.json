@@ -5,9 +5,9 @@
     "p": 500,
     "rep": 0,
     "seed": 1829338324,
-    "rho": 0.6,
+    "rho": 0.2,
     "gamma": 0.01,
-    "sigma": 0.5,
+    "sigma": 0.4,
     "amplitude": 1.0,
     "s_true": 20,
     "support_sorted": [
@@ -33,12 +33,12 @@
       474
     ],
     "X_col_standardized": true,
-    "y_norm": 68.89103072451509,
+    "y_norm": 68.82139204207144,
     "beta_star_l2": 4.47213595499958,
-    "beta_ridge_l2": 3.1700995296938648,
+    "beta_ridge_l2": 3.1298763530447196,
     "G_trace": 125000.0,
     "G_diag_min": 249.99999999999966,
-    "G_diag_max": 250.00000000000028
+    "G_diag_max": 250.00000000000037
   },
   {
     "path": "../data/bss_cardinality/p=500/n=250/inst_p500_n250_rep01.npz",
@@ -46,9 +46,9 @@
     "p": 500,
     "rep": 1,
     "seed": 384259585,
-    "rho": 0.6,
+    "rho": 0.2,
     "gamma": 0.01,
-    "sigma": 0.5,
+    "sigma": 0.4,
     "amplitude": 1.0,
     "s_true": 20,
     "support_sorted": [
@@ -74,12 +74,12 @@
       463
     ],
     "X_col_standardized": true,
-    "y_norm": 80.20144715365605,
+    "y_norm": 73.62325554346046,
     "beta_star_l2": 4.47213595499958,
-    "beta_ridge_l2": 3.266954101735936,
+    "beta_ridge_l2": 3.2319717677537563,
     "G_trace": 125000.0,
-    "G_diag_min": 249.99999999999966,
-    "G_diag_max": 250.0000000000004
+    "G_diag_min": 249.99999999999972,
+    "G_diag_max": 250.00000000000037
   },
   {
     "path": "../data/bss_cardinality/p=500/n=250/inst_p500_n250_rep02.npz",
@@ -87,9 +87,9 @@
     "p": 500,
     "rep": 2,
     "seed": 56731231,
-    "rho": 0.6,
+    "rho": 0.2,
     "gamma": 0.01,
-    "sigma": 0.5,
+    "sigma": 0.4,
     "amplitude": 1.0,
     "s_true": 20,
     "support_sorted": [
@@ -115,12 +115,12 @@
       486
     ],
     "X_col_standardized": true,
-    "y_norm": 64.29609748769617,
+    "y_norm": 65.88605440868996,
     "beta_star_l2": 4.47213595499958,
-    "beta_ridge_l2": 3.145369692173253,
+    "beta_ridge_l2": 3.1126847791040464,
     "G_trace": 125000.0,
-    "G_diag_min": 249.99999999999952,
-    "G_diag_max": 250.00000000000045
+    "G_diag_min": 249.99999999999955,
+    "G_diag_max": 250.0000000000004
   },
   {
     "path": "../data/bss_cardinality/p=500/n=250/inst_p500_n250_rep03.npz",
@@ -128,9 +128,9 @@
     "p": 500,
     "rep": 3,
     "seed": 1374203058,
-    "rho": 0.6,
+    "rho": 0.2,
     "gamma": 0.01,
-    "sigma": 0.5,
+    "sigma": 0.4,
     "amplitude": 1.0,
     "s_true": 20,
     "support_sorted": [
@@ -156,12 +156,12 @@
       478
     ],
     "X_col_standardized": true,
-    "y_norm": 69.92474451442325,
+    "y_norm": 72.86240054589565,
     "beta_star_l2": 4.47213595499958,
-    "beta_ridge_l2": 3.2913142461756673,
+    "beta_ridge_l2": 3.3078284418102517,
     "G_trace": 125000.0,
-    "G_diag_min": 249.99999999999963,
-    "G_diag_max": 250.00000000000045
+    "G_diag_min": 249.9999999999996,
+    "G_diag_max": 250.00000000000034
   },
   {
     "path": "../data/bss_cardinality/p=500/n=250/inst_p500_n250_rep04.npz",
@@ -169,9 +169,9 @@
     "p": 500,
     "rep": 4,
     "seed": 784857332,
-    "rho": 0.6,
+    "rho": 0.2,
     "gamma": 0.01,
-    "sigma": 0.5,
+    "sigma": 0.4,
     "amplitude": 1.0,
     "s_true": 20,
     "support_sorted": [
@@ -197,12 +197,12 @@
       460
     ],
     "X_col_standardized": true,
-    "y_norm": 71.50000238542596,
+    "y_norm": 70.03519592248328,
     "beta_star_l2": 4.47213595499958,
-    "beta_ridge_l2": 3.1393967975351686,
+    "beta_ridge_l2": 3.136327265782998,
     "G_trace": 125000.0,
-    "G_diag_min": 249.9999999999996,
-    "G_diag_max": 250.0000000000004
+    "G_diag_min": 249.99999999999966,
+    "G_diag_max": 250.00000000000034
   },
   {
     "path": "../data/bss_cardinality/p=500/n=1000/inst_p500_n1000_rep00.npz",
@@ -210,9 +210,9 @@
     "p": 500,
     "rep": 0,
     "seed": 1003451250,
-    "rho": 0.6,
+    "rho": 0.2,
     "gamma": 0.01,
-    "sigma": 0.5,
+    "sigma": 0.4,
     "amplitude": 1.0,
     "s_true": 20,
     "support_sorted": [
@@ -238,12 +238,12 @@
       473
     ],
     "X_col_standardized": true,
-    "y_norm": 146.3204440619659,
+    "y_norm": 141.6356029449225,
     "beta_star_l2": 4.47213595499958,
-    "beta_ridge_l2": 4.530626117250888,
+    "beta_ridge_l2": 4.494554942062719,
     "G_trace": 500000.0,
-    "G_diag_min": 999.9999999999977,
-    "G_diag_max": 1000.0000000000026
+    "G_diag_min": 999.9999999999976,
+    "G_diag_max": 1000.0000000000031
   },
   {
     "path": "../data/bss_cardinality/p=500/n=1000/inst_p500_n1000_rep01.npz",
@@ -251,9 +251,9 @@
     "p": 500,
     "rep": 1,
     "seed": 171429433,
-    "rho": 0.6,
+    "rho": 0.2,
     "gamma": 0.01,
-    "sigma": 0.5,
+    "sigma": 0.4,
     "amplitude": 1.0,
     "s_true": 20,
     "support_sorted": [
@@ -279,12 +279,12 @@
       470
     ],
     "X_col_standardized": true,
-    "y_norm": 146.97391729751493,
+    "y_norm": 142.8014454086573,
     "beta_star_l2": 4.47213595499958,
-    "beta_ridge_l2": 4.525185412372366,
+    "beta_ridge_l2": 4.496090881214963,
     "G_trace": 500000.0,
-    "G_diag_min": 999.9999999999978,
-    "G_diag_max": 1000.0000000000028
+    "G_diag_min": 999.9999999999974,
+    "G_diag_max": 1000.0000000000023
   },
   {
     "path": "../data/bss_cardinality/p=500/n=1000/inst_p500_n1000_rep02.npz",
@@ -292,9 +292,9 @@
     "p": 500,
     "rep": 2,
     "seed": 795643823,
-    "rho": 0.6,
+    "rho": 0.2,
     "gamma": 0.01,
-    "sigma": 0.5,
+    "sigma": 0.4,
     "amplitude": 1.0,
     "s_true": 20,
     "support_sorted": [
@@ -320,12 +320,12 @@
       494
     ],
     "X_col_standardized": true,
-    "y_norm": 133.59483193924893,
+    "y_norm": 139.89695413199894,
     "beta_star_l2": 4.47213595499958,
-    "beta_ridge_l2": 4.531178434546481,
+    "beta_ridge_l2": 4.495094171296813,
     "G_trace": 500000.0,
     "G_diag_min": 999.9999999999978,
-    "G_diag_max": 1000.000000000002
+    "G_diag_max": 1000.0000000000022
   },
   {
     "path": "../data/bss_cardinality/p=500/n=1000/inst_p500_n1000_rep03.npz",
@@ -333,9 +333,9 @@
     "p": 500,
     "rep": 3,
     "seed": 1381800716,
-    "rho": 0.6,
+    "rho": 0.2,
     "gamma": 0.01,
-    "sigma": 0.5,
+    "sigma": 0.4,
     "amplitude": 1.0,
     "s_true": 20,
     "support_sorted": [
@@ -361,12 +361,12 @@
       485
     ],
     "X_col_standardized": true,
-    "y_norm": 141.72429281795726,
+    "y_norm": 137.1941196169319,
     "beta_star_l2": 4.47213595499958,
-    "beta_ridge_l2": 4.524160279817995,
+    "beta_ridge_l2": 4.487521826471055,
     "G_trace": 500000.0,
-    "G_diag_min": 999.9999999999978,
-    "G_diag_max": 1000.0000000000023
+    "G_diag_min": 999.9999999999972,
+    "G_diag_max": 1000.0000000000025
   },
   {
     "path": "../data/bss_cardinality/p=500/n=1000/inst_p500_n1000_rep04.npz",
@@ -374,9 +374,9 @@
     "p": 500,
     "rep": 4,
     "seed": 762179171,
-    "rho": 0.6,
+    "rho": 0.2,
     "gamma": 0.01,
-    "sigma": 0.5,
+    "sigma": 0.4,
     "amplitude": 1.0,
     "s_true": 20,
     "support_sorted": [
@@ -402,11 +402,11 @@
       477
     ],
     "X_col_standardized": true,
-    "y_norm": 150.24741357110815,
+    "y_norm": 145.3988244730671,
     "beta_star_l2": 4.47213595499958,
-    "beta_ridge_l2": 4.550497099185837,
+    "beta_ridge_l2": 4.501914540811416,
     "G_trace": 500000.0,
-    "G_diag_min": 999.9999999999976,
-    "G_diag_max": 1000.0000000000025
+    "G_diag_min": 999.9999999999978,
+    "G_diag_max": 1000.000000000002
   }
 ]
