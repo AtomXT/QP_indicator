@@ -138,6 +138,7 @@ def cor_reform(Q, d, lam, M=100, timelimit=None, mip_gap=None, threads=None, ver
     # Aggregate variables
     x = m.addVars(n, lb=-GRB.INFINITY, ub=GRB.INFINITY, name="x")
     g = m.addVars(n, lb=-GRB.INFINITY, ub=GRB.INFINITY, name="g")
+    m._g = g  # useful to check the interaction level
 
     # Disaggregated per-regime variables
     x0 = m.addVars(n, lb=-GRB.INFINITY, ub=GRB.INFINITY, name="x0")
