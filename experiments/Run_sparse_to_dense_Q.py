@@ -138,27 +138,30 @@ def cor_reform(Q, d, lam, M=100, timelimit=None, mip_gap=None, threads=None, ver
     # Aggregate variables
     x = m.addVars(n, lb=-GRB.INFINITY, ub=GRB.INFINITY, name="x")
     g = m.addVars(n, lb=-GRB.INFINITY, ub=GRB.INFINITY, name="g")
+    m._x = x
     m._g = g  # useful to check the interaction level
 
     # Disaggregated per-regime variables
-    x0 = m.addVars(n, lb=-GRB.INFINITY, ub=GRB.INFINITY, name="x0")
-    xp = m.addVars(n, lb=-GRB.INFINITY, ub=GRB.INFINITY, name="xp")
-    xm = m.addVars(n, lb=-GRB.INFINITY, ub=GRB.INFINITY, name="xm")
+    # x0 = m.addVars(n, lb=-GRB.INFINITY, ub=GRB.INFINITY, name="x0")
+    xp = m.addVars(n, lb=-GRB.INFINITY, ub=0, name="xp")
+    xm = m.addVars(n, lb=0, ub=GRB.INFINITY, name="xm")
 
     g0 = m.addVars(n, lb=-GRB.INFINITY, ub=GRB.INFINITY, name="g0")
-    gpv = m.addVars(n, lb=-GRB.INFINITY, ub=GRB.INFINITY, name="gplus")
-    gmv = m.addVars(n, lb=-GRB.INFINITY, ub=GRB.INFINITY, name="gminus")
+    gpv = m.addVars(n, lb=0, ub=GRB.INFINITY, name="gplus")
+    gmv = m.addVars(n, lb=0, ub=GRB.INFINITY, name="gminus")
 
     # Regime binaries
     z0 = m.addVars(n, vtype=GRB.BINARY, name="z0")
     m._z0 = z0
+
     zp = m.addVars(n, vtype=GRB.BINARY, name="zplus")
     zm = m.addVars(n, vtype=GRB.BINARY, name="zminus")
-
-    # Bounds on aggregate x (required)
-    for i in range(n):
-        m.addConstr(x[i] <= xbar[i], name=f"x_ub[{i}]")
-        m.addConstr(x[i] >= -xbar[i], name=f"x_lb[{i}]")
+    m._zp = zp
+    m._zm = zm
+    # # Bounds on aggregate x (required)
+    # for i in range(n):
+    #     m.addConstr(x[i] <= xbar[i], name=f"x_ub[{i}]")
+    #     m.addConstr(x[i] >= -xbar[i], name=f"x_lb[{i}]")
 
     # g definition and optional explicit g bounds
     for i in range(n):
@@ -167,17 +170,17 @@ def cor_reform(Q, d, lam, M=100, timelimit=None, mip_gap=None, threads=None, ver
             expr += gp.quicksum(Q[i, j] * x[j] for j in N[i])
         # off-diagonal sum: we excluded j=i already
         m.addConstr(g[i] == expr, name=f"g_def[{i}]")
-        m.addConstr(g[i] <= G[i], name=f"g_ub[{i}]")
-        m.addConstr(g[i] >= -G[i], name=f"g_lb[{i}]")
+        # m.addConstr(g[i] <= G[i], name=f"g_ub[{i}]")
+        # m.addConstr(g[i] >= -G[i], name=f"g_lb[{i}]")
 
     # Hull coupling: x = x0+xp+xm, g = g0+gplus+gminus, select regime
     for i in range(n):
-        m.addConstr(x[i] == x0[i] + xp[i] + xm[i], name=f"disagg_x[{i}]")
-        m.addConstr(g[i] == g0[i] + gpv[i] + gmv[i], name=f"disagg_g[{i}]")
+        m.addConstr(x[i] == xp[i] + xm[i], name=f"disagg_x[{i}]")
+        m.addConstr(g[i] == g0[i] + gpv[i] - gmv[i], name=f"disagg_g[{i}]")
         m.addConstr(z0[i] + zp[i] + zm[i] == 1, name=f"regime_sum[{i}]")
 
         # Off piece: x0 = 0, |g0| <= tau_i z0
-        m.addConstr(x0[i] == 0, name=f"off_x0[{i}]")
+        # m.addConstr(x0[i] == 0, name=f"off_x0[{i}]")
         m.addConstr(g0[i] <= tau[i] * z0[i], name=f"off_g0_ub[{i}]")
         m.addConstr(g0[i] >= -tau[i] * z0[i], name=f"off_g0_lb[{i}]")
 
@@ -185,19 +188,19 @@ def cor_reform(Q, d, lam, M=100, timelimit=None, mip_gap=None, threads=None, ver
         Qii = Q[i, i]
         m.addConstr(Qii * xp[i] + gpv[i] == 0, name=f"onp_stat[{i}]")
         m.addConstr(gpv[i] >= tau[i] * zp[i], name=f"onp_g_lb[{i}]")
-        m.addConstr(gpv[i] <= G[i] * zp[i], name=f"onp_g_ub[{i}]")
+        # m.addConstr(gpv[i] <= G[i] * zp[i], name=f"onp_g_ub[{i}]")
 
         # On- piece: Q_ii xm + gminus = 0, -G z- <= gminus <= -tau z-
-        m.addConstr(Qii * xm[i] + gmv[i] == 0, name=f"onm_stat[{i}]")
-        m.addConstr(gmv[i] >= -G[i] * zm[i], name=f"onm_g_lb[{i}]")
-        m.addConstr(gmv[i] <= -tau[i] * zm[i], name=f"onm_g_ub[{i}]")
+        m.addConstr(Qii * xm[i] - gmv[i] == 0, name=f"onm_stat[{i}]")
+        # m.addConstr(-gmv[i] >= -G[i] * zm[i], name=f"onm_g_lb[{i}]")
+        m.addConstr(-gmv[i] <= -tau[i] * zm[i], name=f"onm_g_ub[{i}]")
 
-        # (Optional but often helps) also bound disaggregated vars tightly
-        # These follow from x bounds and disaggregation; keeps numerics stable.
-        m.addConstr(xp[i] <= xbar[i] * zp[i], name=f"xp_ub[{i}]")
+        # # (Optional but often helps) also bound disaggregated vars tightly
+        # # These follow from x bounds and disaggregation; keeps numerics stable.
+        # m.addConstr(xp[i] <= xbar[i] * zp[i], name=f"xp_ub[{i}]")
         m.addConstr(xp[i] >= -xbar[i] * zp[i], name=f"xp_lb[{i}]")
         m.addConstr(xm[i] <= xbar[i] * zm[i], name=f"xm_ub[{i}]")
-        m.addConstr(xm[i] >= -xbar[i] * zm[i], name=f"xm_lb[{i}]")
+        # m.addConstr(xm[i] >= -xbar[i] * zm[i], name=f"xm_lb[{i}]")
         # x0 is fixed 0 so no need for bounds there.
 
     # Objective: 1/2 x^T Q x + c^T x + sum lambda_i (zplus+zminus)
