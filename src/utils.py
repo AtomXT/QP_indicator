@@ -234,6 +234,45 @@ def load_instance_bss(p: int, n: int, rep: int, project_root: str):
 
     return X, y, G, c, beta_star, support, beta_ridge, bar_beta, H, meta
 
+def load_instance_socp_sparsity(n: int, delta: float, rep: int):
+    """
+    Load one SOCP indicator dataset specified by (n, delta, rep).
+
+    Returns:
+        Q     : scipy.sparse.csr_matrix
+        c     : numpy array
+        sigma : float
+        meta  : dict
+    """
+    data_root = f"{project_root}/data/SOCP_indicator"
+    delta_str = f"{delta:g}"
+    fname = f"inst_n{n}_delta{delta_str}_rep{rep:02d}.npz"
+
+    path = os.path.join(
+        data_root,
+        f"n={n}",
+        f"delta={delta_str}",
+        fname
+    )
+
+    if not os.path.exists(path):
+        raise FileNotFoundError(f"Instance not found: {path}")
+
+    obj = np.load(path, allow_pickle=True)
+
+    # Reconstruct sparse matrix Q (CSR)
+    Q = sp.csr_matrix(
+        (obj["Q_data"], obj["Q_indices"], obj["Q_indptr"]),
+        shape=tuple(obj["Q_shape"])
+    )
+
+    c = obj["c"]
+    sigma = float(obj["sigma"])
+
+    meta = json.loads(str(obj["meta_json"]))
+
+    return Q, c, sigma, meta
+
 def pairwise_infeasible(F, a, D, lam, i, j, s, t, tol=1e-9):
     """
     Check infeasibility of (z_i^s, z_j^t) = (1,1).
