@@ -12,6 +12,9 @@ import os
 import argparse
 import json
 
+import networkx as nx
+from networkx.algorithms.approximation.treewidth import treewidth_min_fill_in, treewidth_min_degree
+
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 
@@ -23,7 +26,7 @@ def parse_args():
     # allow scalar or list-like inputs
     p.add_argument("--n_list", type=str, default="500",
                    help='e.g. "500" or "50,60,70" or "[50,60,70]"')
-    p.add_argument("--delta_list", type=str, default="0.01",
+    p.add_argument("--delta_list", type=str, default="0.99",
                    help='e.g. "0.01" or "0.01,0.05" or "[0.01,0.05]"')
     p.add_argument("--rep_list", type=str, default="0",
                    help='e.g. "0" or "0,1,2" or "[0,1,2]"')
@@ -244,6 +247,18 @@ for n in n_list:
     for delta in delta_list:
         for rep in rep_list:
             Q, d, meta = load_instance_Q_sparsity(n, delta, rep)
+            A = Q.toarray()
+            np.fill_diagonal(A, 0)
+            A_binary = (A != 0).astype(int)
+            G = nx.from_numpy_array(A_binary)
+
+            tw1, decomp1 = treewidth_min_fill_in(G)
+            tw2, decomp2 = treewidth_min_degree(G)
+
+            print("min-fill upper bound:", tw1)
+            print("min-degree upper bound:", tw2)
+
+
             c = -Q.T @ d
             BIG_M = BIG_M_INIT
             for tau in tau_list:
@@ -285,18 +300,18 @@ for n in n_list:
                     model_ori.params.Threads = THREADS
                     model_ori.params.TimeLimit = timelimit
                     model_ori.optimize(record_root_lb)
-                    z_opt_vals = np.array([z_ori[i].X for i in range(n)])
+                    z_ori_vals = np.array([z_ori[i].X for i in range(n)])
                     result_opt = [n, delta, tau, rep, 'original', root_bound[0], root_bound[1],
                             (root_bound[0] - root_bound[1]) / root_bound[0], model_ori.ObjVal, model_ori.ObjBound,
-                            (model_ori.ObjVal - model_ori.ObjBound) / model_ori.ObjVal, np.count_nonzero(z_opt_vals), model_ori.NodeCount,
+                            (model_ori.ObjVal - model_ori.ObjBound) / model_ori.ObjVal, np.count_nonzero(z_ori_vals), model_ori.NodeCount,
                             model_ori.runtime]
                     results.append(result_opt)
                     print('--------------------------------')
                     print('solve the problem in original formulation')
                     print(f"The obj is {model_ori.objVal}.")
                     print(f"The root upper bound is: {root_bound[0]}, lower bound is: {root_bound[1]}. The root gap is: {np.round(100*(root_bound[0]-root_bound[1])/root_bound[0],4)}%. Runtime: {model_ori.runtime}.")
-                    print(np.where(z_opt_vals == 1)[0])
-                    print(f"Number of outliers: {np.count_nonzero(z_opt_vals)}")
+                    print(np.where(z_ori_vals == 1)[0])
+                    print(f"Number of outliers: {np.count_nonzero(z_ori_vals)}")
                     print('--------------------------------')
 
                     ## solve the optimal solution in the proposed formulation
