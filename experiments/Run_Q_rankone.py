@@ -288,7 +288,7 @@ for n in n_list:
 
             # Build rank-one vector a (reproducible per rep)
             rng = np.random.default_rng(100000 * rep + 17 * n)
-            a = rng.standard_normal(n)
+            a = rng.standard_normal(n)/n  # the rank-one vector should not dominate Q
             # a = np.zeros(n)
 
             # Shift term: c = Q d
