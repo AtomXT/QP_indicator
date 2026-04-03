@@ -1,0 +1,67 @@
+[
+  {
+    "path": "../data/Q_path/n=500/inst_n500_rep00.npz",
+    "n": 500,
+    "rep": 0,
+    "seed": 1829338324,
+    "target_kappa": 100.0,
+    "achieved_kappa_est": 99.99999999988606,
+    "trace_per_dim_after_norm": 1.0,
+    "num_edges": 499,
+    "offdiag_nnz": 998,
+    "diag_nnz": 500,
+    "Q_nnz_total": 1498
+  },
+  {
+    "path": "../data/Q_path/n=500/inst_n500_rep01.npz",
+    "n": 500,
+    "rep": 1,
+    "seed": 384259585,
+    "target_kappa": 100.0,
+    "achieved_kappa_est": 99.99999999988762,
+    "trace_per_dim_after_norm": 0.9999999999999999,
+    "num_edges": 499,
+    "offdiag_nnz": 998,
+    "diag_nnz": 500,
+    "Q_nnz_total": 1498
+  },
+  {
+    "path": "../data/Q_path/n=500/inst_n500_rep02.npz",
+    "n": 500,
+    "rep": 2,
+    "seed": 56731231,
+    "target_kappa": 100.0,
+    "achieved_kappa_est": 99.99999999980953,
+    "trace_per_dim_after_norm": 0.9999999999999999,
+    "num_edges": 499,
+    "offdiag_nnz": 998,
+    "diag_nnz": 500,
+    "Q_nnz_total": 1498
+  },
+  {
+    "path": "../data/Q_path/n=500/inst_n500_rep03.npz",
+    "n": 500,
+    "rep": 3,
+    "seed": 1374203058,
+    "target_kappa": 100.0,
+    "achieved_kappa_est": 99.99999999987362,
+    "trace_per_dim_after_norm": 1.0000000000000004,
+    "num_edges": 499,
+    "offdiag_nnz": 998,
+    "diag_nnz": 500,
+    "Q_nnz_total": 1498
+  },
+  {
+    "path": "../data/Q_path/n=500/inst_n500_rep04.npz",
+    "n": 500,
+    "rep": 4,
+    "seed": 784857332,
+    "target_kappa": 100.0,
+    "achieved_kappa_est": 99.99999999983706,
+    "trace_per_dim_after_norm": 1.0000000000000002,
+    "num_edges": 499,
+    "offdiag_nnz": 998,
+    "diag_nnz": 500,
+    "Q_nnz_total": 1498
+  }
+]

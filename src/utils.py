@@ -186,6 +186,41 @@ def load_instance_Q_sparsity(n: int, delta: float, rep: int):
     return Q, d, meta
 
 
+def load_instance_Q_path(n: int, rep: int):
+    """
+    Load one dataset specified by (n, rep).
+
+    Returns:
+        Q   : scipy.sparse.csr_matrix
+        d   : numpy array
+        meta: dict
+    """
+    data_root = f"{project_root}/data/Q_path"
+    fname = f"inst_n{n}_rep{rep:02d}.npz"
+
+    path = os.path.join(
+        data_root,
+        f"n={n}",
+        fname
+    )
+
+    if not os.path.exists(path):
+        raise FileNotFoundError(f"Instance not found: {path}")
+
+    obj = np.load(path, allow_pickle=True)
+
+    # Reconstruct sparse matrix Q (CSR)
+    Q = sp.csr_matrix(
+        (obj["Q_data"], obj["Q_indices"], obj["Q_indptr"]),
+        shape=tuple(obj["Q_shape"])
+    )
+
+    d = obj["d"]
+    meta = json.loads(str(obj["meta_json"]))
+
+    return Q, d, meta
+
+
 def load_instance_bss(p: int, n: int, rep: int, project_root: str):
     """
     Load one BSS dataset specified by (p, n, rep).

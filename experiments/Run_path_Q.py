@@ -7,7 +7,7 @@ import gurobipy as gp
 import cvxpy as cp
 import random
 from gurobipy import GRB
-from src.utils import decomposition, get_data, get_data_offline, load_instance_Q_sparsity
+from src.utils import decomposition, get_data, get_data_offline, load_instance_Q_path
 import os
 import argparse
 import json
@@ -26,13 +26,11 @@ def parse_args():
     # allow scalar or list-like inputs
     p.add_argument("--n_list", type=str, default="500",
                    help='e.g. "500" or "50,60,70" or "[50,60,70]"')
-    p.add_argument("--delta_list", type=str, default="0.01",
-                   help='e.g. "0.01" or "0.01,0.05" or "[0.01,0.05]"')
     p.add_argument("--rep_list", type=str, default="0",
                    help='e.g. "0" or "0,1,2" or "[0,1,2]"')
     p.add_argument("--tau_list", type=str, default="0.1",
                    help='e.g. "0.05,0.1,0.2"')
-    p.add_argument("--timelimit", type=float, default=10.0)
+    p.add_argument("--timelimit", type=float, default=20.0)
     p.add_argument("--threads", type=int, default=8)
     p.add_argument("--big_m_init", type=float, default=1000.0)
 
@@ -201,9 +199,15 @@ def cor_reform(Q, d, lam, M=100, timelimit=None, mip_gap=None, threads=None, ver
         # # (Optional but often helps) also bound disaggregated vars tightly
         # # These follow from x bounds and disaggregation; keeps numerics stable.
         # m.addConstr(xp[i] <= xbar[i] * zp[i], name=f"xp_ub[{i}]")
+
+        # m.addConstr(xp[i] <= -tau[i]/Q[i, i] * zp[i], name=f"xp_ub[{i}]")
+
         m.addConstr(xp[i] >= -xbar[i] * zp[i], name=f"xp_lb[{i}]")
         m.addConstr(xm[i] <= xbar[i] * zm[i], name=f"xm_ub[{i}]")
         # m.addConstr(xm[i] >= -xbar[i] * zm[i], name=f"xm_lb[{i}]")
+
+        # m.addConstr(xm[i] >= tau[i] / Q[i, i] * zm[i], name=f"xm_lb[{i}]")
+
         # x0 is fixed 0 so no need for bounds there.
 
     # Objective: 1/2 x^T Q x + c^T x + sum lambda_i (zplus+zminus)
@@ -225,7 +229,6 @@ def cor_reform(Q, d, lam, M=100, timelimit=None, mip_gap=None, threads=None, ver
     obj.add(0.5*d.T@Q@d)
 
     m.setObjective(obj, GRB.MINIMIZE)
-    # turn off if needed
     # m.setParam("Presolve", 0)
     # m.setParam("Cuts", 0)
     # m.setParam("Heuristics", 0)
@@ -239,7 +242,6 @@ def cor_reform(Q, d, lam, M=100, timelimit=None, mip_gap=None, threads=None, ver
 args = parse_args()
 
 n_list = parse_list(args.n_list, int)
-delta_list = parse_list(args.delta_list, float)
 rep_list = parse_list(args.rep_list, int)
 tau_list = parse_list(args.tau_list, float)
 timelimit = args.timelimit
@@ -251,9 +253,8 @@ job_name = args.job_name
 results = []
 
 for n in n_list:
-    for delta in delta_list:
         for rep in rep_list:
-            Q, d, meta = load_instance_Q_sparsity(n, delta, rep)
+            Q, d, meta = load_instance_Q_path(n, rep)
             A = Q.toarray()
             np.fill_diagonal(A, 0)
             A_binary = (A != 0).astype(int)
@@ -270,7 +271,7 @@ for n in n_list:
             BIG_M = BIG_M_INIT
             for tau in tau_list:
                 try:
-                    print([n, delta, tau, rep])
+                    print([n, tau, rep])
                     lam = tau * np.ones(n) / np.sqrt(n)
                     # define a container to store the root node lower bound
                     root_bound = [np.inf, -np.inf]
@@ -305,10 +306,11 @@ for n in n_list:
                     model_ori.addConstrs(x_ori[i] >= -BIG_M*z_ori[i] for i in range(n))
                     model_ori.params.OutputFlag = 1
                     model_ori.params.Threads = THREADS
-                    model_ori.params.TimeLimit = timelimit
+                    model_ori.params.TimeLimit = timelimit/5
+                    # model_ori.setParam("Presolve", 0)
                     model_ori.optimize(record_root_lb)
                     z_ori_vals = np.array([z_ori[i].X for i in range(n)])
-                    result_opt = [n, delta, tau, rep, 'original', root_bound[0], root_bound[1],
+                    result_opt = [n, tau, rep, 'original', root_bound[0], root_bound[1],
                             (root_bound[0] - root_bound[1]) / root_bound[0], model_ori.ObjVal, model_ori.ObjBound,
                             (model_ori.ObjVal - model_ori.ObjBound) / model_ori.ObjVal, np.count_nonzero(z_ori_vals), model_ori.NodeCount,
                             model_ori.runtime]
@@ -326,15 +328,15 @@ for n in n_list:
 
                     model_opt = cor_reform(Q, d, lam, BIG_M)
                     # check presolved model
-                    # p = model_opt.presolve()
-                    # p.write('presolved_model.mps')
+                    p = model_opt.presolve()
+                    p.write('presolved_model.mps')
                     model_opt.params.OutputFlag = 1
                     # model_opt.params.PreMIQCPForm = 1
                     model_opt.params.Threads = THREADS
                     model_opt.params.TimeLimit = timelimit
                     model_opt.optimize(record_root_lb)
                     z_opt_vals = np.array([1-model_opt._z0[i].X for i in range(n)])
-                    result_opt = [n, delta, tau, rep, 'opt', root_bound[0], root_bound[1],
+                    result_opt = [n, tau, rep, 'opt', root_bound[0], root_bound[1],
                                 (root_bound[0] - root_bound[1]) / root_bound[0], model_opt.ObjVal, model_opt.ObjBound,
                                 (model_opt.ObjVal - model_opt.ObjBound) / model_opt.ObjVal, np.count_nonzero(z_opt_vals), model_opt.NodeCount,
                                 model_opt.runtime]
@@ -347,9 +349,9 @@ for n in n_list:
                     print('--------------------------------------------------')
 
 
-                    results_df = pd.DataFrame(results, columns=['n', 'delta', 'tau', 'rep' ,'formulation','root_ub','root_lb','root_gap','end_ub','end_lb','end_gap','nnz','node_count','time'])
+                    results_df = pd.DataFrame(results, columns=['n', 'tau', 'rep' ,'formulation','root_ub','root_lb','root_gap','end_ub','end_lb','end_gap','nnz','node_count','time'])
                     print(results_df)
-                    results_df.to_csv(f"{current_dir}/../experiments_results/Sparsity_Q_{job_name}.csv", index=False)
+                    results_df.to_csv(f"{current_dir}/../experiments_results/path_Q_{job_name}.csv", index=False)
                 except Exception as e:
                     print(f"Error: {e}")
                     continue
