@@ -171,11 +171,11 @@ def save_instance(
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--out_dir", type=str, default="../data/Q_sparsity")
-    parser.add_argument("--n_list", type=str, default="100,500,1000",
+    parser.add_argument("--n_list", type=str, default="100,200,500,1000,2000,5000,10000",
                         help="Comma-separated list of n values.")
-    parser.add_argument("--delta_list", type=str, default="0.01,0.05,0.1,0.5",
+    parser.add_argument("--delta_list", type=str, default="0.01",
                         help="Comma-separated list of ER densities (edge probabilities).")
-    parser.add_argument("--reps", type=int, default=10, help="Instances per (n,delta).")
+    parser.add_argument("--reps", type=int, default=5, help="Instances per (n,delta).")
     parser.add_argument("--kappa", type=float, default=100.0, help="Target condition number of Q.")
     parser.add_argument("--seed", type=int, default=2026, help="Base RNG seed.")
     args = parser.parse_args()
