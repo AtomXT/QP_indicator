@@ -306,7 +306,7 @@ for n in n_list:
                     model_ori.addConstrs(x_ori[i] >= -BIG_M*z_ori[i] for i in range(n))
                     model_ori.params.OutputFlag = 1
                     model_ori.params.Threads = THREADS
-                    model_ori.params.TimeLimit = timelimit/5
+                    model_ori.params.TimeLimit = timelimit
                     # model_ori.setParam("Presolve", 0)
                     model_ori.optimize(record_root_lb)
                     z_ori_vals = np.array([z_ori[i].X for i in range(n)])
