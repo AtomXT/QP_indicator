@@ -166,7 +166,7 @@ def save_instance(
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--out_dir", type=str, default="../data/Q_path")
-    parser.add_argument("--n_list", type=str, default="500",
+    parser.add_argument("--n_list", type=str, default="1000",
                         help="Comma-separated list of n values.")
     parser.add_argument("--reps", type=int, default=5, help="Instances per n.")
     parser.add_argument("--kappa", type=float, default=100.0, help="Target condition number of Q.")

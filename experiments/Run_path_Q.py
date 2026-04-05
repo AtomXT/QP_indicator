@@ -24,13 +24,13 @@ def parse_args():
     p = argparse.ArgumentParser()
 
     # allow scalar or list-like inputs
-    p.add_argument("--n_list", type=str, default="500",
+    p.add_argument("--n_list", type=str, default="1000",
                    help='e.g. "500" or "50,60,70" or "[50,60,70]"')
     p.add_argument("--rep_list", type=str, default="0",
                    help='e.g. "0" or "0,1,2" or "[0,1,2]"')
     p.add_argument("--tau_list", type=str, default="0.1",
                    help='e.g. "0.05,0.1,0.2"')
-    p.add_argument("--timelimit", type=float, default=20.0)
+    p.add_argument("--timelimit", type=float, default=10.0)
     p.add_argument("--threads", type=int, default=8)
     p.add_argument("--big_m_init", type=float, default=1000.0)
 
@@ -260,11 +260,11 @@ for n in n_list:
             A_binary = (A != 0).astype(int)
             G = nx.from_numpy_array(A_binary)
 
-            tw1, decomp1 = treewidth_min_fill_in(G)
-            tw2, decomp2 = treewidth_min_degree(G)
-
-            print("min-fill upper bound:", tw1)
-            print("min-degree upper bound:", tw2)
+            # tw1, decomp1 = treewidth_min_fill_in(G)
+            # tw2, decomp2 = treewidth_min_degree(G)
+            #
+            # print("min-fill upper bound:", tw1)
+            # print("min-degree upper bound:", tw2)
 
 
             c = -Q.T @ d
@@ -328,8 +328,8 @@ for n in n_list:
 
                     model_opt = cor_reform(Q, d, lam, BIG_M)
                     # check presolved model
-                    p = model_opt.presolve()
-                    p.write('presolved_model.mps')
+                    # p = model_opt.presolve()
+                    # p.write('presolved_model.mps')
                     model_opt.params.OutputFlag = 1
                     # model_opt.params.PreMIQCPForm = 1
                     model_opt.params.Threads = THREADS
