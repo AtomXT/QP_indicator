@@ -1,0 +1,68 @@
+# analysis/summarize_results.py
+
+import os
+import pandas as pd
+import matplotlib.pyplot as plt
+import numpy as np
+
+def load_results(results_dir):
+    all_files = [
+        os.path.join(results_dir, f)
+        for f in os.listdir(results_dir)
+        if f.endswith(".csv") and f.startswith("path_Q")
+    ]
+
+    dfs = []
+    for file in all_files:
+        df = pd.read_csv(file)
+        dfs.append(df)
+
+    df_all = pd.concat(dfs, ignore_index=True)
+    return df_all
+
+
+def main():
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    results_dir = os.path.join(current_dir, "..", "experiments_results")
+    df_all = load_results(results_dir)
+
+    avg = df_all.groupby(['n', 'formulation'])[["root_ub","root_lb","root_gap","end_ub", "end_lb", "end_gap", "nnz", "node_count", "time"]].mean()
+    print(avg)
+
+    # save
+    output_path = os.path.join(current_dir, "averaged_results_path_Q.csv")
+    # avg.to_csv(output_path, index=True)
+
+
+    # Example: replace with your actual data
+    n_values = np.array([100, 200, 300, 500, 1000, 2000, 5000, 10000])
+    avg = avg.reset_index()
+    core_times = avg[avg['formulation'] == 'opt'].time
+
+    # Fit slope in log-log space
+    log_n = np.log(n_values)
+    log_t = np.log(core_times)
+
+    slope, intercept = np.polyfit(log_n, log_t, 1)
+
+    print(f"Estimated slope: {slope:.3f}")
+
+    plt.figure(figsize=(6, 4))
+
+    fitted = np.exp(intercept) * n_values ** slope
+    plt.loglog(n_values, fitted, linestyle='--', label=f'Fit slope={slope:.2f}')
+    plt.loglog(n_values, core_times, marker='o', linewidth=2, label='CORe')
+
+    plt.xlabel('Problem size n (log scale)')
+    plt.ylabel('Solution time (seconds, log scale)')
+    plt.title('Log-Log Plot: CORe (Path Graph)')
+    plt.grid(True, which="both", linestyle='--', linewidth=0.5)
+
+    plt.legend()
+    plt.tight_layout()
+    plt.savefig("core_path_plot.pdf", format="pdf", bbox_inches="tight")
+    plt.show()
+
+
+if __name__ == "__main__":
+    main()
