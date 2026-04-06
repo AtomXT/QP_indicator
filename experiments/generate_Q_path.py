@@ -123,10 +123,8 @@ def build_Q_with_kappa(
     alpha = max(lmax / (target_kappa - 1.0), eps)  # Because the smallest eigenvalue of Laplacian is 0.
     Q = (L + sp.eye(n, format="csr") * alpha).tocsr()
 
-    # Optional: estimate achieved kappa on Q (cost: two eigsh calls)
-    qmin = float(eigsh(Q, k=1, which="SA", return_eigenvectors=False, tol=tol, maxiter=max_eig_iter)[0])
-    qmax = float(eigsh(Q, k=1, which="LA", return_eigenvectors=False, tol=tol, maxiter=max_eig_iter)[0])
-    achieved = qmax / max(qmin, eps)
+    # achieved kappa on Q
+    achieved = (lmax + alpha) / max(alpha, eps)
     return Q, achieved
 
 
@@ -166,7 +164,7 @@ def save_instance(
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--out_dir", type=str, default="../data/Q_path")
-    parser.add_argument("--n_list", type=str, default="1000",
+    parser.add_argument("--n_list", type=str, default="100,200,300,500,1000,2000,5000,10000",
                         help="Comma-separated list of n values.")
     parser.add_argument("--reps", type=int, default=5, help="Instances per n.")
     parser.add_argument("--kappa", type=float, default=100.0, help="Target condition number of Q.")
