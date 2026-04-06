@@ -306,6 +306,7 @@ for n in n_list:
                     model_ori.params.OutputFlag = 1
                     model_ori.params.Threads = THREADS
                     model_ori.params.TimeLimit = timelimit
+                    model_ori.Params.NodefileStart = 1
                     model_ori.optimize(record_root_lb)
                     z_ori_vals = np.array([z_ori[i].X for i in range(n)])
                     result_opt = [n, delta, tau, rep, 'original', root_bound[0], root_bound[1],
