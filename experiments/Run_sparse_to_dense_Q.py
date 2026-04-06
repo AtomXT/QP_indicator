@@ -30,8 +30,8 @@ def parse_args():
                    help='e.g. "0.01" or "0.01,0.05" or "[0.01,0.05]"')
     p.add_argument("--rep_list", type=str, default="0",
                    help='e.g. "0" or "0,1,2" or "[0,1,2]"')
-    p.add_argument("--tau_list", type=str, default="1",
-                   help='e.g. "0.5,1,2"')
+    p.add_argument("--tau_list", type=str, default="0.2",
+                   help='e.g. "0.05,0.1,0.2"')
     p.add_argument("--timelimit", type=float, default=10.0)
     p.add_argument("--threads", type=int, default=8)
     p.add_argument("--big_m_init", type=float, default=1000.0)
@@ -254,10 +254,10 @@ for n in n_list:
     for delta in delta_list:
         for rep in rep_list:
             Q, d, meta = load_instance_Q_sparsity(n, delta, rep)
-            A = Q.toarray()
-            np.fill_diagonal(A, 0)
-            A_binary = (A != 0).astype(int)
-            G = nx.from_numpy_array(A_binary)
+            # A = Q.toarray()
+            # np.fill_diagonal(A, 0)
+            # A_binary = (A != 0).astype(int)
+            # G = nx.from_numpy_array(A_binary)
             # Too slow, don't compute treewidth for large graph
             # tw1, decomp1 = treewidth_min_fill_in(G)
             # tw2, decomp2 = treewidth_min_degree(G)
@@ -271,7 +271,7 @@ for n in n_list:
             for tau in tau_list:
                 try:
                     print([n, delta, tau, rep])
-                    lam = tau * np.ones(n) / n
+                    lam = tau * np.ones(n) * np.log(n) / n
                     # define a container to store the root node lower bound
                     root_bound = [np.inf, -np.inf]
 

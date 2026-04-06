@@ -28,7 +28,7 @@ def parse_args():
                    help='e.g. "500" or "50,60,70" or "[50,60,70]"')
     p.add_argument("--rep_list", type=str, default="0",
                    help='e.g. "0" or "0,1,2" or "[0,1,2]"')
-    p.add_argument("--tau_list", type=str, default="1",
+    p.add_argument("--tau_list", type=str, default="0.2",
                    help='e.g. "0.05,0.1,0.2"')
     p.add_argument("--timelimit", type=float, default=10.0)
     p.add_argument("--threads", type=int, default=8)
@@ -272,7 +272,7 @@ for n in n_list:
             for tau in tau_list:
                 try:
                     print([n, tau, rep])
-                    lam = tau * np.ones(n) / n
+                    lam = tau * np.ones(n) * np.log(n) / n
                     # define a container to store the root node lower bound
                     root_bound = [np.inf, -np.inf]
 
