@@ -255,10 +255,10 @@ results = []
 for n in n_list:
         for rep in rep_list:
             Q, d, meta = load_instance_Q_path(n, rep)
-            A = Q.toarray()
-            np.fill_diagonal(A, 0)
-            A_binary = (A != 0).astype(int)
-            G = nx.from_numpy_array(A_binary)
+            # A = Q.toarray()
+            # np.fill_diagonal(A, 0)
+            # A_binary = (A != 0).astype(int)
+            # G = nx.from_numpy_array(A_binary)
 
             # tw1, decomp1 = treewidth_min_fill_in(G)
             # tw2, decomp2 = treewidth_min_degree(G)
