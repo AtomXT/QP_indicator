@@ -310,7 +310,7 @@ for dataset in data_list:
     z_ori_vals = np.array([z_ori[i].X for i in range(n)])
     result_opt = [m, n, dataset, 'original', root_bound[0], root_bound[1],
               (root_bound[0] - root_bound[1]) / root_bound[0], model_ori.ObjVal, model_ori.ObjBound,
-              (model_ori.ObjVal - model_ori.ObjBound) / model_ori.ObjVal, , np.count_nonzero(z_ori_vals), model_ori.NodeCount,
+              (model_ori.ObjVal - model_ori.ObjBound) / model_ori.ObjVal, np.count_nonzero(z_ori_vals), model_ori.NodeCount,
               model_ori.runtime]
     results.append(result_opt)
     print('--------------------------------')
