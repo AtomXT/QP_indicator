@@ -244,7 +244,7 @@ for dataset in data_list:
     if dimension:
         X = X[:, :dimension]
     if sample_size:
-        X = X[:sample_size,:dimension]
+        X = X[:sample_size,:]
         y = y[:sample_size]
     n, m = X.shape
 # try:
@@ -307,18 +307,18 @@ for dataset in data_list:
     model_ori.params.TimeLimit = timelimit
     model_ori.params.NodefileStart = 1
     model_ori.optimize(record_root_lb)
-    z_opt_vals = np.array([z_ori[i].X for i in range(n)])
+    z_ori_vals = np.array([z_ori[i].X for i in range(n)])
     result_opt = [m, n, dataset, 'original', root_bound[0], root_bound[1],
               (root_bound[0] - root_bound[1]) / root_bound[0], model_ori.ObjVal, model_ori.ObjBound,
-              (model_ori.ObjVal - model_ori.ObjBound) / model_ori.ObjVal, model_ori.NodeCount,
+              (model_ori.ObjVal - model_ori.ObjBound) / model_ori.ObjVal, , np.count_nonzero(z_ori_vals), model_ori.NodeCount,
               model_ori.runtime]
     results.append(result_opt)
     print('--------------------------------')
     print('solve the problem in original formulation')
     print(f"The obj is {model_ori.objVal}.")
     print(f"The root upper bound is: {root_bound[0]}, lower bound is: {root_bound[1]}. The root gap is: {np.round(100*(root_bound[0]-root_bound[1])/root_bound[0],4)}%. Runtime: {model_ori.runtime}.")
-    print(np.where(z_opt_vals == 1)[0])
-    print(f"Number of outliers: {np.count_nonzero(z_opt_vals)}")
+    print(np.where(z_ori_vals == 1)[0])
+    print(f"Number of outliers: {np.count_nonzero(z_ori_vals)}")
     print('--------------------------------')
 
 
@@ -338,6 +338,7 @@ for dataset in data_list:
     z = model_opt.addMVar(n, vtype=GRB.BINARY, name="z")
     zp = model_opt.addMVar(n, vtype=GRB.BINARY, name="zp")
     zm = model_opt.addMVar(n, vtype=GRB.BINARY, name="zm")
+    model_opt._z = z
 
     # continuous
     y_opt = model_opt.addMVar(m, vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name="y")
@@ -404,9 +405,10 @@ for dataset in data_list:
     # model_opt.params.Threads = THREADS
     # model_opt.params.TimeLimit = timelimit
     model_opt.optimize(record_root_lb)
+    z_opt_vals = np.array([1-model_opt._z[i].X for i in range(n)])
     result_hull = [m, n, dataset, 'opt', root_bound[0], root_bound[1],
                   (root_bound[0] - root_bound[1]) / root_bound[0], model_opt.ObjVal, model_opt.ObjBound,
-                  (model_opt.ObjVal - model_opt.ObjBound) / model_opt.ObjVal, model_opt.NodeCount,
+                  (model_opt.ObjVal - model_opt.ObjBound) / model_opt.ObjVal, np.count_nonzero(z_opt_vals), model_opt.NodeCount,
                   model_opt.runtime]
     results.append(result_hull)
     print('--------------------------------------------------')
@@ -416,7 +418,7 @@ for dataset in data_list:
         f"The root upper bound is: {root_bound[0]}, lower bound is: {root_bound[1]}. The root gap is: {np.round(100 * (root_bound[0] - root_bound[1]) / root_bound[0], 4)}%. Runtime: {model_opt.runtime}.")
     print('--------------------------------------------------')
 
-    results_df = pd.DataFrame(results, columns=['m','n','dataset','formulation','root_ub','root_lb','root_gap','end_ub','end_lb','end_gap','node_count','time'])
+    results_df = pd.DataFrame(results, columns=['m','n','dataset','formulation','root_ub','root_lb','root_gap','end_ub','end_lb','end_gap','nnz','node_count','time'])
     print(results_df)
     results_df.to_csv(f"{current_dir}/../experiments_results/diagonal_minus_low_rank_{job_name}.csv", index=False)
 # except:

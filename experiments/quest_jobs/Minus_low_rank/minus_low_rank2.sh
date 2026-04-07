@@ -19,5 +19,5 @@ python3 -m experiments.Run_diagonal_minus_low_rank \
   --dataset "crime" \
   --sample_size "1000" \
   --timelimit "3600" \
-  --job_name "diabetes"
+  --job_name "crime"
 
