@@ -9,7 +9,7 @@ def load_results(results_dir):
     all_files = [
         os.path.join(results_dir, f)
         for f in os.listdir(results_dir)
-        if f.endswith(".csv") and f.startswith("path_Q")
+        if f.endswith(".csv") and f.startswith("Sparsity_Q_problem_size")
     ]
 
     dfs = []
@@ -31,16 +31,14 @@ def main():
     df_all.loc[mask, ["root_ub", "root_lb"]] = df_all.loc[mask, ["end_ub", "end_lb"]].to_numpy()
     df_all.loc[mask, "root_gap"] = 0
     avg = df_all.groupby(['n', 'formulation'])[["root_ub","root_lb","root_gap","end_ub", "end_lb", "end_gap", "nnz", "node_count", "time"]].mean()
-    avg = df_all.groupby(['n', 'formulation'])[["root_ub","root_lb","root_gap","end_ub", "end_lb", "end_gap", "nnz", "node_count", "time"]].mean()
     print(avg)
 
     # save
-    output_path = os.path.join(current_dir, "averaged_results_path_Q.csv")
+    output_path = os.path.join(current_dir, "averaged_results_problem_size.csv")
     avg.to_csv(output_path, index=True)
 
-
     # Example: replace with your actual data
-    n_values = np.array([100, 200, 300, 500, 1000, 2000, 5000, 10000])
+    n_values = np.array([100, 200, 300, 500, 800, 1000])
     avg = avg.reset_index()
     core_times = avg[avg['formulation'] == 'opt'].time
 
@@ -65,7 +63,7 @@ def main():
 
     plt.legend()
     plt.tight_layout()
-    plt.savefig("core_path_plot.pdf", format="pdf", bbox_inches="tight")
+    plt.savefig("core_problem_size_plot.pdf", format="pdf", bbox_inches="tight")
     plt.show()
 
 
