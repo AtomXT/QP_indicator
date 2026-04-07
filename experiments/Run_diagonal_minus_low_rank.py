@@ -405,7 +405,7 @@ for dataset in data_list:
     # model_opt.params.Threads = THREADS
     # model_opt.params.TimeLimit = timelimit
     model_opt.optimize(record_root_lb)
-    z_opt_vals = np.array([1-model_opt._z[i].X for i in range(n)])
+    z_opt_vals = np.array([model_opt._z[i].X for i in range(n)])
     result_hull = [m, n, dataset, 'opt', root_bound[0], root_bound[1],
                   (root_bound[0] - root_bound[1]) / root_bound[0], model_opt.ObjVal, model_opt.ObjBound,
                   (model_opt.ObjVal - model_opt.ObjBound) / model_opt.ObjVal, np.count_nonzero(z_opt_vals), model_opt.NodeCount,
