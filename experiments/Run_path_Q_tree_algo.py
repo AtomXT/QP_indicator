@@ -316,7 +316,6 @@ for n in n_list:
 
                     ## solve the optimal solution in the proposed formulation
                     root_bound = [np.inf, -np.inf]
-                    start = time.time()
                     model_opt = cor_reform(Q, d, lam, BIG_M)
                     # check presolved model
                     # p = model_opt.presolve()
@@ -326,12 +325,11 @@ for n in n_list:
                     model_opt.params.Threads = THREADS
                     model_opt.params.TimeLimit = timelimit
                     model_opt.optimize(record_root_lb)
-                    opt_time = time.time() - start
                     z_opt_vals = np.array([1-model_opt._z0[i].X for i in range(n)])
                     result_opt = [n, tau, rep, 'opt', root_bound[0], root_bound[1],
                                 (root_bound[0] - root_bound[1]) / root_bound[0], model_opt.ObjVal, model_opt.ObjBound,
                                 (model_opt.ObjVal - model_opt.ObjBound) / model_opt.ObjVal, np.count_nonzero(z_opt_vals), model_opt.NodeCount,
-                                opt_time]
+                                model_opt.runtime]
                     results.append(result_opt)
                     print('--------------------------------------------------')
                     print("Solve the optimal solution in the proposed formulation")
