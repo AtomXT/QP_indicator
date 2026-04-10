@@ -210,7 +210,7 @@ def main():
     parser.add_argument(
         "--n_list",
         type=str,
-        default="100,200,500,1000,2000,5000,10000",
+        default="100,200,300,500,1000,2000,5000,10000",
         help="Comma-separated list of n values."
     )
     parser.add_argument("--reps", type=int, default=5, help="Instances per n.")
