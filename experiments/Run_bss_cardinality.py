@@ -48,14 +48,14 @@ def parse_args():
 
     p.add_argument("--p_list", type=str, default="500",
                    help='e.g. "500" or "500,1000" or "[500,1000]"')
-    p.add_argument("--n_list", type=str, default="250,1000",
+    p.add_argument("--n_list", type=str, default="250",
                    help='e.g. "250" or "250,1000" or "[250,1000]"')
-    p.add_argument("--rep_list", type=str, default="0,1,2,3,4",
+    p.add_argument("--rep_list", type=str, default="0",
                    help='e.g. "0" or "0,1,2" or "[0,1,2]"')
-    p.add_argument("--k_list", type=str, default="5,10,15,20,25,30,40,50,75,100",
+    p.add_argument("--k_list", type=str, default="20",
                    help='e.g. "10" or "10,20,50" or "[10,20,50]"')
 
-    p.add_argument("--timelimit", type=float, default=600.0)
+    p.add_argument("--timelimit", type=float, default=10.0)
     p.add_argument("--mipgap", type=float, default=1e-3)
     p.add_argument("--threads", type=int, default=8)
 
@@ -139,10 +139,10 @@ def build_relax_bss(G: np.ndarray, c: np.ndarray, gamma: float, bar_beta: np.nda
     # Objective
     G = G / n
     c = c / n
-    G[np.abs(G) < 0.1] = 0
+    G[np.abs(G) < np.quantile(np.abs(G), 0.8)] = 0
     G += np.diag(np.abs(G).sum(axis=0))
     Q = G + gamma * np.eye(p)
-    obj = 0.5 * beta @ Q @ beta - c @ beta + 0.5 * float(y @ y)
+    obj = 0.5 * beta @ Q @ beta - c @ beta + 0.5 * float(y @ y) / n
     m.setObjective(obj, GRB.MINIMIZE)
 
     # Keep handles
@@ -179,10 +179,10 @@ def build_original_bss(G: np.ndarray, c: np.ndarray, gamma: float, bar_beta: np.
     # Objective
     G = G/n
     c = c/n
-    G[np.abs(G) < 0.1] = 0
+    G[np.abs(G) < np.quantile(np.abs(G), 0.8)] = 0
     G += np.diag(np.abs(G).sum(axis=0))
     Q = G + gamma * np.eye(p)
-    obj = 0.5 * beta @ Q @ beta - c @ beta + 0.5 * float(y @ y)/n
+    obj = 0.5 * beta @ Q @ beta - c @ beta + 0.5 * float(y @ y) / n
     m.setObjective(obj, GRB.MINIMIZE)
 
     # Keep handles
@@ -209,12 +209,12 @@ def build_core_bss(G: np.ndarray, c: np.ndarray, gamma: float, bar_beta: np.ndar
     n = len(y)
     G = G/n
     c = c/n
-    G[np.abs(G) < 0.1] = 0
+    G[np.abs(G) < np.quantile(np.abs(G), 0.8)] = 0
     G += np.diag(np.abs(G).sum(axis=0))
     Q = G + gamma * np.eye(p)
     Qabs = np.abs(Q)
     np.fill_diagonal(Qabs, 0)  # optional
-    H = np.abs(c) + Qabs @ bar_beta
+    H = 1
 
     m = gp.Model("bss_core")
     m.Params.OutputFlag = 1 if verbose else 0
@@ -227,48 +227,48 @@ def build_core_bss(G: np.ndarray, c: np.ndarray, gamma: float, bar_beta: np.ndar
 
     # Aggregate
     beta = m.addMVar(p, vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name="beta")
-    g = m.addMVar(p, vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name="g")
 
     # Disaggregated
-    beta0 = m.addMVar(p, vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name="beta0")
-    beta1 = m.addMVar(p, vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name="beta1")
+    betap = m.addMVar(p, vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=0, name="betap")
+    betam = m.addMVar(p, vtype=GRB.CONTINUOUS, lb=0, ub=GRB.INFINITY, name="betam")
     g0 = m.addMVar(p, vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name="g0")
-    g1 = m.addMVar(p, vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name="g1")
+    g_p = m.addMVar(p, vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name="gp")
+    gm = m.addMVar(p, vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name="gm")
 
-    z0 = m.addMVar(p, vtype=GRB.BINARY, name="z0")
-    z1 = m.addMVar(p, vtype=GRB.BINARY, name="z1")
+    z = m.addMVar(p, vtype=GRB.BINARY, name="z")
+    zp = m.addMVar(p, vtype=GRB.BINARY, name="zp")
+    zm = m.addMVar(p, vtype=GRB.BINARY, name="zm")
+
+    eta = m.addMVar(p, vtype=GRB.CONTINUOUS, lb=0, ub=GRB.INFINITY, name="eta")
+    eta0 = m.addMVar(p, vtype=GRB.CONTINUOUS, lb=0, ub=GRB.INFINITY, name="eta0")
+    etap = m.addMVar(p, vtype=GRB.CONTINUOUS, lb=0, ub=GRB.INFINITY, name="etap")
+    etam = m.addMVar(p, vtype=GRB.CONTINUOUS, lb=0, ub=GRB.INFINITY, name="etam")
+
 
     # Coupling
-    m.addConstr(beta == beta0 + beta1, name="disagg_beta")
-    m.addConstr(g == g0 + g1, name="disagg_g")
-    m.addConstrs(z0[i] + z1[i] == 1 for i in range(p))
+    m.addConstr(beta == betap + betam, name="disagg_beta")
+    m.addConstr(eta == eta0 + etap + etam, name="disagg_eta")
+    m.addConstrs(zp[i] + zm[i] == z[i] for i in range(p))
 
     # Cardinality on z1
-    m.addConstr(z1.sum() <= k, name="card")
+    m.addConstr(z.sum() <= k, name="card")
 
-    # g definition: g_i = sum_{j!=i} G_ij beta_j - c_i
-    # Implement as: g = (G beta) - diag(G)*beta - c
     diagG = np.diag(G)
-    # G @ beta is an MVar expression
-    m.addConstr(g == (G @ beta) - (diagG * beta) - c, name="g_def")
-    # m.addConstrs(g[i] == gp.quicksum(G[i,j]*beta[j] for j in range(p) if j != i) - c[i] for i in range(p))
+    m.addConstr(g_p + gm + g0 == (G @ beta) - (diagG * beta) - c, name="g_def")
 
-    # D0: beta0 = 0
-    m.addConstr(beta0 == 0, name="D0_beta0_zero")
-    # g0 bounded by H * z0
-    m.addConstr(g0 <= H * z0, name="D0_g0_ub")
-    m.addConstr(g0 >= -H * z0, name="D0_g0_lb")
+    m.addConstr(g0 <= np.sqrt(2*(diagG+gamma))*eta0, name="D0_g0_ub")
+    m.addConstr(g0 >= -np.sqrt(2*(diagG+gamma))*eta0, name="D0_g0_lb")
 
-    # D1: (G beta1)_i + gamma beta1_i = c_i z1_i
-    # Note: this uses full G beta1 (including diagonal), matching your normal equation form.
-    # m.addConstr((G @ beta1) + gamma * beta1 == c * z1, name="D1_normal_eq")
-    m.addConstrs(beta1[i] == -g1[i]/(G[i,i]+gamma) for i in range(p))
-    # g1 bounded by H * z1
-    m.addConstr(g1 <= H * z1, name="D1_g1_ub")
-    m.addConstr(g1 >= -H * z1, name="D1_g1_lb")
-    # Bound beta1 when z1=0 to keep the hull well-behaved
-    m.addConstr(beta1 <= bar_beta * z1, name="D1_beta1_ub")
-    m.addConstr(beta1 >= -bar_beta * z1, name="D1_beta1_lb")
+    m.addConstr(betap == -g_p/(diagG+gamma))
+    m.addConstr(np.sqrt(2*(diagG+gamma)) * etap <= g_p)
+
+    m.addConstr(betam == -gm / (diagG + gamma))
+    m.addConstr(-np.sqrt(2 * (diagG + gamma)) * etam >= gm)
+
+    m.addConstr(betap >= -bar_beta * zp)
+    m.addConstr(betam <= bar_beta * zm)
+    m.addConstr(etap <= H * zp)
+    m.addConstr(etam <= H * zm)
 
     # Objective in aggregated beta
 
@@ -277,7 +277,6 @@ def build_core_bss(G: np.ndarray, c: np.ndarray, gamma: float, bar_beta: np.ndar
 
     # Keep handles
     m._beta = beta
-    m._z1 = z1
     return m
 
 
@@ -316,112 +315,98 @@ def main():
                     if k < 1 or k > p:
                         continue
 
-                    try:
-                        if verbose:
-                            print(f"[p={p}, n={n}, rep={rep}, k={k}]")
+                # try:
+                    if verbose:
+                        print(f"[p={p}, n={n}, rep={rep}, k={k}]")
 
-                        m_relax = build_relax_bss(
-                            G=G, c=c, gamma=meta["gamma"], bar_beta=bar_beta, k=k, y=y,
-                            timelimit=timelimit, mipgap=mipgap, threads=threads, verbose=verbose
-                        )
-                        m_relax.optimize()
-                        print(f"The relaxed obj is {m_relax.objVal}.")
-                        x_relax_vals = np.array([m_relax._beta[i].X for i in range(p)])
-                        print(f"The larges value of x is {max(abs(x_relax_vals))}")
-                        BIG_M = min(1000, 2 * max(abs(x_relax_vals)))
-                        print(f'Use new Big-M {BIG_M}.')
-                        bar_beta = BIG_M*np.ones(p)
-                        # ---------- Original ----------
-                        global root_bound
-                        root_bound = [np.inf, -np.inf]
+                    m_relax = build_relax_bss(
+                        G=G, c=c, gamma=meta["gamma"], bar_beta=bar_beta, k=k, y=y,
+                        timelimit=timelimit, mipgap=mipgap, threads=threads
+                    )
+                    m_relax.optimize()
+                    print(f"The relaxed obj is {m_relax.objVal}.")
+                    x_relax_vals = np.array([m_relax._beta[i].X for i in range(p)])
+                    print(f"The larges value of x is {max(abs(x_relax_vals))}")
+                    BIG_M = min(1000, 2 * max(abs(x_relax_vals)))
+                    print(f'Use new Big-M {BIG_M}.')
+                    bar_beta = BIG_M*np.ones(p)
+                    # ---------- Original ----------
+                    global root_bound
+                    root_bound = [np.inf, -np.inf]
 
 
 
-                        m_ori = build_original_bss(
-                            G=G, c=c, gamma=meta["gamma"], bar_beta=bar_beta, k=k, y=y,
-                            timelimit=timelimit, mipgap=mipgap, threads=threads, verbose=verbose
-                        )
-                        t0 = time.time()
-                        m_ori.optimize(record_root_bounds)
-                        t_ori = time.time() - t0
+                    m_ori = build_original_bss(
+                        G=G, c=c, gamma=meta["gamma"], bar_beta=bar_beta, k=k, y=y,
+                        timelimit=timelimit, mipgap=mipgap, threads=threads, verbose=verbose
+                    )
+                    m_ori.optimize(record_root_bounds)
 
-                        # Collect
-                        z_vals = None
-                        support_size = np.nan
-                        end_ub = np.nan
-                        end_lb = np.nan
-                        if m_ori.SolCount > 0:
-                            z_vals = m_ori._z.X
-                            support_size = int(np.count_nonzero(z_vals > 0.5))
-                            end_ub = float(m_ori.ObjVal)
-                        end_lb = float(m_ori.ObjBound) if np.isfinite(m_ori.ObjBound) else np.nan
+                    # Collect
+                    z_vals = None
+                    support_size = np.nan
+                    end_ub = np.nan
+                    end_lb = np.nan
+                    if m_ori.SolCount > 0:
+                        z_vals = m_ori._z.X
+                        support_size = int(np.count_nonzero(z_vals > 0.5))
+                        end_ub = float(m_ori.ObjVal)
+                    end_lb = float(m_ori.ObjBound) if np.isfinite(m_ori.ObjBound) else np.nan
 
-                        r = [
-                            p, n, rep, k, "original",
-                            float(root_bound[0]) if np.isfinite(root_bound[0]) else np.nan,
-                            float(root_bound[1]) if np.isfinite(root_bound[1]) else np.nan,
-                            safe_gap(root_bound[0], root_bound[1]),
-                            end_ub,
-                            end_lb,
-                            safe_gap(end_ub, end_lb) if np.isfinite(end_ub) and np.isfinite(end_lb) else np.nan,
-                            support_size,
-                            float(m_ori.NodeCount),
-                            float(m_ori.Runtime),
-                            int(m_ori.Status),
-                        ]
-                        results.append(r)
+                    r = [
+                        p, n, rep, k, "original",
+                        float(root_bound[0]) if np.isfinite(root_bound[0]) else np.nan,
+                        float(root_bound[1]) if np.isfinite(root_bound[1]) else np.nan,
+                        safe_gap(root_bound[0], root_bound[1]),
+                        end_ub,
+                        end_lb,
+                        safe_gap(end_ub, end_lb) if np.isfinite(end_ub) and np.isfinite(end_lb) else np.nan,
+                        support_size,
+                        float(m_ori.NodeCount),
+                        float(m_ori.Runtime),
+                        int(m_ori.Status),
+                    ]
+                    results.append(r)
 
-                        # ---------- CORe ----------
-                        root_bound = [np.inf, -np.inf]
+                    # ---------- CORe ----------
+                    root_bound = [np.inf, -np.inf]
 
-                        m_cor = build_core_bss(
-                            G=G, c=c, gamma=meta["gamma"], bar_beta=bar_beta, H=H, k=k, y=y,
-                            timelimit=timelimit, mipgap=mipgap, threads=threads, verbose=verbose
-                        )
-                        t0 = time.time()
-                        m_cor.optimize(record_root_bounds)
-                        t_cor = time.time() - t0
+                    m_cor = build_core_bss(
+                        G=G, c=c, gamma=meta["gamma"], bar_beta=bar_beta, H=H, k=k, y=y,
+                        timelimit=timelimit, mipgap=mipgap, threads=threads, verbose=verbose
+                    )
+                    m_cor.optimize(record_root_bounds)
 
-                        z1_vals = None
-                        support_size = np.nan
-                        end_ub = np.nan
-                        end_lb = np.nan
-                        if m_cor.SolCount > 0:
-                            z1_vals = m_cor._z1.X
-                            support_size = int(np.count_nonzero(z1_vals > 0.5))
-                            end_ub = float(m_cor.ObjVal)
-                        end_lb = float(m_cor.ObjBound) if np.isfinite(m_cor.ObjBound) else np.nan
 
-                        r = [
-                            p, n, rep, k, "core",
-                            float(root_bound[0]) if np.isfinite(root_bound[0]) else np.nan,
-                            float(root_bound[1]) if np.isfinite(root_bound[1]) else np.nan,
-                            safe_gap(root_bound[0], root_bound[1]),
-                            end_ub,
-                            end_lb,
-                            safe_gap(end_ub, end_lb) if np.isfinite(end_ub) and np.isfinite(end_lb) else np.nan,
-                            support_size,
-                            float(m_cor.NodeCount),
-                            float(m_cor.Runtime),
-                            int(m_cor.Status),
-                        ]
-                        results.append(r)
+                    r = [
+                        p, n, rep, k, "core",
+                        float(root_bound[0]) if np.isfinite(root_bound[0]) else np.nan,
+                        float(root_bound[1]) if np.isfinite(root_bound[1]) else np.nan,
+                        safe_gap(root_bound[0], root_bound[1]),
+                        m_ori.ObjVal, m_ori.ObjBound,
+                        safe_gap(end_ub, end_lb) if np.isfinite(end_ub) and np.isfinite(end_lb) else np.nan,
+                        support_size,
+                        float(m_cor.NodeCount),
+                        float(m_cor.Runtime),
+                        int(m_cor.Status),
+                    ]
+                    results.append(r)
 
-                        # Save incrementally
-                        df = pd.DataFrame(
-                            results,
-                            columns=[
-                                "p", "n", "rep", "k", "formulation",
-                                "root_ub", "root_lb", "root_gap",
-                                "end_ub", "end_lb", "end_gap",
-                                "support_size", "node_count", "time", "status"
-                            ],
-                        )
-                        df.to_csv(out_csv, index=False)
+                    # Save incrementally
+                    df = pd.DataFrame(
+                        results,
+                        columns=[
+                            "p", "n", "rep", "k", "formulation",
+                            "root_ub", "root_lb", "root_gap",
+                            "end_ub", "end_lb", "end_gap",
+                            "support_size", "node_count", "time", "status"
+                        ],
+                    )
+                    df.to_csv(out_csv, index=False)
 
-                    except Exception as e:
-                        print(f"Error at p={p}, n={n}, rep={rep}, k={k}: {e}")
-                        continue
+                # except Exception as e:
+                #     print(f"Error at p={p}, n={n}, rep={rep}, k={k}: {e}")
+                #     continue
 
     print(f"Done. Results saved to: {out_csv}")
 
