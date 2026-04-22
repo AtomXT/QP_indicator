@@ -5,3 +5,4 @@ quest_jobs/outlog/
 **/.idea/
 __pycache__/
 *.pyc
+data/2D-MRF/
