@@ -124,8 +124,8 @@ def cor_reform(Q, d, lam, M=100, timelimit=None, mip_gap=None, threads=None, ver
     if mip_gap is not None:
         m.Params.MIPGap = float(mip_gap)
 
-    x = m.addVars(n, lb=-GRB.INFINITY, ub=GRB.INFINITY, name="x")
-    g = m.addVars(n, lb=-GRB.INFINITY, ub=GRB.INFINITY, name="g")
+    x = m.addMVar(n, lb=-GRB.INFINITY, ub=GRB.INFINITY, name="x")
+    g = m.addMVar(n, lb=-GRB.INFINITY, ub=GRB.INFINITY, name="g")
     m._x = x
     m._g = g
 
@@ -136,11 +136,11 @@ def cor_reform(Q, d, lam, M=100, timelimit=None, mip_gap=None, threads=None, ver
     gpv = m.addVars(n, lb=0, ub=GRB.INFINITY, name="gplus")
     gmv = m.addVars(n, lb=0, ub=GRB.INFINITY, name="gminus")
 
-    z0 = m.addVars(n, vtype=GRB.BINARY, name="z0")
+    z0 = m.addMVar(n, vtype=GRB.BINARY, name="z0")
     m._z0 = z0
 
-    zp = m.addVars(n, vtype=GRB.BINARY, name="zplus")
-    zm = m.addVars(n, vtype=GRB.BINARY, name="zminus")
+    zp = m.addMVar(n, vtype=GRB.BINARY, name="zplus")
+    zm = m.addMVar(n, vtype=GRB.BINARY, name="zminus")
     m._zp = zp
     m._zm = zm
 
@@ -168,15 +168,7 @@ def cor_reform(Q, d, lam, M=100, timelimit=None, mip_gap=None, threads=None, ver
         m.addConstr(xp[i] >= -xbar[i] * zp[i], name=f"xp_lb[{i}]")
         m.addConstr(xm[i] <= xbar[i] * zm[i], name=f"xm_ub[{i}]")
 
-    obj = gp.QuadExpr()
-    for i in range(n):
-        obj.add(0.5 * Q[i, i] * x[i] * x[i])
-        for j in range(i + 1, n):
-            if Q[i, j] != 0.0:
-                obj.add(Q[i, j] * x[i] * x[j])
-    obj.add(gp.LinExpr(c.tolist(), [x[i] for i in range(n)]))
-    obj.add(gp.quicksum(lam[i] * (zp[i] + zm[i]) for i in range(n)))
-    obj.add(0.5 * d.T @ Q @ d)
+    obj = 0.5 * x @ Q @ x + c@x + lam@(zp+zm) + 0.5*d@Q@d
 
     m.setObjective(obj, GRB.MINIMIZE)
     return m

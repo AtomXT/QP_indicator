@@ -24,7 +24,7 @@ def parse_args():
     p = argparse.ArgumentParser()
 
     # allow scalar or list-like inputs
-    p.add_argument("--n_list", type=str, default="2000",
+    p.add_argument("--n_list", type=str, default="100",
                    help='e.g. "500" or "50,60,70" or "[50,60,70]"')
     p.add_argument("--delta_list", type=str, default="0.01",
                    help='e.g. "0.01" or "0.01,0.05" or "[0.01,0.05]"')
@@ -139,8 +139,8 @@ def cor_reform(Q, d, lam, M=100, timelimit=None, mip_gap=None, threads=None, ver
         m.Params.MIPGap = float(mip_gap)
 
     # Aggregate variables
-    x = m.addVars(n, lb=-GRB.INFINITY, ub=GRB.INFINITY, name="x")
-    g = m.addVars(n, lb=-GRB.INFINITY, ub=GRB.INFINITY, name="g")
+    x = m.addMVar(n, lb=-GRB.INFINITY, ub=GRB.INFINITY, name="x")
+    g = m.addMVar(n, lb=-GRB.INFINITY, ub=GRB.INFINITY, name="g")
     m._x = x
     m._g = g  # useful to check the interaction level
 
@@ -154,11 +154,11 @@ def cor_reform(Q, d, lam, M=100, timelimit=None, mip_gap=None, threads=None, ver
     gmv = m.addVars(n, lb=0, ub=GRB.INFINITY, name="gminus")
 
     # Regime binaries
-    z0 = m.addVars(n, vtype=GRB.BINARY, name="z0")
+    z0 = m.addMVar(n, vtype=GRB.BINARY, name="z0")
     m._z0 = z0
 
-    zp = m.addVars(n, vtype=GRB.BINARY, name="zplus")
-    zm = m.addVars(n, vtype=GRB.BINARY, name="zminus")
+    zp = m.addMVar(n, vtype=GRB.BINARY, name="zplus")
+    zm = m.addMVar(n, vtype=GRB.BINARY, name="zminus")
     m._zp = zp
     m._zm = zm
     # # Bounds on aggregate x (required)
@@ -208,21 +208,7 @@ def cor_reform(Q, d, lam, M=100, timelimit=None, mip_gap=None, threads=None, ver
 
     # Objective: 1/2 x^T Q x + c^T x + sum lambda_i (zplus+zminus)
     # Build quadratic form explicitly
-    obj = gp.QuadExpr()
-    # 0.5 * sum_{i,j} Q_ij x_i x_j
-    for i in range(n):
-        # diagonal
-        obj.add(0.5 * Q[i, i] * x[i] * x[i])
-        # off-diagonal (i<j)
-        for j in range(i + 1, n):
-            if Q[i, j] != 0.0:
-                obj.add(Q[i, j] * x[i] * x[j])
-    # linear term c^T x
-    obj.add(gp.LinExpr(c.tolist(), [x[i] for i in range(n)]))
-    # penalty
-    obj.add(gp.quicksum(lam[i] * (zp[i] + zm[i]) for i in range(n)))
-    # constant
-    obj.add(0.5*d.T@Q@d)
+    obj = 0.5 * x @ Q @ x + c@x + lam@(zp+zm) + 0.5*d@Q@d
 
     m.setObjective(obj, GRB.MINIMIZE)
     # turn off if needed

@@ -141,15 +141,15 @@ def cor_reform(Q, c, const, lam, M=100, timelimit=None, mip_gap=None, threads=No
         m.Params.MIPGap = float(mip_gap)
 
     # Aggregate variables
-    x = m.addVars(n, lb=-GRB.INFINITY, ub=GRB.INFINITY, name="x")
-    g = m.addVars(n, lb=-GRB.INFINITY, ub=GRB.INFINITY, name="g")
+    x = m.addMVar(n, lb=-GRB.INFINITY, ub=GRB.INFINITY, name="x")
+    g = m.addMVar(n, lb=-GRB.INFINITY, ub=GRB.INFINITY, name="g")
     m._x = x
     m._g = g  # useful to check the interaction level
 
     # Disaggregated per-regime variables
     # x0 = m.addVars(n, lb=-GRB.INFINITY, ub=GRB.INFINITY, name="x0")
-    xp = m.addVars(n, lb=-GRB.INFINITY, ub=0, name="xp")
-    xm = m.addVars(n, lb=0, ub=GRB.INFINITY, name="xm")
+    xp = m.addMVar(n, lb=-GRB.INFINITY, ub=0, name="xp")
+    xm = m.addMVar(n, lb=0, ub=GRB.INFINITY, name="xm")
 
     g0 = m.addVars(n, lb=-GRB.INFINITY, ub=GRB.INFINITY, name="g0")
     gpv = m.addVars(n, lb=0, ub=GRB.INFINITY, name="gplus")
@@ -159,8 +159,8 @@ def cor_reform(Q, c, const, lam, M=100, timelimit=None, mip_gap=None, threads=No
     z0 = m.addVars(n, vtype=GRB.BINARY, name="z0")
     m._z0 = z0
 
-    zp = m.addVars(n, vtype=GRB.BINARY, name="zplus")
-    zm = m.addVars(n, vtype=GRB.BINARY, name="zminus")
+    zp = m.addMVar(n, vtype=GRB.BINARY, name="zplus")
+    zm = m.addMVar(n, vtype=GRB.BINARY, name="zminus")
     m._zp = zp
     m._zm = zm
     # # Bounds on aggregate x (required)
@@ -208,23 +208,8 @@ def cor_reform(Q, c, const, lam, M=100, timelimit=None, mip_gap=None, threads=No
         # m.addConstr(xm[i] >= -xbar[i] * zm[i], name=f"xm_lb[{i}]")
         # x0 is fixed 0 so no need for bounds there.
 
-    # Objective: 1/2 x^T Q x + c^T x + sum lambda_i (zplus+zminus)
-    # Build quadratic form explicitly
-    obj = gp.QuadExpr()
-    # 0.5 * sum_{i,j} Q_ij x_i x_j
-    for i in range(n):
-        # diagonal
-        obj.add(0.5 * Q[i, i] * x[i] * x[i])
-        # off-diagonal (i<j)
-        for j in range(i + 1, n):
-            if Q[i, j] != 0.0:
-                obj.add(Q[i, j] * x[i] * x[j])
-    # linear term c^T x
-    obj.add(gp.LinExpr(c.tolist(), [x[i] for i in range(n)]))
-    # penalty
-    obj.add(gp.quicksum(lam[i] * (zp[i] + zm[i]) for i in range(n)))
-    # constant
-    obj.add(const)
+    # # Objective: 1/2 x^T Q x + c^T x + sum lambda_i (zplus+zminus)
+    obj = 0.5 * x @ Q @ x + c@x + lam@(zp+zm) + const
 
     m.setObjective(obj, GRB.MINIMIZE)
     # m.Params.NumericFocus = 3
@@ -265,10 +250,6 @@ for grid_size in grid_size_list:
                 rep=rep
             )
             Q = L
-            # Q = (L + np.eye(grid_size*grid_size))*2
-            # const = const/sigma2/sigma2
-            # c = c/sigma2/sigma2
-            # Q = 2*Q
             # A = Q.toarray()
             # np.fill_diagonal(A, 0)
             # A_binary = (A != 0).astype(int)
@@ -282,7 +263,7 @@ for grid_size in grid_size_list:
 
             BIG_M = BIG_M_INIT
             for tau in tau_list:
-                try:
+                # try:
                     n = grid_size * grid_size
                     print([grid_size, sigma2, tau, rep])
                     lam = tau * np.ones(n) * np.log(n) / n
@@ -374,7 +355,7 @@ for grid_size in grid_size_list:
                     results_df = pd.DataFrame(results, columns=['n', 'delta', 'tau', 'rep' ,'formulation','root_ub','root_lb','root_gap','end_ub','end_lb','end_gap','nnz','node_count','time'])
                     print(results_df)
                     results_df.to_csv(f"{current_dir}/../experiments_results/Sparsity_Q_{job_name}.csv", index=False)
-                except Exception as e:
-                    print(f"Error: {e}")
-                    continue
+                # except Exception as e:
+                #     print(f"Error: {e}")
+                #     continue
 
