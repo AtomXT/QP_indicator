@@ -6,6 +6,7 @@ from sklearn import datasets
 from gurobipy import GRB
 from ucimlrepo import fetch_ucirepo
 import os
+import glob
 
 import json
 import scipy.sparse as sp
@@ -184,6 +185,82 @@ def load_instance_Q_sparsity(n: int, delta: float, rep: int):
     meta = json.loads(str(obj["meta_json"]))
 
     return Q, d, meta
+
+
+def load_instance_2d_mrf(grid_size: int, sigma2: float, rep: int):
+    """
+    Load one 2D-MRF dataset specified by (grid_size, sigma2, rep).
+
+    Assumptions:
+        - data_root is fixed
+        - for each grid_size there is only one (block_h, block_w)
+        - the requested instance is guaranteed to exist
+
+    Returns:
+        L       : scipy.sparse.csr_matrix
+        c       : numpy array
+        y       : numpy array
+        support : numpy array
+        const   : float
+        meta    : dict
+    """
+    data_root = f"{project_root}/data/2D-MRF"
+
+    pattern = os.path.join(
+        data_root,
+        f"syntGrid{grid_size}-*-*-{sigma2}-{rep}_quad.csv"
+    )
+    matches = glob.glob(pattern)
+
+    if len(matches) != 1:
+        raise ValueError(
+            f"Expected exactly one matching file, found {len(matches)}:\n" +
+            "\n".join(matches)
+        )
+
+    path = matches[0]
+
+    with open(path, "r") as f:
+        n = int(f.readline().strip())
+        const = float(f.readline().strip())
+        support = np.fromstring(f.readline().strip(), sep=",", dtype=int)
+        y = np.fromstring(f.readline().strip(), sep=",", dtype=float)
+        c = np.fromstring(f.readline().strip(), sep=",", dtype=float)
+
+        L_rows = []
+        for i in range(n):
+            row = np.fromstring(f.readline().strip(), sep=",", dtype=float)
+            if row.size != n:
+                raise ValueError(f"Q row {i} has length {row.size}, expected {n}.")
+            L_rows.append(row)
+
+    if support.size != n:
+        raise ValueError(f"support has length {support.size}, expected {n}.")
+    if y.size != n:
+        raise ValueError(f"y has length {y.size}, expected {n}.")
+    if c.size != n:
+        raise ValueError(f"c has length {c.size}, expected {n}.")
+
+    L = sp.csr_matrix(np.vstack(L_rows))
+
+    fname = os.path.basename(path)
+    stem = fname[:-9]   # remove "_quad.csv"
+    parts = stem[len("syntGrid"):].split("-")
+    grid_str, block_h_str, block_w_str, sigma_str, rep_str = parts
+
+    meta = {
+        "path": path,
+        "filename": fname,
+        "n": n,
+        "constant": const,
+        "grid_size": int(grid_str),
+        "block_h": int(block_h_str),
+        "block_w": int(block_w_str),
+        "sigma2": float(sigma_str),
+        "rep": int(rep_str),
+    }
+
+    return L, c, y, support, const, meta
 
 
 def load_instance_Q_path(n: int, rep: int):
