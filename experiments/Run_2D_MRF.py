@@ -354,7 +354,7 @@ for grid_size in grid_size_list:
                     print('--------------------------------------------------')
 
 
-                    results_df = pd.DataFrame(results, columns=['n', 'delta', 'tau', 'rep' ,'formulation','root_ub','root_lb','root_gap','end_ub','end_lb','end_gap','TPR','FPR','nnz','node_count','time'])
+                    results_df = pd.DataFrame(results, columns=['n', 'sigma2', 'tau', 'rep' ,'formulation','root_ub','root_lb','root_gap','end_ub','end_lb','end_gap','TPR','FPR','nnz','node_count','time'])
                     print(results_df)
                     results_df.to_csv(f"{current_dir}/../experiments_results/2D_MRF_{job_name}.csv", index=False)
                 except Exception as e:
