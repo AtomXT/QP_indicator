@@ -308,7 +308,7 @@ for grid_size in grid_size_list:
                     # model_ori.Params.OptimalityTol = 1e-9
                     model_ori.Params.MIPGap = 0
                     model_ori.optimize(record_root_lb)
-                    z_ori_vals = np.array([z_ori[i].X for i in range(n)])
+                    z_ori_vals = np.array([1 if z_ori[i].X > 0.999 else 0 for i in range(n)])
                     x_ori_vals = np.array([x_ori[i].X for i in range(n)])
                     TPR, FPR = np.sum(z_ori_vals * support) / np.sum(support), np.sum(z_ori_vals * (1-support))/np.sum(1-support)
                     result_opt = [n, sigma2, tau, rep, 'original', root_bound[0], root_bound[1],
@@ -337,7 +337,7 @@ for grid_size in grid_size_list:
                     model_opt.params.Threads = THREADS
                     model_opt.params.TimeLimit = timelimit
                     model_opt.optimize(record_root_lb)
-                    z_opt_vals = np.array([1-model_opt._z0[i].X for i in range(n)])
+                    z_opt_vals = np.array([1 if 1-model_opt._z0[i].X > 0.999 else 0 for i in range(n)])
                     x_opt_vals = np.array([model_opt._x[i].X for i in range(n)])
                     TPR, FPR = np.sum(z_opt_vals*support)/np.sum(support), np.sum(z_opt_vals * (1-support))/np.sum(1-support)
                     print(f"The TPR is {TPR}; FPR is {FPR}")
