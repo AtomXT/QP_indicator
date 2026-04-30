@@ -31,7 +31,7 @@ def parse_args():
                    help='e.g. "0.02" or "0.02,0.1,0.3" or "[0.02,0.1,0.3]"')
     p.add_argument("--rep_list", type=str, default="101",
                    help='e.g. "101" or "101,102,103" or "[101,102,103]"')
-    p.add_argument("--tau_list", type=str, default="1",
+    p.add_argument("--tau_list", type=str, default="0.1",
                    help='e.g. "0.05,0.1,0.2"')
 
     p.add_argument("--timelimit", type=float, default=20.0)
@@ -216,7 +216,7 @@ def cor_reform(Q, c, const, lam, M=100, timelimit=None, mip_gap=None, threads=No
     # m.Params.FeasibilityTol = 1e-9
     # m.Params.IntFeasTol = 1e-9
     # m.Params.OptimalityTol = 1e-9
-    m.Params.MIPGap = 0
+    # m.Params.MIPGap = 0
     # turn off if needed
     # m.setParam("Presolve", 0)
     # m.setParam("Cuts", 0)
@@ -266,7 +266,7 @@ for grid_size in grid_size_list:
                 try:
                     n = grid_size * grid_size
                     print([grid_size, sigma2, tau, rep])
-                    lam = tau * np.ones(n) * np.log(n) / n
+                    lam = tau * np.ones(n) * sigma2 * np.sqrt(np.log(n) / n)
                     # define a container to store the root node lower bound
                     root_bound = [np.inf, -np.inf]
 
@@ -306,7 +306,7 @@ for grid_size in grid_size_list:
                     # model_ori.Params.FeasibilityTol = 1e-9
                     # model_ori.Params.IntFeasTol = 1e-9
                     # model_ori.Params.OptimalityTol = 1e-9
-                    model_ori.Params.MIPGap = 0
+                    # model_ori.Params.MIPGap = 0
                     model_ori.optimize(record_root_lb)
                     z_ori_vals = np.array([1 if z_ori[i].X > 0.999 else 0 for i in range(n)])
                     x_ori_vals = np.array([x_ori[i].X for i in range(n)])
@@ -327,8 +327,8 @@ for grid_size in grid_size_list:
 
                     ## solve the optimal solution in the proposed formulation
                     root_bound = [np.inf, -np.inf]
-
-                    model_opt = cor_reform(Q, c, const, lam, BIG_M)
+                    scaler = np.max(np.diag(Q.toarray()))  # for numerical stability
+                    model_opt = cor_reform(Q/scaler, c/scaler, const, lam, BIG_M)
                     # check presolved model
                     # p = model_opt.presolve()
                     # p.write('presolved_model.mps')
