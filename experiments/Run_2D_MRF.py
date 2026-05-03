@@ -244,12 +244,11 @@ results = []
 for grid_size in grid_size_list:
     for sigma2 in sigma2_list:
         for rep in rep_list:
-            L, c, y, support, const, meta = load_instance_2d_mrf(
+            Q, c, y, support, const, meta = load_instance_2d_mrf(
                 grid_size=grid_size,
                 sigma2=sigma2,
                 rep=rep
             )
-            Q = L
             # A = Q.toarray()
             # np.fill_diagonal(A, 0)
             # A_binary = (A != 0).astype(int)
@@ -260,6 +259,10 @@ for grid_size in grid_size_list:
             #
             # print("min-fill upper bound:", tw1)
             # print("min-degree upper bound:", tw2)
+
+            scaler = np.max(np.diag(Q.toarray()))  # for numerical stability
+            Q = Q / scaler
+            c = c / scaler
 
             BIG_M = BIG_M_INIT
             for tau in tau_list:
@@ -327,8 +330,8 @@ for grid_size in grid_size_list:
 
                     ## solve the optimal solution in the proposed formulation
                     root_bound = [np.inf, -np.inf]
-                    scaler = np.max(np.diag(Q.toarray()))  # for numerical stability
-                    model_opt = cor_reform(Q/scaler, c/scaler, const, lam, BIG_M)
+                    
+                    model_opt = cor_reform(Q, c, const, lam, BIG_M)
                     # check presolved model
                     # p = model_opt.presolve()
                     # p.write('presolved_model.mps')
