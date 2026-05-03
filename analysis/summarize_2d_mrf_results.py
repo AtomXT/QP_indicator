@@ -30,7 +30,7 @@ def main():
     mask = df_all["node_count"] <= 1
     df_all.loc[mask, ["root_ub", "root_lb"]] = df_all.loc[mask, ["end_ub", "end_lb"]].to_numpy()
     df_all.loc[mask, "root_gap"] = 0
-    avg = df_all.groupby(['n', 'formulation'])[["root_ub","root_lb","root_gap","end_ub", "end_lb", "end_gap", "TPR", "FPR", "nnz", "node_count", "time"]].mean()
+    avg = df_all.groupby(['n', 'formulation','sigma2'])[["root_ub","root_lb","root_gap","end_ub", "end_lb", "end_gap", "TPR", "FPR", "nnz", "node_count", "time"]].mean()
     print(avg)
 
     # save
