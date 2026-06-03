@@ -17,7 +17,7 @@ module load gurobi
 
 python3 -m experiments.Run_2D_MRF \
   --grid_size_list "10,20,40" \
-  --sigma2_list "0.05,0.1,0.2" \
+  --sigma2_list "0.01,0.02,0.05" \
   --rep_list "102" \
   --timelimit "3600" \
   --job_name "mrf_2"
