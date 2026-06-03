@@ -9,6 +9,8 @@ import pandas as pd
 import scipy.sparse as sp
 from gurobipy import GRB
 
+from src.Parametric import Para_Algo
+
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 project_root = os.path.dirname(current_dir)
@@ -265,6 +267,24 @@ for n in n_list:
                 print(f"The obj is {model_opt.objVal}.")
                 print(f"The root upper bound is: {root_bound[0]}, lower bound is: {root_bound[1]}. The root gap is: {np.round(100 * (root_bound[0] - root_bound[1]) / root_bound[0], 4)}%. Runtime: {model_opt.runtime}.")
                 print("--------------------------------------------------")
+
+                start = time.time()
+                tree_obj, x_tree = Para_Algo(Q.toarray(), c, lam, BIG_M)
+                tree_obj += 0.5 * d.T @ Q @ d
+                tree_time = time.time() - start
+                z_tree_vals = np.array([1 if x_tree[i] != 0 else 0 for i in range(n)])
+                result_opt = [
+                    n, tau, rep, "tree", np.nan, np.nan, np.nan, tree_obj, np.nan, np.nan,
+                    np.count_nonzero(z_tree_vals), 0, tree_time
+                ]
+                results.append(result_opt)
+                print("--------------------------------")
+                print("solve the problem in tree algorithm")
+                print(f"The obj is {tree_obj}.")
+                print(f"Runtime: {tree_time}.")
+                print(np.where(z_tree_vals == 1)[0])
+                print(f"Number of outliers: {np.count_nonzero(z_tree_vals)}")
+                print("--------------------------------")
 
                 results_df = pd.DataFrame(
                     results,
