@@ -16,9 +16,8 @@ source activate python39
 module load gurobi
 
 python3 -m experiments.Run_2D_MRF \
-  --grid_size_list "10,40,100" \
+  --grid_size_list "10,20,40" \
   --sigma2_list "0.05,0.1,0.2" \
   --rep_list "103" \
   --timelimit "3600" \
   --job_name "mrf_3"
-

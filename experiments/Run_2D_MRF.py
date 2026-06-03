@@ -27,11 +27,11 @@ def parse_args():
     # allow scalar or list-like inputs
     p.add_argument("--grid_size_list", type=str, default="10",
                    help='e.g. "10" or "10,20,40" or "[10,20,40]"')
-    p.add_argument("--sigma2_list", type=str, default="0.1",
+    p.add_argument("--sigma2_list", type=str, default="0.05",
                    help='e.g. "0.02" or "0.02,0.1,0.3" or "[0.02,0.1,0.3]"')
     p.add_argument("--rep_list", type=str, default="101",
                    help='e.g. "101" or "101,102,103" or "[101,102,103]"')
-    p.add_argument("--tau_list", type=str, default="0.1",
+    p.add_argument("--tau_list", type=str, default="0.7",
                    help='e.g. "0.05,0.1,0.2"')
 
     p.add_argument("--timelimit", type=float, default=20.0)
@@ -75,6 +75,22 @@ def record_root_lb(model, where):
                 root_bound[1] = lb
             if ub <= root_bound[0]:
                 root_bound[0] = ub
+
+
+def support_scores(z_vals, support):
+    z_bool = np.asarray(z_vals).astype(bool)
+    support_bool = np.asarray(support).astype(bool)
+
+    tp = np.sum(z_bool & support_bool)
+    fp = np.sum(z_bool & ~support_bool)
+    fn = np.sum(~z_bool & support_bool)
+    tn = np.sum(~z_bool & ~support_bool)
+
+    TPR = tp / (tp + fn) if tp + fn > 0 else np.nan
+    FPR = fp / (fp + tn) if fp + tn > 0 else np.nan
+    F1 = 2 * tp / (2 * tp + fp + fn) if 2 * tp + fp + fn > 0 else np.nan
+
+    return TPR, FPR, F1
 
 
 def cor_reform(Q, c, const, lam, M=100, timelimit=None, mip_gap=None, threads=None, verbose=False):
@@ -260,16 +276,16 @@ for grid_size in grid_size_list:
             # print("min-fill upper bound:", tw1)
             # print("min-degree upper bound:", tw2)
 
-            scaler = np.max(np.diag(Q.toarray()))  # for numerical stability
-            Q = Q / scaler
-            c = c / scaler
+            # scaler = np.max(np.diag(Q.toarray()))  # for numerical stability
+            # Q = Q / scaler
+            # c = c / scaler
 
             BIG_M = BIG_M_INIT
             for tau in tau_list:
                 try:
                     n = grid_size * grid_size
                     print([grid_size, sigma2, tau, rep])
-                    lam = tau * np.ones(n) * sigma2 * np.sqrt(np.log(n) / n)
+                    lam = tau * np.ones(n) * np.log(n)
                     # define a container to store the root node lower bound
                     root_bound = [np.inf, -np.inf]
 
@@ -313,16 +329,16 @@ for grid_size in grid_size_list:
                     model_ori.optimize(record_root_lb)
                     z_ori_vals = np.array([1 if z_ori[i].X > 0.999 else 0 for i in range(n)])
                     x_ori_vals = np.array([x_ori[i].X for i in range(n)])
-                    TPR, FPR = np.sum(z_ori_vals * support) / np.sum(support), np.sum(z_ori_vals * (1-support))/np.sum(1-support)
+                    TPR, FPR, F1 = support_scores(z_ori_vals, support)
                     result_opt = [n, sigma2, tau, rep, 'original', root_bound[0], root_bound[1],
                             (root_bound[0] - root_bound[1]) / root_bound[0], model_ori.ObjVal, model_ori.ObjBound,
-                            (model_ori.ObjVal - model_ori.ObjBound) / model_ori.ObjVal, TPR, FPR, np.count_nonzero(z_ori_vals), model_ori.NodeCount,
+                            (model_ori.ObjVal - model_ori.ObjBound) / model_ori.ObjVal, TPR, FPR, F1, np.count_nonzero(z_ori_vals), model_ori.NodeCount,
                             model_ori.runtime]
                     results.append(result_opt)
                     print('--------------------------------')
                     print('solve the problem in original formulation')
                     print(f"The obj is {model_ori.objVal}.")
-                    print(f"The TPR is {TPR}; FPR is {FPR}")
+                    print(f"The TPR is {TPR}; FPR is {FPR}; F1-score is {F1}")
                     print(f"The root upper bound is: {root_bound[0]}, lower bound is: {root_bound[1]}. The root gap is: {np.round(100*(root_bound[0]-root_bound[1])/root_bound[0],4)}%. Runtime: {model_ori.runtime}.")
                     print(np.where(z_ori_vals == 1)[0])
                     print(f"Number of outliers: {np.count_nonzero(z_ori_vals)}")
@@ -342,11 +358,11 @@ for grid_size in grid_size_list:
                     model_opt.optimize(record_root_lb)
                     z_opt_vals = np.array([1 if 1-model_opt._z0[i].X > 0.999 else 0 for i in range(n)])
                     x_opt_vals = np.array([model_opt._x[i].X for i in range(n)])
-                    TPR, FPR = np.sum(z_opt_vals*support)/np.sum(support), np.sum(z_opt_vals * (1-support))/np.sum(1-support)
-                    print(f"The TPR is {TPR}; FPR is {FPR}")
+                    TPR, FPR, F1 = support_scores(z_opt_vals, support)
+                    print(f"The TPR is {TPR}; FPR is {FPR}; F1-score is {F1}")
                     result_opt = [n, sigma2, tau, rep, 'opt', root_bound[0], root_bound[1],
                                 (root_bound[0] - root_bound[1]) / root_bound[0], model_opt.ObjVal, model_opt.ObjBound,
-                                (model_opt.ObjVal - model_opt.ObjBound) / model_opt.ObjVal, TPR, FPR, np.count_nonzero(z_opt_vals), model_opt.NodeCount,
+                                (model_opt.ObjVal - model_opt.ObjBound) / model_opt.ObjVal, TPR, FPR, F1, np.count_nonzero(z_opt_vals), model_opt.NodeCount,
                                 model_opt.runtime]
                     results.append(result_opt)
                     print('--------------------------------------------------')
@@ -357,10 +373,9 @@ for grid_size in grid_size_list:
                     print('--------------------------------------------------')
 
 
-                    results_df = pd.DataFrame(results, columns=['n', 'sigma2', 'tau', 'rep' ,'formulation','root_ub','root_lb','root_gap','end_ub','end_lb','end_gap','TPR','FPR','nnz','node_count','time'])
+                    results_df = pd.DataFrame(results, columns=['n', 'sigma2', 'tau', 'rep' ,'formulation','root_ub','root_lb','root_gap','end_ub','end_lb','end_gap','TPR','FPR','F1_score','nnz','node_count','time'])
                     print(results_df)
                     results_df.to_csv(f"{current_dir}/../experiments_results/2D_MRF_{job_name}.csv", index=False)
                 except Exception as e:
                     print(f"Error: {e}")
                     continue
-
