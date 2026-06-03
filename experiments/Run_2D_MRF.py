@@ -27,11 +27,11 @@ def parse_args():
     # allow scalar or list-like inputs
     p.add_argument("--grid_size_list", type=str, default="10",
                    help='e.g. "10" or "10,20,40" or "[10,20,40]"')
-    p.add_argument("--sigma2_list", type=str, default="0.05",
+    p.add_argument("--sigma2_list", type=str, default="0.01",
                    help='e.g. "0.02" or "0.02,0.1,0.3" or "[0.02,0.1,0.3]"')
     p.add_argument("--rep_list", type=str, default="101",
                    help='e.g. "101" or "101,102,103" or "[101,102,103]"')
-    p.add_argument("--tau_list", type=str, default="0.7",
+    p.add_argument("--tau_list", type=str, default="0.5",
                    help='e.g. "0.05,0.1,0.2"')
 
     p.add_argument("--timelimit", type=float, default=20.0)
