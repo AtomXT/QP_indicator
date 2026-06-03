@@ -58,7 +58,14 @@ def main():
     mask = df_all["node_count"] <= 1
     df_all.loc[mask, ["root_ub", "root_lb"]] = df_all.loc[mask, ["end_ub", "end_lb"]].to_numpy()
     df_all.loc[mask, "root_gap"] = 0
-    avg = df_all.groupby(['n', 'formulation','sigma2'])[["root_ub","root_lb","root_gap","end_ub", "end_lb", "end_gap", "TPR", "FPR", "nnz", "node_count", "time"]].mean()
+
+    # Report support size as a percentage of all pixels.
+    df_all["nnz_percent"] = 100.0 * df_all["nnz"] / df_all["n"]
+
+    metric_cols = ["root_ub", "root_lb", "root_gap", "end_ub", "end_lb", "end_gap",
+                   "TPR", "FPR", "F1_score", "nnz_percent", "node_count", "time"]
+
+    avg = df_all.groupby(['n', 'formulation','sigma2'])[metric_cols].mean()
     print(avg)
 
     # save
