@@ -16,7 +16,7 @@ source activate python39
 module load gurobi
 
 python3 -m experiments.Run_star_Q \
-  --n_list "100,200,300,500,1000,2000" \
+  --n_list "100,200,300,500,1000,2000,5000,10000" \
   --timelimit "600" \
   --rep_list "0,1,2,3,4" \
   --job_name "star_Q"
