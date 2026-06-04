@@ -57,6 +57,7 @@ def main():
     current_dir = os.path.dirname(os.path.abspath(__file__))
     results_dir = os.path.join(current_dir, "..", "experiments_results")
     df_all = load_results(results_dir)
+    df_all["Active (%)"] = 100 * df_all["nnz"] / df_all["n"]
 
     # If it solved in one node then the root gap is zero.
     mask = df_all["node_count"] <= 1
@@ -64,7 +65,7 @@ def main():
     df_all.loc[mask, "root_gap"] = 0
 
     avg = df_all.groupby(["n", "formulation"])[
-        ["root_ub", "root_lb", "root_gap", "end_ub", "end_lb", "end_gap", "nnz", "node_count", "time"]
+        ["root_ub", "root_lb", "root_gap", "end_ub", "end_lb", "end_gap", "Active (%)", "node_count", "time"]
     ].mean()
 
     avg_time = df_all.groupby(["n", "formulation"]).apply(majority_filtered_mean_time)
@@ -76,35 +77,30 @@ def main():
     avg.to_csv(output_path, index=True)
 
     avg = avg.reset_index()
-    core_df = avg[avg["formulation"] == "opt"].sort_values("n")
-    bigm_df = avg[avg["formulation"] == "original"].sort_values("n")
-
-    n_core = core_df["n"].to_numpy()
-    t_core = core_df["time"].to_numpy()
-    n_bigm = bigm_df["n"].to_numpy()
-    t_bigm = bigm_df["time"].to_numpy()
-
     plt.figure(figsize=(6, 4))
 
-    valid_core = np.isfinite(t_core) & (t_core > 0)
-    valid_bigm = np.isfinite(t_bigm) & (t_bigm > 0)
+    methods = [
+        ("opt", "CORe", "o"),
+        ("original", "Big-M", "s"),
+        ("tree", "parametric", "^"),
+    ]
+    for formulation, label, marker in methods:
+        method_df = avg[avg["formulation"] == formulation].sort_values("n")
+        n_values = method_df["n"].to_numpy()
+        times = method_df["time"].to_numpy()
+        valid = np.isfinite(times) & (times > 0)
 
-    if np.count_nonzero(valid_core) >= 2:
-        slope_core, intercept_core = np.polyfit(np.log(n_core[valid_core]), np.log(t_core[valid_core]), 1)
-        fitted_core = np.exp(intercept_core) * n_core[valid_core] ** slope_core
-        plt.loglog(n_core[valid_core], fitted_core, linestyle="--", label=f"Fit slope for CORe={slope_core:.2f}")
+        if np.count_nonzero(valid) >= 2:
+            slope, intercept = np.polyfit(np.log(n_values[valid]), np.log(times[valid]), 1)
+            fitted = np.exp(intercept) * n_values[valid] ** slope
+            plt.loglog(n_values[valid], fitted, linestyle="--", label=f"Fit slope for {label}={slope:.2f}")
 
-    if np.count_nonzero(valid_bigm) >= 2:
-        slope_bigm, intercept_bigm = np.polyfit(np.log(n_bigm[valid_bigm]), np.log(t_bigm[valid_bigm]), 1)
-        fitted_bigm = np.exp(intercept_bigm) * n_bigm[valid_bigm] ** slope_bigm
-        plt.loglog(n_bigm[valid_bigm], fitted_bigm, linestyle="--", label=f"Fit slope for Big-M={slope_bigm:.2f}")
-
-    plt.loglog(n_core[valid_core], t_core[valid_core], marker="o", linewidth=2, label="CORe")
-    plt.loglog(n_bigm[valid_bigm], t_bigm[valid_bigm], marker="s", linewidth=2, label="Big-M")
+        if np.count_nonzero(valid) > 0:
+            plt.loglog(n_values[valid], times[valid], marker=marker, linewidth=2, label=label)
 
     plt.xlabel("Problem size n (log scale)")
     plt.ylabel("Solution time (seconds, log scale)")
-    plt.title("Log-Log Plot: CORe vs Big-M (Star Graph)")
+    plt.title("Log-Log Plot: CORe vs Big-M vs parametric (Star Graph)")
     plt.grid(True, which="both", linestyle="--", linewidth=0.5)
 
     plt.legend()
