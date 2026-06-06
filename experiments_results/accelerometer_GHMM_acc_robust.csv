@@ -1,0 +1,3 @@
+dataset,inference_mode,formulation,T,n_model,gamma,lambda_outlier,sigma2,nu,big_m,root_ub,root_lb,root_gap,end_ub,end_lb,end_gap,hidden_active_count,outlier_active_count,node_count,time,status
+accelerometer,robust,opt,1380,1380,400.0,100.0,2.0,1.0,854.2310925206759,511207.8159998007,402235.3898668757,0.2131665884642254,493874.8279807575,440844.03908465063,0.10737698277299745,437,1063,2808.0,3600.11367893219,9
+accelerometer,robust,tree,1380,15180,400.0,100.0,2.0,1.0,854.2310925206759,,,,481164.62647904083,,,421,1169,0.0,16.534557104110718,tree_completed
